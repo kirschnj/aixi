@@ -58,11 +58,28 @@ void ContextTree::clear(void) {
 
 void ContextTree::update(symbol_t sym) {
 	// TODO: implement
+
+    /* Notes:
+       Get context.
+       Create nodes if this is the first time we have seen this context.
+       Use -log of KT estimate, to avoid precision errors.
+       Update KT estimate - something to do with logKTMul.
+       Update estimates back up to root - need to figure out weighting for log.
+
+       Add "sym" to context.
+    */
 }
 
 
 void ContextTree::update(const symbol_list_t &symlist) {
 	// TODO: implement
+    /* Notes
+    Just call update, on each symbol in this list.
+    */
+
+    for (symbol_list_t::const_iterator it = symlist.begin(); it != symlist.end(); ++it) {
+        update(*it);
+    }
 }
 
 
@@ -78,6 +95,14 @@ void ContextTree::updateHistory(const symbol_list_t &symlist) {
 // removes the most recently observed symbol from the context tree
 void ContextTree::revert(void) {
 	// TODO: implement
+
+    /* Notes:
+       We can either store a snapshot of the tree in its entirety
+       OR
+       Just recompute the tree -
+            delete whatever nodes were added by the last symbol.
+            recalculate estimates.
+    */
 }
 
 
@@ -106,6 +131,16 @@ void ContextTree::genRandomSymbols(symbol_list_t &symbols, size_t bits) {
 // generated bits
 void ContextTree::genRandomSymbolsAndUpdate(symbol_list_t &symbols, size_t bits) {
 	// TODO: implement
+
+    // Notes:
+    for (size_t i=0; i < bits; i++) {
+        //make a symbol somehow
+        //symbol_t sym = //TODO
+        //add this to symbols
+        symbols.push_back(sym);
+        //update
+        update(sym);
+    }
 }
 
 
