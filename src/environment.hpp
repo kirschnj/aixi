@@ -46,4 +46,28 @@ private:
 	double p; // Probability of observing 1 (heads)
 };
 
+
+// Tiger environment
+class Tiger : public Environment {
+public:
+
+	// set up the initial environment percept
+	Tiger(options_t &options);
+
+	// receives the agent's action and calculates the new environment percept
+	virtual void performAction(action_t action);
+
+private:
+	bool m_tiger_left;// Whether the tiger is behind the left door or not
+	
+	const action_t m_listen_action = 0;
+	const action_t m_open_left = 1;
+	const action_t m_open_right = 2;
+	const unsigned int m_num_actions = 3;
+	
+	const percept_t m_no_observation = 0;
+	const percept_t m_hear_tiger_left = 1;
+	const percept_t m_hear_tiger_right = 2;
+};
+
 #endif // __ENVIRONMENT_HPP__
