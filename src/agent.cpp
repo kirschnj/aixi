@@ -89,6 +89,31 @@ action_t Agent::genRandomAction(void) const {
 // to our history statistics
 action_t Agent::genAction(void) const {
 	return NULL; // TODO: implement
+	/*
+		for (eachAction) {
+			convert to symbol list.
+			compute conditional probability of seeing that sequence,
+			given everything we've already seen:
+				read the joint probability so far from the root of the CTW (log_prob_weights)
+				get the joint probability of everything and this prospective action symbol list
+					(by updating the CTW with all the action symbols sequentially)
+				divide the latter by the former, to get the conditional probability
+					of seeing those action symbols.
+				And be careful of log space, so division means subtraction.
+				revert the CTW
+		}
+		compute random number in [0, 1]
+		double probSum = 0;
+		for (eachAction) {
+			probSum = probSum + action probability
+			if (probSum > random number) {
+				return this action.
+			}
+		}
+		On the off chance that numerical approximations mean the sum is less than 1,
+		and we make it past the loop:
+		return last action
+	*/
 }
 
 
@@ -96,6 +121,32 @@ action_t Agent::genAction(void) const {
 // to our history statistics
 percept_t Agent::genPercept(void) const {
 	return NULL; // TODO: implement
+	/*
+		Very similar to above, but this time we have to go over all
+		2^numPerceptBits possible percepts.
+		for (every possible percept sequence) {
+			compute conditional probability of seeing that sequence,
+			given everything we've already seen:
+				read the joint probability so far from the root of the CTW (log_prob_weights)
+				get the joint probability of everything and this prospective percept
+					(by updating the CTW with all the symbols sequentially)
+				divide the latter by the former, to get the conditional probability
+					of seeing that percept sequence
+				And be careful of log space, so division means subtraction.
+				revert the CTW
+		}
+		compute random number in [0, 1]
+		double probSum = 0;
+		for (every possible percept) {
+			probSum = probSum + percept probability
+			if (probSum > random number) {
+				return this percept.
+			}
+		}
+		On the off chance that numerical approximations mean the sum is less than 1,
+		and we make it past the loop:
+		return last percept
+	*/
 }
 
 
