@@ -32,7 +32,9 @@ size_t CTNode::size(void) const {
 
 // compute the logarithm of the KT-estimator update multiplier
 double CTNode::logKTMul(symbol_t sym) const {
-	return NULL; // TODO: implement
+	return log( (double) (m_count[sym] + 0.5)
+				/ (double) (m_count[false] + m_count[true] + 1) );
+	//TODO probably needs <cmath> for log.
 }
 
 
@@ -58,15 +60,48 @@ void ContextTree::clear(void) {
 
 void ContextTree::update(symbol_t sym) {
 	// TODO: implement
-
+	
+	CTNode *context_nodes[m_depth];
+	
+	context_nodes[0] = m_root;
+	for (size_t n = 1; n < m_depth; ++n) {
+		symbol_t context_symbol;
+		// Generate fictional histories of 0s if necessary.
+		if (m_history.size() - n < 0) {
+			context_symbol = false;
+		} else {
+			context_symbol = m_history[m_history.size() - n];
+		}
+		// Create children as you need them.
+		if (context_nodes[n-1].m_child[context_symbol] == NULL) {
+			context_nodes[n-1].m_child[context_symbol] = new CTNode();
+		}
+		context_nodes[n] = context_nodes[n-1].m_child[context_symbol];
+	}
+	
+	for (int n = m_depth - 1; n >= 0; --n) {
+		// Update the log probabilities, after seeing sym.
+		//TODO Verify this. Local KT estimate update, in log form.
+		context_nodes[n].m_log_prob_est = context_nodes[n].m_log_prob_est
+										  + context_nodes[n].logKTMul(sym);
+		++(context_nodes[n].m_count[sym]);// Update a / b.
+		//TODO CTW average in log form. I can't derive a nice expression for this in log form.
+		context_nodes[n].m_log_prob_weighted = 0;
+	}
+	
+	m_history.push_back(sym);
+	
     /* Notes:
-       Get context.
+       Get context / CTNodes corresponding to that context
+       		- What to do when m_history is smaller than m_depth?
+       			Is a fictional history of 0s ok?
        Create nodes if this is the first time we have seen this context.
+       Update estimates back up to root - need to figure out weighting for log.
        Use -log of KT estimate, to avoid precision errors.
        Update KT estimate - something to do with logKTMul.
-       Update estimates back up to root - need to figure out weighting for log.
 
        Add "sym" to context.
+       	- m_history.push_back(sym);
     */
 }
 
@@ -82,7 +117,7 @@ void ContextTree::update(const symbol_list_t &symlist) {
     }
 }
 
-
+// TODO this seems strange, when would we ever need to do this?
 // updates the history statistics, without touching the context tree
 void ContextTree::updateHistory(const symbol_list_t &symlist) {
 
@@ -149,7 +184,8 @@ double ContextTree::logBlockProbability(void) {
     return m_root->logProbWeighted();
 }
 
-
+// TODO Watch out, returns the n'th history symbol (from the front),
+// 		not the n'th most recent (from the back).
 // get the n'th most recent history symbol, NULL if doesn't exist
 const symbol_t *ContextTree::nthHistorySymbol(size_t n) const {
     return n < m_history.size() ? &m_history[n] : NULL;
