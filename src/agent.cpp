@@ -90,6 +90,10 @@ action_t Agent::genRandomAction(void) const {
 action_t Agent::genAction(void) const {
 	return NULL; // TODO: implement
 	/*
+		TODO Note: the CTW is 'action-conditional', which means it doesn't
+			encode the probabilities of actions. it encodes P((o,r)1:n | a1:n)
+			So, the following is wrong, and I'm not sure what this function is
+			meant to actually mean.
 		for (eachAction) {
 			convert to symbol list.
 			compute conditional probability of seeing that sequence,
@@ -184,6 +188,10 @@ void Agent::modelUpdate(action_t action) {
 	m_ct->update(action_syms);// TODO update will add to the history directly,
 							// It has to right? successive updates rely on the previous one as history.
 	m_ct->updateHistory(action_syms);// So this shouldn't be necessary. See predict.cpp:update().
+
+	//TODO Alternative to my comments above, the CTW is action-conditional:
+	//		The only thing we should be doing here is updating the history,
+	//		and not touching the actual CTW model at all.
 
 	m_time_cycle++;
 	m_last_update_percept = false;
