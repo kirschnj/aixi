@@ -44,10 +44,26 @@ private:
 // internal model of the world, returning the accumulated reward.
 static reward_t playout(Agent &agent, unsigned int playout_len) {
 	return 0; // TODO: implement
+	/*
+		'RollOut' function from the paper.
+		Pick actions randomly until playout_len is reached.
+		Use agent.getRandomAction() and .genPercept();
+		Question: Would the agent's CTW of the environment need to be updated
+			while doing this, (and then reverted) or is it not relevant?
+	*/
 }
 
 // determine the best action by searching ahead using MCTS
 extern action_t search(Agent &agent) {
 	return agent.genRandomAction(); // TODO: implement
+	/*
+		Initialise the search tree (non-chance node)
+		start timing up to cycle-length-millis
+		while ( still more time || less than mc-simulations completed) {
+			searchTree.sample(agent, whatever dfr is meant to be (search horizon m i think));
+		}
+		look through all the successors of the root of our search tree:
+		pick the action corresponding to the successor with highest m_mean/expectation().
+	*/
 }
 
