@@ -37,9 +37,9 @@ double CTNode::logKTMul(symbol_t sym) const {
 	return log( (double) (m_count[sym] + 0.5)
 				/ (double) (m_count[false] + m_count[true] + 1) );
 	//TODO probably needs <cmath> for log.
-
     // Note, CTNode includes a visit() function, which we could use in place
-    // of m_count[false] + m_count[true]. That's optional.
+    // of m_count[false] + m_count[true]. That's optional (they do exactly the
+    // same thing, just visit() looks shorter).
 
     /* We could consider using a cache (like the table in the lectures) where
        we calculate a bunch of smallish KT estimates, which are looked up
@@ -92,6 +92,7 @@ void ContextTree::clear(void) {
 void ContextTree::update(symbol_t sym) {
 	// TODO: implement
 	
+    // Path based on context
 	CTNode *context_nodes[m_depth];
 
 	context_nodes[0] = m_root;
@@ -113,10 +114,6 @@ void ContextTree::update(symbol_t sym) {
 	for (int n = m_depth - 1; n >= 0; --n) {
 		// Update the log probabilities, after seeing sym.
 		//TODO Verify this. Local KT estimate update, in log form.
-        /* Jesse: I don't think we need the + for the estimated prob.
-           In my head this should just be:
-           context_nodes[n].m_log_prob_est = context_nodes[n].logKTMul(sym);
-        */
 		context_nodes[n].m_log_prob_est = context_nodes[n].m_log_prob_est
 										  + context_nodes[n].logKTMul(sym);
 		++(context_nodes[n].m_count[sym]);// Update a / b.
@@ -157,11 +154,7 @@ void ContextTree::update(symbol_t sym) {
 
 
 void ContextTree::update(const symbol_list_t &symlist) {
-	// TODO: implement
-    /* Notes
-    Just call update, on each symbol in this list.
-    */
-
+    // Call update, on each symbol in this list.
     for (symbol_list_t::const_iterator it = symlist.begin(); it != symlist.end(); ++it) {
         update(*it);
     }
