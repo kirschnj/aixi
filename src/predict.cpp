@@ -2,6 +2,8 @@
 
 #include <cassert>
 
+// compute log(0.5)
+static const double log_half = log(0.5);
 
 CTNode::CTNode(void) :
 	m_log_prob_est(0.0),
@@ -35,6 +37,35 @@ double CTNode::logKTMul(symbol_t sym) const {
 	return log( (double) (m_count[sym] + 0.5)
 				/ (double) (m_count[false] + m_count[true] + 1) );
 	//TODO probably needs <cmath> for log.
+
+    // Note, CTNode includes a visit() function, which we could use in place
+    // of m_count[false] + m_count[true]. That's optional.
+
+    /* We could consider using a cache (like the table in the lectures) where
+       we calculate a bunch of smallish KT estimates, which are looked up
+       rather than re-computed every time we call this function.
+       I imagine a lookup will be faster than using log(), and considering
+       we'll be constantly updating the CTW tree, this should improve speed a
+       little. At least in the beginning, before we get really large numbers
+       for a and b (which won't be in our table).
+
+       A possible implementation:
+        
+        // Cache initialisation
+        int tableSize = 128 // Could make this larger even
+        double KTCache[tableSize][tableSize];
+        for (int i = 0; i < tableSize; i++) {
+            for (int j = 0; j < tableSize; j++) {
+                KTCache[i][j] = log( ((double) i + 0.5) / ((double) j + 1));
+            }
+        }
+
+        // Later calls to logKTMul
+        if (visits() < tableSize) {
+            return KTCache[m_count[sym]][visits()];
+        }
+
+    */
 }
 
 
@@ -62,7 +93,7 @@ void ContextTree::update(symbol_t sym) {
 	// TODO: implement
 	
 	CTNode *context_nodes[m_depth];
-	
+
 	context_nodes[0] = m_root;
 	for (size_t n = 1; n < m_depth; ++n) {
 		symbol_t context_symbol;
@@ -78,15 +109,28 @@ void ContextTree::update(symbol_t sym) {
 		}
 		context_nodes[n] = context_nodes[n-1].m_child[context_symbol];
 	}
-	
+
 	for (int n = m_depth - 1; n >= 0; --n) {
 		// Update the log probabilities, after seeing sym.
 		//TODO Verify this. Local KT estimate update, in log form.
+        /* Jesse: I don't think we need the + for the estimated prob.
+           In my head this should just be:
+           context_nodes[n].m_log_prob_est = context_nodes[n].logKTMul(sym);
+        */
 		context_nodes[n].m_log_prob_est = context_nodes[n].m_log_prob_est
 										  + context_nodes[n].logKTMul(sym);
 		++(context_nodes[n].m_count[sym]);// Update a / b.
-		//TODO CTW average in log form. I can't derive a nice expression for this in log form.
-		context_nodes[n].m_log_prob_weighted = 0;
+
+        // Compute log(0.5 * (P_e + P_w0 * P_w1))
+        // TODO check syntax/calculation
+        double log_w0 = context_nodes[n].child(false).logProbWeighted();
+        double log_w1 = context_nodes[n].child(true).logProbWeighted();
+        double log_exp = log_w0 + log_w1 - context_nodes[n].logProbEstimated();
+
+        // TODO: deal with/avoid overflow
+		context_nodes[n].m_log_prob_weighted = log_half
+            + context_nodes[n].logProbEstimated()
+            + log(1.0 + exp(log_exp));
 	}
 	
 	m_history.push_back(sym);
@@ -95,6 +139,12 @@ void ContextTree::update(symbol_t sym) {
        Get context / CTNodes corresponding to that context
        		- What to do when m_history is smaller than m_depth?
        			Is a fictional history of 0s ok?
+    Jesse:
+    Rather than creating a node based on arbitrary histories, we could just
+    not update (the probabilities, symbols still should be added to history)
+    until we have enough context (seen depth bits).
+    I'm not sure about this though.
+
        Create nodes if this is the first time we have seen this context.
        Update estimates back up to root - need to figure out weighting for log.
        Use -log of KT estimate, to avoid precision errors.
