@@ -6,19 +6,19 @@
 static const double log_half = log(0.5);
 
 CTNode::CTNode(void) :
-	m_log_prob_est(0.0),
-	m_log_prob_weighted(0.0)
+    m_log_prob_est(0.0),
+    m_log_prob_weighted(0.0)
 {
-	m_count[0] = 0;
-	m_count[1] = 0;
-	m_child[0] = NULL;
-	m_child[1] = NULL;
+    m_count[0] = 0;
+    m_count[1] = 0;
+    m_child[0] = NULL;
+    m_child[1] = NULL;
 }
 
 
 CTNode::~CTNode(void) {
-	if (m_child[0]) delete m_child[0];
-	if (m_child[1]) delete m_child[1];
+    if (m_child[0]) delete m_child[0];
+    if (m_child[1]) delete m_child[1];
 }
 
 
@@ -34,9 +34,9 @@ size_t CTNode::size(void) const {
 
 // compute the logarithm of the KT-estimator update multiplier
 double CTNode::logKTMul(symbol_t sym) const {
-	return log( (double) (m_count[sym] + 0.5)
-				/ (double) (m_count[false] + m_count[true] + 1) );
-	//TODO probably needs <cmath> for log.
+    return log( (double) (m_count[sym] + 0.5)
+                / (double) (m_count[false] + m_count[true] + 1) );
+    //TODO probably needs <cmath> for log.
     // Note, CTNode includes a visit() function, which we could use in place
     // of m_count[false] + m_count[true]. That's optional (they do exactly the
     // same thing, just visit() looks shorter).
@@ -71,54 +71,54 @@ double CTNode::logKTMul(symbol_t sym) const {
 
 // create a context tree of specified maximum depth
 ContextTree::ContextTree(size_t depth) :
-	m_root(new CTNode()),
-	m_depth(depth)
+    m_root(new CTNode()),
+    m_depth(depth)
 { return; }
 
 
 ContextTree::~ContextTree(void) {
-	if (m_root) delete m_root;
+    if (m_root) delete m_root;
 }
 
 
 // clear the entire context tree
 void ContextTree::clear(void) {
-	m_history.clear();
-	if (m_root) delete m_root;
-	m_root = new CTNode();
+    m_history.clear();
+    if (m_root) delete m_root;
+    m_root = new CTNode();
 }
 
 
 void ContextTree::update(symbol_t sym) {
-	// TODO: implement
-	
+    // TODO: implement
+    
     // Path based on context
     // TODO consider renaming this, it's a bit long..
-	CTNode *context_nodes[m_depth];
+    CTNode *context_nodes[m_depth];
 
-	context_nodes[0] = m_root;
-	for (size_t n = 1; n < m_depth; ++n) {
-		symbol_t context_symbol;
-		// Generate fictional histories of 0s if necessary.
-		if (m_history.size() - n < 0) {
-			context_symbol = false;
-		} else {
-			context_symbol = m_history[m_history.size() - n];
-		}
-		// Create children as you need them.
-		if (context_nodes[n-1].m_child[context_symbol] == NULL) {
-			context_nodes[n-1].m_child[context_symbol] = new CTNode();
-		}
-		context_nodes[n] = context_nodes[n-1].m_child[context_symbol];
-	}
+    context_nodes[0] = m_root;
+    for (size_t n = 1; n < m_depth; ++n) {
+        symbol_t context_symbol;
+        // Generate fictional histories of 0s if necessary.
+        if (m_history.size() - n < 0) {
+            context_symbol = false;
+        } else {
+            context_symbol = m_history[m_history.size() - n];
+        }
+        // Create children as you need them.
+        if (context_nodes[n-1].m_child[context_symbol] == NULL) {
+            context_nodes[n-1].m_child[context_symbol] = new CTNode();
+        }
+        context_nodes[n] = context_nodes[n-1].m_child[context_symbol];
+    }
 
     // Update possibilities from leaf back to root
-	for (int n = m_depth - 1; n >= 0; --n) {
-		// Update the log probabilities, after seeing sym.
-		//TODO Verify this. Local KT estimate update, in log form.
-		context_nodes[n].m_log_prob_est = context_nodes[n].m_log_prob_est
-										  + context_nodes[n].logKTMul(sym);
-		++(context_nodes[n].m_count[sym]);// Update a / b.
+    for (int n = m_depth - 1; n >= 0; --n) {
+        // Update the log probabilities, after seeing sym.
+        //TODO Verify this. Local KT estimate update, in log form.
+        context_nodes[n].m_log_prob_est = context_nodes[n].m_log_prob_est
+                                          + context_nodes[n].logKTMul(sym);
+        ++(context_nodes[n].m_count[sym]);// Update a / b.
 
         // Update weighted probabilities
         if (n == m_depth - 1) {
@@ -126,25 +126,25 @@ void ContextTree::update(symbol_t sym) {
             context_nodes[n].m_log_prob_weighted =
                     context_nodes[n].logProbEstimated();
         } else {
-        // Compute log(0.5 * (P_e + P_w0 * P_w1))
-        // TODO check syntax/calculation
-        double log_w0 = context_nodes[n].child(false).logProbWeighted();
-        double log_w1 = context_nodes[n].child(true).logProbWeighted();
-        double log_exp = log_w0 + log_w1 - context_nodes[n].logProbEstimated();
+            // Compute log(0.5 * (P_e + P_w0 * P_w1))
+            // TODO check syntax/calculation
+            double log_w0 = context_nodes[n].child(false).logProbWeighted();
+            double log_w1 = context_nodes[n].child(true).logProbWeighted();
+            double log_exp = log_w0 + log_w1 - context_nodes[n].logProbEstimated();
 
-        // TODO: deal with/avoid overflow
-		context_nodes[n].m_log_prob_weighted = log_half
-            + context_nodes[n].logProbEstimated()
-            + log(1.0 + exp(log_exp));
+            // TODO: deal with/avoid overflow
+            context_nodes[n].m_log_prob_weighted = log_half
+                + context_nodes[n].logProbEstimated()
+                + log(1.0 + exp(log_exp));
         }
-	}
-	
-	m_history.push_back(sym);
-	
+    }
+    
+    m_history.push_back(sym);
+    
     /* Notes:
        Get context / CTNodes corresponding to that context
-       		- What to do when m_history is smaller than m_depth?
-       			Is a fictional history of 0s ok?
+            - What to do when m_history is smaller than m_depth?
+                Is a fictional history of 0s ok?
     Jesse:
     Rather than creating a node based on arbitrary histories, we could just
     not update (the probabilities, symbols still should be added to history)
@@ -157,7 +157,7 @@ void ContextTree::update(symbol_t sym) {
        Update KT estimate - something to do with logKTMul.
 
        Add "sym" to context.
-       	- m_history.push_back(sym);
+        - m_history.push_back(sym);
     */
 }
 
@@ -171,7 +171,7 @@ void ContextTree::update(const symbol_list_t &symlist) {
 
 // TODO this seems strange, when would we ever need to do this?
 // Answer: Action-Conditional CTW: action symbols aren't added to the tree,
-// 		they are just appended straight to the history.
+//      they are just appended straight to the history.
 // updates the history statistics, without touching the context tree
 void ContextTree::updateHistory(const symbol_list_t &symlist) {
 
@@ -183,7 +183,7 @@ void ContextTree::updateHistory(const symbol_list_t &symlist) {
 
 // removes the most recently observed symbol from the context tree
 void ContextTree::revert(void) {
-	// TODO: implement
+    // TODO: implement
 
     /* Notes:
        We can either store a snapshot of the tree in its entirety
@@ -202,23 +202,23 @@ void ContextTree::revert(void) {
     m_history.pop_back();
 
     // Path based on context
-	CTNode *context_nodes[m_depth];
+    CTNode *context_nodes[m_depth];
 
-	context_nodes[0] = m_root;
+    context_nodes[0] = m_root;
     // Traverse tree to leaf
-	for (size_t n = 1; n < m_depth; ++n) {
-		symbol_t context_symbol;
+    for (size_t n = 1; n < m_depth; ++n) {
+        symbol_t context_symbol;
         // Default to false if history does not exist
         if (m_history.size() - n < 0) {
-			context_symbol = false;
-		} else {
-			context_symbol = m_history[m_history.size() - n];
-		}
-		context_nodes[n] = context_nodes[n-1].m_child[context_symbol];
-	}
+            context_symbol = false;
+        } else {
+            context_symbol = m_history[m_history.size() - n];
+        }
+        context_nodes[n] = context_nodes[n-1].m_child[context_symbol];
+    }
 
     // Update estimates
-	for (int n = m_depth - 1; n >= 0; --n) {
+    for (int n = m_depth - 1; n >= 0; --n) {
         // Remove effects of last update
         --context_nodes[n].m_count[latest_sym];
         context_nodes[n].m_log_prob_est -= logKTMul(latest_sym);
@@ -228,16 +228,16 @@ void ContextTree::revert(void) {
             // Leaf node
             context_nodes[n].m_log_prob_weighted = context_nodes[n].logProbEstimated();
         } else {
-        // Compute log(0.5 * (P_e + P_w0 * P_w1))
-        // TODO check syntax/calculation
-        double log_w0 = context_nodes[n].child(false).logProbWeighted();
-        double log_w1 = context_nodes[n].child(true).logProbWeighted();
-        double log_exp = log_w0 + log_w1 - context_nodes[n].logProbEstimated();
+            // Compute log(0.5 * (P_e + P_w0 * P_w1))
+            // TODO check syntax/calculation
+            double log_w0 = context_nodes[n].child(false).logProbWeighted();
+            double log_w1 = context_nodes[n].child(true).logProbWeighted();
+            double log_exp = log_w0 + log_w1 - context_nodes[n].logProbEstimated();
 
-        // TODO: deal with/avoid overflow
-		context_nodes[n].m_log_prob_weighted = log_half
-            + context_nodes[n].logProbEstimated()
-            + log(1.0 + exp(log_exp));
+            // TODO: deal with/avoid overflow
+            context_nodes[n].m_log_prob_weighted = log_half
+                + context_nodes[n].logProbEstimated()
+                + log(1.0 + exp(log_exp));
         }
     }
 }
@@ -256,10 +256,10 @@ void ContextTree::revertHistory(size_t newsize) {
 // distributed according to the context tree statistics
 void ContextTree::genRandomSymbols(symbol_list_t &symbols, size_t bits) {
 
-	genRandomSymbolsAndUpdate(symbols, bits);
+    genRandomSymbolsAndUpdate(symbols, bits);
 
-	// restore the context tree to it's original state
-	for (size_t i=0; i < bits; i++) revert();
+    // restore the context tree to it's original state
+    for (size_t i=0; i < bits; i++) revert();
 }
 
 
@@ -267,7 +267,7 @@ void ContextTree::genRandomSymbols(symbol_list_t &symbols, size_t bits) {
 // the context tree statistics and update the context tree with the newly
 // generated bits
 void ContextTree::genRandomSymbolsAndUpdate(symbol_list_t &symbols, size_t bits) {
-	// TODO: implement
+    // TODO: implement
 
     // Notes:
     for (size_t i=0; i < bits; i++) {
@@ -287,7 +287,7 @@ double ContextTree::logBlockProbability(void) {
 }
 
 // TODO Watch out, returns the n'th history symbol (from the front),
-// 		not the n'th most recent (from the back).
+//      not the n'th most recent (from the back).
 // get the n'th most recent history symbol, NULL if doesn't exist
 const symbol_t *ContextTree::nthHistorySymbol(size_t n) const {
     return n < m_history.size() ? &m_history[n] : NULL;
