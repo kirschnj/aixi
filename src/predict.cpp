@@ -37,9 +37,9 @@ double CTNode::logKTMul(symbol_t sym) const {
     return log( (double) (m_count[sym] + 0.5)
                 / (double) (m_count[false] + m_count[true] + 1) );
     //TODO probably needs <cmath> for log.
-    // Note, CTNode includes a visit() function, which we could use in place
+    // Note, CTNode includes a visits() function, which we could use in place
     // of m_count[false] + m_count[true]. That's optional (they do exactly the
-    // same thing, just visit() looks shorter).
+    // same thing, just visits() looks shorter).
 
     /* We could consider using a cache (like the table in the lectures) where
        we calculate a bunch of smallish KT estimates, which are looked up
@@ -221,6 +221,15 @@ void ContextTree::revert(void) {
     for (int n = m_depth - 1; n >= 0; --n) {
         // Remove effects of last update
         --context_nodes[n].m_count[latest_sym];
+        // TODO: consider deleting this node if it contains no visits.
+        /*
+
+        if (context_nodes[n].visits() == 0) {
+            delete context_nodes[n];
+            continue;
+        }
+
+        */
         context_nodes[n].m_log_prob_est -= logKTMul(latest_sym);
 
         // Update weighted probabilities
