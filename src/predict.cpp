@@ -93,6 +93,7 @@ void ContextTree::update(symbol_t sym) {
 	// TODO: implement
 	
     // Path based on context
+    // TODO consider renaming this, it's a bit long..
 	CTNode *context_nodes[m_depth];
 
 	context_nodes[0] = m_root;
@@ -111,6 +112,7 @@ void ContextTree::update(symbol_t sym) {
 		context_nodes[n] = context_nodes[n-1].m_child[context_symbol];
 	}
 
+    // Update possibilities from leaf back to root
 	for (int n = m_depth - 1; n >= 0; --n) {
 		// Update the log probabilities, after seeing sym.
 		//TODO Verify this. Local KT estimate update, in log form.
@@ -118,6 +120,12 @@ void ContextTree::update(symbol_t sym) {
 										  + context_nodes[n].logKTMul(sym);
 		++(context_nodes[n].m_count[sym]);// Update a / b.
 
+        // Update weighted probabilities
+        if (n == m_depth - 1) {
+            // Leaf node
+            context_nodes[n].m_log_prob_weighted =
+                    context_nodes[n].logProbEstimated();
+        } else {
         // Compute log(0.5 * (P_e + P_w0 * P_w1))
         // TODO check syntax/calculation
         double log_w0 = context_nodes[n].child(false).logProbWeighted();
@@ -128,6 +136,7 @@ void ContextTree::update(symbol_t sym) {
 		context_nodes[n].m_log_prob_weighted = log_half
             + context_nodes[n].logProbEstimated()
             + log(1.0 + exp(log_exp));
+        }
 	}
 	
 	m_history.push_back(sym);
@@ -178,11 +187,59 @@ void ContextTree::revert(void) {
 
     /* Notes:
        We can either store a snapshot of the tree in its entirety
+            We probably won't have enough memory to do this.
        OR
        Just recompute the tree -
             delete whatever nodes were added by the last symbol.
             recalculate estimates.
     */
+
+    // ensure we have a recently observed symbol
+    if (historySize() == 0) return;
+    
+    // Get latest symbol (to update counts) and remove from history
+    symbol_t latest_sym = m_history.back();
+    m_history.pop_back();
+
+    // Path based on context
+	CTNode *context_nodes[m_depth];
+
+	context_nodes[0] = m_root;
+    // Traverse tree to leaf
+	for (size_t n = 1; n < m_depth; ++n) {
+		symbol_t context_symbol;
+        // Default to false if history does not exist
+        if (m_history.size() - n < 0) {
+			context_symbol = false;
+		} else {
+			context_symbol = m_history[m_history.size() - n];
+		}
+		context_nodes[n] = context_nodes[n-1].m_child[context_symbol];
+	}
+
+    // Update estimates
+	for (int n = m_depth - 1; n >= 0; --n) {
+        // Remove effects of last update
+        --context_nodes[n].m_count[latest_sym];
+        context_nodes[n].m_log_prob_est -= logKTMul(latest_sym);
+
+        // Update weighted probabilities
+        if (n == m_depth - 1) {
+            // Leaf node
+            context_nodes[n].m_log_prob_weighted = context_nodes[n].logProbEstimated();
+        } else {
+        // Compute log(0.5 * (P_e + P_w0 * P_w1))
+        // TODO check syntax/calculation
+        double log_w0 = context_nodes[n].child(false).logProbWeighted();
+        double log_w1 = context_nodes[n].child(true).logProbWeighted();
+        double log_exp = log_w0 + log_w1 - context_nodes[n].logProbEstimated();
+
+        // TODO: deal with/avoid overflow
+		context_nodes[n].m_log_prob_weighted = log_half
+            + context_nodes[n].logProbEstimated()
+            + log(1.0 + exp(log_exp));
+        }
+    }
 }
 
 
