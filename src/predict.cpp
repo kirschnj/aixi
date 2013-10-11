@@ -73,7 +73,12 @@ double CTNode::logKTMul(symbol_t sym) const {
 ContextTree::ContextTree(size_t depth) :
     m_root(new CTNode()),
     m_depth(depth)
-{ return; }
+{
+    // Create a fictional history of 'depth' number of 0s.
+    for (size_t i = 0; i < depth; ++i) {
+        m_history.push_back(false);
+    }
+}
 
 
 ContextTree::~ContextTree(void) {
@@ -98,14 +103,8 @@ void ContextTree::update(symbol_t sym) {
 
     context_nodes[0] = m_root;
     for (size_t n = 1; n < m_depth; ++n) {
-        symbol_t context_symbol;
-        // Generate fictional histories of 0s if necessary.
-        if (m_history.size() - n < 0) {
-            context_symbol = false;
-        } else {
-            context_symbol = m_history[m_history.size() - n];
-        }
-        // Create children as you need them.
+        symbol_t context_symbol = m_history[m_history.size() - n];
+        // Create children as they are needed.
         if (context_nodes[n-1].m_child[context_symbol] == NULL) {
             context_nodes[n-1].m_child[context_symbol] = new CTNode();
         }
