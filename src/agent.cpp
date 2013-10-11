@@ -110,60 +110,34 @@ action_t Agent::genAction(void) const {
 // generate a percept distributed according
 // to our history statistics
 percept_t Agent::genPercept(void) const {
-	// TODO: implement
+	// Efficient implementation: randomly choose bits sequentially until 
+	// a whole percept worth of bits have been chosen.
 	
-	double percept_prob[numPercepts()];
-	double joint_prob = m_ct->logBlockProbability();
+	symbol_list_t symbols;
 	
-	for (unsigned int p = 0; p < numPercepts(); ++p) {
-	    symbol_list_t percept_symbols;
-	    encode(percept_symbols, p, m_obs_bits + m_rew_bits);
-	    //TODO move probability getting into CTW predict() functions.
-	    m_ct->update(percept_symbols);
-	    percept_prob[p] = m_ct->logBlockProbability() - joint_prob;
-	    for (unsigned int i = 0; i < m_obs_bits + m_rew_bits; ++i) {
-	        m_ct->revert();
-	    }
+	for (unsigned int b = 0; b < m_obs_bits + m_rew_bits; ++b) {
+        //TODO move probability getting into CTW predict() functions.
+	    double log_joint_prob = m_ct->logBlockProbability();
+        m_ct->update(false);
+        double log_prob_false = m_ct->logBlockProbability() - log_joint_prob;
+        m_ct->revert();
+        
+	    double random = rand01();
+        if (random <= exp(log_prob_false)) {
+            symbols.push_back(false);
+            m_ct->update(false);
+        } else {
+            symbols.push_back(true);
+            m_ct->update(true);
+        }
 	}
 	
-	double random = rand01();
-	double sum;
-	percept_t percept = numPercepts() - 1;
-	for (unsigned int p = 0; p < numPercepts(); ++p) {
-	    sum += exp(percept_prob[p]);
-	    if (random <= sum) {
-	        percept = p;
-	        break;
-	    }
-	}
+	// TODO At present, the CTW has been left with the generated percept updated.
+	// Users of this function need to be aware that this is the case,
+	// if a percept needs to be generated without updating, then a revert loop
+	// can be done here.
 	
-	return percept;
-	/*
-		Very similar to above, but this time we have to go over all
-		2^numPerceptBits possible percepts.
-		for (every possible percept sequence) {
-			compute conditional probability of seeing that sequence,
-			given everything we've already seen:
-				read the joint probability so far from the root of the CTW (log_prob_weights)
-				get the joint probability of everything and this prospective percept
-					(by updating the CTW with all the symbols sequentially)
-				divide the latter by the former, to get the conditional probability
-					of seeing that percept sequence
-				And be careful of log space, so division means subtraction.
-				revert the CTW
-		}
-		compute random number in [0, 1]
-		double probSum = 0;
-		for (every possible percept) {
-			probSum = probSum + percept probability
-			if (probSum > random number) {
-				return this percept.
-			}
-		}
-		On the off chance that numerical approximations mean the sum is less than 1,
-		and we make it past the loop:
-		return last percept
-	*/
+	return decode(symbols, m_obs_bits + m_rew_bits);
 }
 
 
