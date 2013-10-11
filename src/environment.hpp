@@ -70,4 +70,40 @@ private:
 	const static percept_t m_hear_tiger_right = 2;
 };
 
+// Pacman environment // TODO: I'll start implementing this later tonight.
+class Pacman : public Environment {
+public:
+	// set up the initial environment percept
+	Pacman(options_t &options);
+
+	// receives the agent's action and calculates the new environment percept
+	virtual void performAction(action_t action);
+
+private:
+    // Actions consist of a movement in some direction.
+    // TODO: add a "none" action as in the arcade version?
+    const static action_t m_move_left = 0
+    const static action_t m_move_right = 1
+    const static action_t m_move_up = 2
+    const static action_t m_move_down = 3
+    const static unsigned int m_num_actions = 4;
+
+    // TODO percepts, which won't be listed here...
+    // 4 bits for wall configuration
+    // 4 bits for ghost visibility via direct line of sight
+    // 3 bits for food ("smelt" within Manhattan distance of 2, 3 or 4)
+    // 4 bits if food is in direct line of sight
+    // 1 bit if under effects of power pill
+
+    // TODO scale rewards, so that they are all positive.
+    /*
+    const static percept_t m_reward_move = -1;
+    const static percept_t m_reward_wall = -10;
+    const static percept_t m_reward_ghost = -50;
+    const static percept_t m_reward_food = 10;
+    const static percept_t m_reward_win = 100;
+    */
+
+};
+
 #endif // __ENVIRONMENT_HPP__
