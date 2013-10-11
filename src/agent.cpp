@@ -1,6 +1,7 @@
 #include "agent.hpp"
 
 #include <cassert>
+#include <cmath>
 
 #include "predict.hpp"
 #include "search.hpp"

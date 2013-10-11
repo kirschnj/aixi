@@ -1,8 +1,9 @@
 #include "search.hpp"
 
 #include "agent.hpp"
-
 #include "util.hpp"
+
+#include <cmath>
 
 typedef unsigned long long visits_t;
 
@@ -21,7 +22,7 @@ public:
 	    unsigned int num_percepts);
 
 	// determine the next action to play
-	action_t selectAction(Agent &agent, unsigned int dfr) const; // TODO: implement
+	action_t selectAction(Agent &agent, unsigned int dfr); // TODO: implement
 
 	// determine the expected reward from this node
 	reward_t expectation(void) const { return m_mean; }
@@ -33,7 +34,7 @@ public:
 	// number of times the search node has been visited
 	visits_t visits(void) const { return m_visits; }
 	
-	SearchNode* child(unsigned int n) { return child[n]; }
+	SearchNode* child(unsigned int n) { return m_child[n]; }
 
 private:
 
@@ -43,16 +44,20 @@ private:
 
 	// TODO: decide how to reference child nodes
 	//  e.g. a fixed-size array
-	SearchNode* child[];
+	std::vector<SearchNode*> m_child;
 };
 
 SearchNode::SearchNode(bool is_chance_node,
     unsigned int num_actions, unsigned int num_percepts)
 : m_chance_node(is_chance_node) {
+    int num_children;
     if (m_chance_node) {
-        child = SearchNode*[num_percepts];
+        num_children = num_percepts;
     } else {
-        child = SearchNode*[num_actions];
+        num_children = num_actions;
+    }
+    for (int i = 0; i < num_children; ++i) {
+        m_child.push_back(NULL);
     }
 }
 
@@ -72,27 +77,28 @@ static reward_t playout(Agent &agent, unsigned int playout_len) {
 action_t SearchNode::selectAction(Agent& agent, unsigned int dfr) {
     std::vector<action_t> unexplored_actions;
     for (action_t a = 0; a < agent.numActions(); ++a) {
-        if (child[a] == NULL) {
+        if (m_child[a] == NULL) {
             unexplored_actions.push_back(a);
         }
     }
     if (!unexplored_actions.empty()) {
         action_t action = unexplored_actions.at(
                                 randRange(unexplored_actions.size()));
-        child[action] = SearchNode(true, agent.numActions(), agent.numPercepts());
+        m_child[action] = new SearchNode(true, agent.numActions(), agent.numPercepts());
         return action;
     } else {
         action_t arg_max = 0;
-        double max = (1.0 / (dfr * agent.maxReward())) * child[0].m_mean
-                    + C * sqrt((log(m_visits)/child[0].m_visits));
+        double C = 1;
+        double max = (1.0 / (dfr * agent.maxReward())) * m_child[0]->m_mean
+                    + C * sqrt((log(m_visits)/m_child[0]->m_visits));
         for (action_t a = 1; a < agent.numActions(); ++a) {
-            double f = (1.0 / (dfr * agent.maxReward())) * child[a].m_mean
-                    + C * sqrt((log(m_visits)/child[a].m_visits));
+            double f = (1.0 / (dfr * agent.maxReward())) * m_child[a]->m_mean
+                    + C * sqrt((log(m_visits)/m_child[a]->m_visits));
             // Notes: agent.minReward() defined as 0, so omitted.
             // TODO Need constant C defined somewhere.
             if (f > max) {
                 max = f;
-                arg_max = action;
+                arg_max = a;
             }
         }
         
@@ -106,19 +112,22 @@ reward_t SearchNode::sample(Agent &agent, unsigned int dfr) {
         return 0;// TODO catch this earlier, no point generating any nodes at 
                 // this depth. Waste of space.
     } else if (m_chance_node) {
-        // Generate observation reward percept.
-        // decode reward into an int r.
-        // decode whole percept into int percept_int
-        if (child[percept_int] == NULL) {
-            child[percept_int] = SearchNode(false,
+        // TODO Generate observation reward percept.
+        percept_t percept;
+        // TODO decode reward into an int r.
+        int r;
+        // TODO decode whole percept into int percept_int
+        int percept_int;
+        if (m_child[percept_int] == NULL) {
+            m_child[percept_int] = new SearchNode(false,
                                     agent.numActions(), agent.numPercepts());
         }
-        newReward = r + child[percept_int].sample(agent, dfr - 1);
-    } else if {m_visits == 0) {
+        newReward = r + m_child[percept_int]->sample(agent, dfr - 1);
+    } else if (m_visits == 0) {
         newReward = playout(agent, dfr);
     } else {
-        action_t action = selectAction(agent);
-        newReward = child[action].sample(agent, drf);
+        action_t action = selectAction(agent, dfr);
+        newReward = m_child[action]->sample(agent, dfr);
     }
     m_mean = (1.0 / (double) (m_visits + 1)) * (newReward + m_visits * m_mean);
     ++m_visits;
@@ -130,16 +139,16 @@ extern action_t search(Agent &agent) {
     SearchNode search_tree(false, agent.numActions(), agent.numPercepts());
     
     // TODO Timing
-    while (timeNow < maxGivenTime /*TODO*/) {
+    while (true /*timeNow < maxGivenTime TODO*/) {
         search_tree.sample(agent, agent.horizon());
     }
     
     // TODO assumes all actions sampled at least once (children exist).
-    double best_reward = search_tree.child(0).expectation();
+    double best_reward = search_tree.child(0)->expectation();
     unsigned int best_action = 0;
     for (unsigned int i = 1; i < agent.numActions(); ++i) {
-        if (search_tree.child(i).expectation() > best_reward) {
-            best_reward = search_tree.child(i).expectation();
+        if (search_tree.child(i)->expectation() > best_reward) {
+            best_reward = search_tree.child(i)->expectation();
             best_action = i;
         }
     }

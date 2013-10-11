@@ -43,7 +43,7 @@ private:
 
     // Compute the log weighted blocked probability, from the KT estimante
     // and children.
-    void computeLogProbWeighted();
+    void updateLogProbWeighted();
 
     weight_t m_log_prob_est;      // log KT estimated probability
     weight_t m_log_prob_weighted; // log weighted block probability

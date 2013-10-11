@@ -12,7 +12,7 @@
 #include "util.hpp"
 
 // Streams for logging
-std::ofstream log;        // A verbose human-readable log
+std::ofstream verboseLog;        // A verbose human-readable log
 std::ofstream compactLog; // A compact comma-separated value log
 
 // The main agent/environment interaction loop
@@ -42,7 +42,7 @@ void mainLoop(Agent &ai, Environment &env, options_t &options) {
 
 		// check for agent termination
 		if (terminate_check && ai.age() > terminate_age) {
-			log << "info: terminating agent" << std::endl;
+			verboseLog << "info: terminating agent" << std::endl;
 			break;
 		}
 
@@ -71,14 +71,14 @@ void mainLoop(Agent &ai, Environment &env, options_t &options) {
 		ai.modelUpdate(action); // TODO: implement in agent.cpp
 
 		// Log this turn
-		log << "cycle: " << cycle << std::endl;
-		log << "observation: " << observation << std::endl;
-		log << "reward: " << reward << std::endl;
-		log << "action: " << action << std::endl;
-		log << "explored: " << (explored ? "yes" : "no") << std::endl;
-		log << "explore rate: " << explore_rate << std::endl;
-		log << "total reward: " << ai.reward() << std::endl;
-		log << "average reward: " << ai.averageReward() << std::endl;
+		verboseLog << "cycle: " << cycle << std::endl;
+		verboseLog << "observation: " << observation << std::endl;
+		verboseLog << "reward: " << reward << std::endl;
+		verboseLog << "action: " << action << std::endl;
+		verboseLog << "explored: " << (explored ? "yes" : "no") << std::endl;
+		verboseLog << "explore rate: " << explore_rate << std::endl;
+		verboseLog << "total reward: " << ai.reward() << std::endl;
+		verboseLog << "average reward: " << ai.averageReward() << std::endl;
 
 		// Log the data in a more compact form
 		compactLog << cycle << ", " << observation << ", " << reward << ", "
@@ -159,7 +159,7 @@ int main(int argc, char *argv[]) {
 
 	// Set up logging
 	std::string log_file = argc < 3 ? "log" : argv[2];
-	log.open((log_file + ".log").c_str());
+	verboseLog.open((log_file + ".log").c_str());
 	compactLog.open((log_file + ".csv").c_str());
 
 	// Print header to compactLog
@@ -241,7 +241,7 @@ int main(int argc, char *argv[]) {
 	// Run the main agent/environment interaction loop
 	mainLoop(ai, *env, options);
 
-	log.close();
+	verboseLog.close();
 	compactLog.close();
 
 	return 0;

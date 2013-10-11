@@ -1,6 +1,8 @@
 #include "predict.hpp"
 
 #include <cassert>
+#include <cmath>
+#include <errno.h>
 
 // compute log(0.5)
 static const double log_half = log(0.5);
@@ -75,13 +77,13 @@ void CTNode::updateLogProbWeighted() {
     // TODO check syntax/calculation
     double log_w0;
     if (m_child[false] != NULL) {
-        log_w0 = m_child[false].logProbWeighted();
+        log_w0 = m_child[false]->logProbWeighted();
     } else {
         log_w0 = 0;
     }
     double log_w1;
     if (m_child[true] != NULL) {
-        log_w1 = m_child[true].logProbWeighted();
+        log_w1 = m_child[true]->logProbWeighted();
     } else {
         log_w1 = 0;
     }
@@ -137,28 +139,28 @@ void ContextTree::update(symbol_t sym) {
     for (size_t n = 1; n < m_depth; ++n) {
         symbol_t context_symbol = m_history[m_history.size() - n];
         // Create children as they are needed.
-        if (context_nodes[n-1].m_child[context_symbol] == NULL) {
-            context_nodes[n-1].m_child[context_symbol] = new CTNode();
+        if (context_nodes[n-1]->m_child[context_symbol] == NULL) {
+            context_nodes[n-1]->m_child[context_symbol] = new CTNode();
         }
-        context_nodes[n] = context_nodes[n-1].m_child[context_symbol];
+        context_nodes[n] = context_nodes[n-1]->m_child[context_symbol];
     }
 
     // Update possibilities from leaf back to root
     for (int n = m_depth - 1; n >= 0; --n) {
         // Update the log probabilities, after seeing sym.
         // Local KT estimate update, in log form.
-        context_nodes[n].m_log_prob_est = context_nodes[n].m_log_prob_est
-                                          + context_nodes[n].logKTMul(sym);
+        context_nodes[n]->m_log_prob_est = context_nodes[n]->m_log_prob_est
+                                          + context_nodes[n]->logKTMul(sym);
         // Update a / b.
-        ++(context_nodes[n].m_count[sym]);
+        ++(context_nodes[n]->m_count[sym]);
 
         // Update weighted probabilities
         if (n == m_depth - 1) {
             // Leaf node
-            context_nodes[n].m_log_prob_weighted =
-                    context_nodes[n].logProbEstimated();
+            context_nodes[n]->m_log_prob_weighted =
+                    context_nodes[n]->logProbEstimated();
         } else {
-            context_nodes[n].updateLogProbWeighted();
+            context_nodes[n]->updateLogProbWeighted();
         }
     }
     
@@ -233,13 +235,13 @@ void ContextTree::revert(void) {
         } else {
             context_symbol = m_history[m_history.size() - n];
         }
-        context_nodes[n] = context_nodes[n-1].m_child[context_symbol];
+        context_nodes[n] = context_nodes[n-1]->m_child[context_symbol];
     }
 
     // Update estimates
     for (int n = m_depth - 1; n >= 0; --n) {
         // Remove effects of last update
-        --context_nodes[n].m_count[latest_sym];
+        --context_nodes[n]->m_count[latest_sym];
         // TODO: consider deleting this node if it contains no visits.
         /*
 
@@ -249,14 +251,14 @@ void ContextTree::revert(void) {
         }
 
         */
-        context_nodes[n].m_log_prob_est -= logKTMul(latest_sym);
+        context_nodes[n]->m_log_prob_est -= context_nodes[n]->logKTMul(latest_sym);
 
         // Update weighted probabilities
         if (n == m_depth - 1) {
             // Leaf node
-            context_nodes[n].m_log_prob_weighted = context_nodes[n].logProbEstimated();
+            context_nodes[n]->m_log_prob_weighted = context_nodes[n]->logProbEstimated();
         } else {
-            context_nodes[n].updateLogProbWeighted();
+            context_nodes[n]->updateLogProbWeighted();
         }
     }
 }
@@ -291,7 +293,7 @@ void ContextTree::genRandomSymbolsAndUpdate(symbol_list_t &symbols, size_t bits)
     // Notes:
     for (size_t i=0; i < bits; i++) {
         //make a symbol somehow
-        //symbol_t sym = //TODO
+        symbol_t sym; //TODO
         /*
         Get the conditional probabilities for each Symbol:
         symbolCondProb[numSymbols]

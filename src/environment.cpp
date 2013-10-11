@@ -46,7 +46,7 @@ Tiger::Tiger(options_t &options) {
 // TODO describe the Tiger environment.
 void Tiger::performAction(action_t action) {
 	assert(action < m_num_actions);
-	if (action == m_listen) {
+	if (action == m_listen_action) {
 		if (m_tiger_left) {
 			if (rand01() < 0.85) {
 				m_observation = m_hear_tiger_left;

@@ -60,14 +60,14 @@ public:
 private:
 	bool m_tiger_left;// Whether the tiger is behind the left door or not
 	
-	const action_t m_listen_action = 0;
-	const action_t m_open_left = 1;
-	const action_t m_open_right = 2;
-	const unsigned int m_num_actions = 3;
+	const static action_t m_listen_action = 0;
+	const static action_t m_open_left = 1;
+	const static action_t m_open_right = 2;
+	const static unsigned int m_num_actions = 3;
 	
-	const percept_t m_no_observation = 0;
-	const percept_t m_hear_tiger_left = 1;
-	const percept_t m_hear_tiger_right = 2;
+	const static percept_t m_no_observation = 0;
+	const static percept_t m_hear_tiger_left = 1;
+	const static percept_t m_hear_tiger_right = 2;
 };
 
 #endif // __ENVIRONMENT_HPP__
