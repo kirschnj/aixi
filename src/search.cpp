@@ -7,7 +7,7 @@ typedef unsigned long long visits_t;
 
 // search options
 static const visits_t     MinVisitsBeforeExpansion = 1;
-static const unsigned int MaxDistanceFromRoot  = 100;
+static const unsigned int MaxDistanceFromRoot  = 100;// Note, Agent defines it's own horizon size;
 static size_t             MaxSearchNodes;
 
 // contains information about a single "state"
@@ -15,7 +15,8 @@ class SearchNode {
 
 public:
 
-	SearchNode(bool is_chance_node);
+	SearchNode(bool is_chance_node, unsigned int num_actions,
+	    unsigned int num_percepts);
 
 	// determine the next action to play
 	action_t selectAction(Agent &agent) const; // TODO: implement
@@ -29,6 +30,8 @@ public:
 
 	// number of times the search node has been visited
 	visits_t visits(void) const { return m_visits; }
+	
+	SearchNode* child(unsigned int n) { return child[n]; }
 
 private:
 
@@ -38,7 +41,18 @@ private:
 
 	// TODO: decide how to reference child nodes
 	//  e.g. a fixed-size array
+	SearchNode* child[];
 };
+
+SearchNode::SearchNode(bool is_chance_node,
+    unsigned int num_actions, unsigned int num_percepts)
+: m_chance_node(is_chance_node) {
+    if (m_chance_node) {
+        child = SearchNode*[num_percepts];
+    } else {
+        child = SearchNode*[num_actions];
+    }
+}
 
 // simulate a path through a hypothetical future for the agent within it's
 // internal model of the world, returning the accumulated reward.
@@ -53,14 +67,59 @@ static reward_t playout(Agent &agent, unsigned int playout_len) {
 	*/
 }
 
+reward_t SearchNode::sample(Agent &agent, unsigned int dfr) {
+    double newReward;
+    if (dfr == 0) {
+        return 0;// TODO catch this earlier, no point generating any nodes at 
+                // this depth. Waste of space.
+    } else if (m_chance_node) {
+        // Generate observation reward percept.
+        // decode reward into an int r.
+        // decode whole percept into int percept_int
+        if (child[percept_int] == NULL) {
+            child[percept_int] = SearchNode(false,
+                                    agent.numActions(), agent.numPercepts());
+        }
+        newReward = r + child[percept_int].sample(agent, dfr - 1);
+    } else if {m_visits == 0) {
+        newReward = playout(agent, dfr);
+    } else {
+        action_t action = selectAction(agent);
+        newReward = child[action].sample(agent, drf);
+    }
+    m_mean = (1.0 / (double) (m_visits + 1)) * (newReward + m_visits * m_mean);
+    ++m_visits;
+    return newReward;
+}
+
 // determine the best action by searching ahead using MCTS
 extern action_t search(Agent &agent) {
+    SearchNode search_tree(false, agent.numActions(), agent.numPercepts());
+    
+    // TODO Timing
+    while (timeNow < maxGivenTime /*TODO*/) {
+        search_tree.sample(agent, agent.horizon());
+    }
+    
+    // TODO assumes all actions sampled at least once (children exist).
+    double best_reward = search_tree.child(0).expectation();
+    unsigned int best_action = 0;
+    for (unsigned int i = 1; i < agent.numActions(); ++i) {
+        if (search_tree.child(i).expectation() > best_reward) {
+            best_reward = search_tree.child(i).expectation();
+            best_action = i;
+        }
+    }
+    
+    return best_action;
+    
+    
 	return agent.genRandomAction(); // TODO: implement
 	/*
 		Initialise the search tree (non-chance node)
 		start timing up to cycle-length-millis
 		while ( still more time || less than mc-simulations completed) {
-			searchTree.sample(agent, whatever dfr is meant to be (search horizon m i think));
+			searchTree.sample(agent, max distance from root));
 		}
 		look through all the successors of the root of our search tree:
 		pick the action corresponding to the successor with highest m_mean/expectation().

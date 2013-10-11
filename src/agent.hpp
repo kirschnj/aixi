@@ -36,6 +36,9 @@ public:
 
 	// number of distinct actions
 	unsigned int numActions(void) const;
+	
+	// number of distinct percepts that can be observed
+	unsigned int numPercepts(void) const;
 
 	// the length of the stored history for an agent
 	size_t historySize(void) const;
@@ -96,6 +99,7 @@ private:
 	unsigned int m_actions_bits; // number of bits to represent an action
 	unsigned int m_obs_bits;     // number of bits to represent an observation
 	unsigned int m_rew_bits;     // number of bits to represent a reward
+	unsigned int m_percepts;     // number of possible percepts
 	size_t m_horizon;            // length of the search horizon
 
 	// Context Tree representing the agent's beliefs

@@ -20,6 +20,9 @@ Agent::Agent(options_t & options) {
 	for (unsigned int i = 1, c = 1; i < m_actions; i *= 2, c++) {
 		m_actions_bits = c;
 	}
+	
+	// calculate the number of possible percepts
+	m_percepts = pow(2, m_obs_bits + m_rew_bits);
 
 	m_ct = new ContextTree(strExtract<unsigned int>(options["ct-depth"]));
 
@@ -64,6 +67,11 @@ reward_t Agent::minReward(void) const {
 // number of distinct actions
 unsigned int Agent::numActions(void) const {
 	return m_actions;
+}
+
+// number of distinct percepts that can be observed
+unsigned int Agent::numPercepts(void) const {
+	return m_percepts;
 }
 
 
