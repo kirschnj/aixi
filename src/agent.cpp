@@ -167,8 +167,7 @@ void Agent::modelUpdate(percept_t observation, percept_t reward) {
 	symbol_list_t percept;
 	encodePercept(percept, observation, reward);
 
-	m_ct->update(percept);// TODO update will add to the history directly,
-	m_ct->updateHistory(percept);// So this shouldn't be necessary. See predict.cpp:update().
+	m_ct->update(percept);
 
 
 	// Update other properties
@@ -185,13 +184,8 @@ void Agent::modelUpdate(action_t action) {
 	// Update internal model
 	symbol_list_t action_syms;
 	encodeAction(action_syms, action);
-	m_ct->update(action_syms);// TODO update will add to the history directly,
-							// It has to right? successive updates rely on the previous one as history.
-	m_ct->updateHistory(action_syms);// So this shouldn't be necessary. See predict.cpp:update().
-
-	//TODO Alternative to my comments above, the CTW is action-conditional:
-	//		The only thing we should be doing here is updating the history,
-	//		and not touching the actual CTW model at all.
+	
+	m_ct->updateHistory(action_syms);
 
 	m_time_cycle++;
 	m_last_update_percept = false;

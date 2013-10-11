@@ -93,7 +93,7 @@ void ContextTree::clear(void) {
     m_root = new CTNode();
 }
 
-
+// Update the CTW with the given symbol, and add that symbol to the history.
 void ContextTree::update(symbol_t sym) {
     // TODO: implement
     
@@ -191,12 +191,8 @@ void ContextTree::update(const symbol_list_t &symlist) {
     }
 }
 
-// TODO this seems strange, when would we ever need to do this?
-// Answer: Action-Conditional CTW: action symbols aren't added to the tree,
-//      they are just appended straight to the history.
 // updates the history statistics, without touching the context tree
 void ContextTree::updateHistory(const symbol_list_t &symlist) {
-
     for (size_t i=0; i < symlist.size(); i++) {
         m_history.push_back(symlist[i]);
     }
