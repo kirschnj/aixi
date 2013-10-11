@@ -216,7 +216,7 @@ void ContextTree::revert(void) {
     */
 
     // ensure we have a recently observed symbol
-    if (historySize() == 0) return;
+    assert(historySize() != 0);
     
     // Get latest symbol (to update counts) and remove from history
     symbol_t latest_sym = m_history.back();
@@ -308,11 +308,12 @@ void ContextTree::genRandomSymbolsAndUpdate(symbol_list_t &symbols, size_t bits)
         Pick a symbol by those probabilities:
         random = rand01();
         sum = 0
-        chosenSymbol = lastsymbol;
+        sym = lastsymbol;
         for (each symbol) {
             sum += exp(logSymbolConditionalProb[symbol])
             if (rand <= sum) {
-                chosenSymbol = symbol
+                sym = symbol
+                break;
             }
         }
         
