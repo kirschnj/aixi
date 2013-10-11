@@ -41,6 +41,10 @@ private:
 	// compute the logarithm of the KT-estimator update multiplier
 	double logKTMul(symbol_t sym) const; // TODO: implement in predict.cpp
 
+    // Compute the log weighted blocked probability, from the KT estimante
+    // and children.
+    void computeLogProbWeighted();
+
     weight_t m_log_prob_est;      // log KT estimated probability
     weight_t m_log_prob_weighted; // log weighted block probability
 

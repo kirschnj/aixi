@@ -68,6 +68,38 @@ double CTNode::logKTMul(symbol_t sym) const {
     */
 }
 
+void CTNode::updateLogProbWeighted() {
+    // Compute log(0.5 * (P_e + P_w0 * P_w1))
+    // == log(0.5) + log(P_e)
+    //    + log(1 + exp(log(P_w0) + log(P_w1) - log(P_e))
+    // TODO check syntax/calculation
+    double log_w0;
+    if (m_child[false] != NULL) {
+        log_w0 = m_child[false].logProbWeighted();
+    } else {
+        log_w0 = 0;
+    }
+    double log_w1;
+    if (m_child[true] != NULL) {
+        log_w1 = m_child[true].logProbWeighted();
+    } else {
+        log_w1 = 0;
+    }
+    errno = 0;
+    double tmp_exp = exp(log_w0 + log_w1 - m_log_prob_est);
+    if (errno == ERANGE) {
+        // exp() overflowed the range of a double.
+        // Then the '1 +' in '1 + exp' is irrelevant.
+        // log(1 + exp(log(P_w0) + log(P_w1) - log(P_e)) becomes:
+        // log(P_w0) + log(P_w1) - log(P_e)
+        // Then log(P_e)'s cancel out.
+        // TODO double check this.
+        m_log_prob_weighted = log_half + log_w0 + log_w1;
+    } else {
+        m_log_prob_weighted = log_half + m_log_prob_est
+            + log(1.0 + tmp_exp);
+    }
+}
 
 // create a context tree of specified maximum depth
 ContextTree::ContextTree(size_t depth) :
@@ -126,38 +158,7 @@ void ContextTree::update(symbol_t sym) {
             context_nodes[n].m_log_prob_weighted =
                     context_nodes[n].logProbEstimated();
         } else {
-            // Compute log(0.5 * (P_e + P_w0 * P_w1))
-            // == log(0.5) + log(P_e)
-            //    + log(1 + exp(log(P_w0) + log(P_w1) - log(P_e))
-            // TODO check syntax/calculation
-            double log_w0;
-            if (context_nodes[n].child(false) != NULL) {
-                log_w0 = context_nodes[n].child(false).logProbWeighted();
-            } else {
-                log_w0 = 0;
-            }
-            double log_w1;
-            if (context_nodes[n].child(true) != NULL) {
-                log_w1 = context_nodes[n].child(true).logProbWeighted();
-            } else {
-                log_w1 = 0;
-            }
-            errno = 0;
-            double tmp_exp = exp(log_w0 + log_w1 - context_nodes[n].logProbEstimated());
-            if (errno == ERANGE) {
-                // exp() overflowed the range of a double.
-                // Then the '1 +' in '1 + exp' is irrelevant.
-                // log(1 + exp(log(P_w0) + log(P_w1) - log(P_e)) becomes:
-                // log(P_w0) + log(P_w1) - log(P_e)
-                // TODO double check this.
-                context_nodes[n].m_log_prob_weighted = log_half
-                    + context_nodes[n].logProbEstimated()
-                    + log_w0 + log_w1 - context_nodes[n].logProbEstimated();
-            } else {
-                context_nodes[n].m_log_prob_weighted = log_half
-                    + context_nodes[n].logProbEstimated()
-                    + log(1.0 + tmp_exp);
-            }
+            context_nodes[n].updateLogProbWeighted();
         }
     }
     
@@ -255,16 +256,7 @@ void ContextTree::revert(void) {
             // Leaf node
             context_nodes[n].m_log_prob_weighted = context_nodes[n].logProbEstimated();
         } else {
-            // Compute log(0.5 * (P_e + P_w0 * P_w1))
-            // TODO check syntax/calculation
-            double log_w0 = context_nodes[n].child(false).logProbWeighted();
-            double log_w1 = context_nodes[n].child(true).logProbWeighted();
-            double log_exp = log_w0 + log_w1 - context_nodes[n].logProbEstimated();
-
-            // TODO: deal with/avoid overflow
-            context_nodes[n].m_log_prob_weighted = log_half
-                + context_nodes[n].logProbEstimated()
-                + log(1.0 + exp(log_exp));
+            context_nodes[n].updateLogProbWeighted();
         }
     }
 }
