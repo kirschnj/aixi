@@ -101,31 +101,8 @@ action_t Agent::genAction(void) const {
 	/*
 		TODO Note: the CTW is 'action-conditional', which means it doesn't
 			encode the probabilities of actions. it encodes P((o,r)1:n | a1:n)
-			So, the following is wrong, and I'm not sure what this function is
+			So I'm not sure what this function is
 			meant to actually mean.
-		for (eachAction) {
-			convert to symbol list.
-			compute conditional probability of seeing that sequence,
-			given everything we've already seen:
-				read the joint probability so far from the root of the CTW (log_prob_weights)
-				get the joint probability of everything and this prospective action symbol list
-					(by updating the CTW with all the action symbols sequentially)
-				divide the latter by the former, to get the conditional probability
-					of seeing those action symbols.
-				And be careful of log space, so division means subtraction.
-				revert the CTW
-		}
-		compute random number in [0, 1]
-		double probSum = 0;
-		for (eachAction) {
-			probSum = probSum + action probability
-			if (probSum > random number) {
-				return this action.
-			}
-		}
-		On the off chance that numerical approximations mean the sum is less than 1,
-		and we make it past the loop:
-		return last action
 	*/
 }
 
@@ -133,7 +110,34 @@ action_t Agent::genAction(void) const {
 // generate a percept distributed according
 // to our history statistics
 percept_t Agent::genPercept(void) const {
-	return NULL; // TODO: implement
+	// TODO: implement
+	
+	double percept_prob[numPercepts()];
+	double joint_prob = m_ct->logBlockProbability();
+	
+	for (unsigned int p = 0; p < numPercepts(); ++p) {
+	    symbol_list_t percept_symbols;
+	    encode(percept_symbols, p, m_obs_bits + m_rew_bits);
+	    //TODO move probability getting into CTW predict() functions.
+	    m_ct->update(percept_symbols);
+	    percept_prob[p] = m_ct->logBlockProbability() - joint_prob;
+	    for (unsigned int i = 0; i < m_obs_bits + m_rew_bits; ++i) {
+	        m_ct->revert();
+	    }
+	}
+	
+	double random = rand01();
+	double sum;
+	percept_t percept = numPercepts() - 1;
+	for (unsigned int p = 0; p < numPercepts(); ++p) {
+	    sum += exp(percept_prob[p]);
+	    if (random <= sum) {
+	        percept = p;
+	        break;
+	    }
+	}
+	
+	return percept;
 	/*
 		Very similar to above, but this time we have to go over all
 		2^numPerceptBits possible percepts.
