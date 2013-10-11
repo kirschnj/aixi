@@ -114,10 +114,11 @@ void ContextTree::update(symbol_t sym) {
     // Update possibilities from leaf back to root
     for (int n = m_depth - 1; n >= 0; --n) {
         // Update the log probabilities, after seeing sym.
-        //TODO Verify this. Local KT estimate update, in log form.
+        // Local KT estimate update, in log form.
         context_nodes[n].m_log_prob_est = context_nodes[n].m_log_prob_est
                                           + context_nodes[n].logKTMul(sym);
-        ++(context_nodes[n].m_count[sym]);// Update a / b.
+        // Update a / b.
+        ++(context_nodes[n].m_count[sym]);
 
         // Update weighted probabilities
         if (n == m_depth - 1) {
@@ -126,15 +127,37 @@ void ContextTree::update(symbol_t sym) {
                     context_nodes[n].logProbEstimated();
         } else {
             // Compute log(0.5 * (P_e + P_w0 * P_w1))
+            // == log(0.5) + log(P_e)
+            //    + log(1 + exp(log(P_w0) + log(P_w1) - log(P_e))
             // TODO check syntax/calculation
-            double log_w0 = context_nodes[n].child(false).logProbWeighted();
-            double log_w1 = context_nodes[n].child(true).logProbWeighted();
-            double log_exp = log_w0 + log_w1 - context_nodes[n].logProbEstimated();
-
-            // TODO: deal with/avoid overflow
-            context_nodes[n].m_log_prob_weighted = log_half
-                + context_nodes[n].logProbEstimated()
-                + log(1.0 + exp(log_exp));
+            double log_w0;
+            if (context_nodes[n].child(false) != NULL) {
+                log_w0 = context_nodes[n].child(false).logProbWeighted();
+            } else {
+                log_w0 = 0;
+            }
+            double log_w1;
+            if (context_nodes[n].child(true) != NULL) {
+                log_w1 = context_nodes[n].child(true).logProbWeighted();
+            } else {
+                log_w1 = 0;
+            }
+            errno = 0;
+            double tmp_exp = exp(log_w0 + log_w1 - context_nodes[n].logProbEstimated());
+            if (errno == ERANGE) {
+                // exp() overflowed the range of a double.
+                // Then the '1 +' in '1 + exp' is irrelevant.
+                // log(1 + exp(log(P_w0) + log(P_w1) - log(P_e)) becomes:
+                // log(P_w0) + log(P_w1) - log(P_e)
+                // TODO double check this.
+                context_nodes[n].m_log_prob_weighted = log_half
+                    + context_nodes[n].logProbEstimated()
+                    + log_w0 + log_w1 - context_nodes[n].logProbEstimated();
+            } else {
+                context_nodes[n].m_log_prob_weighted = log_half
+                    + context_nodes[n].logProbEstimated()
+                    + log(1.0 + tmp_exp);
+            }
         }
     }
     
