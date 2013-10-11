@@ -2,6 +2,8 @@
 
 #include "agent.hpp"
 
+#include "util.hpp"
+
 typedef unsigned long long visits_t;
 
 
@@ -19,7 +21,7 @@ public:
 	    unsigned int num_percepts);
 
 	// determine the next action to play
-	action_t selectAction(Agent &agent) const; // TODO: implement
+	action_t selectAction(Agent &agent, unsigned int dfr) const; // TODO: implement
 
 	// determine the expected reward from this node
 	reward_t expectation(void) const { return m_mean; }
@@ -65,6 +67,37 @@ static reward_t playout(Agent &agent, unsigned int playout_len) {
 		Question: Would the agent's CTW of the environment need to be updated
 			while doing this, (and then reverted) or is it not relevant?
 	*/
+}
+
+action_t SearchNode::selectAction(Agent& agent, unsigned int dfr) {
+    std::vector<action_t> unexplored_actions;
+    for (action_t a = 0; a < agent.numActions(); ++a) {
+        if (child[a] == NULL) {
+            unexplored_actions.push_back(a);
+        }
+    }
+    if (!unexplored_actions.empty()) {
+        action_t action = unexplored_actions.at(
+                                randRange(unexplored_actions.size()));
+        child[action] = SearchNode(true, agent.numActions(), agent.numPercepts());
+        return action;
+    } else {
+        action_t arg_max = 0;
+        double max = (1.0 / (dfr * agent.maxReward())) * child[0].m_mean
+                    + C * sqrt((log(m_visits)/child[0].m_visits));
+        for (action_t a = 1; a < agent.numActions(); ++a) {
+            double f = (1.0 / (dfr * agent.maxReward())) * child[a].m_mean
+                    + C * sqrt((log(m_visits)/child[a].m_visits));
+            // Notes: agent.minReward() defined as 0, so omitted.
+            // TODO Need constant C defined somewhere.
+            if (f > max) {
+                max = f;
+                arg_max = action;
+            }
+        }
+        
+        return arg_max;
+    }
 }
 
 reward_t SearchNode::sample(Agent &agent, unsigned int dfr) {
