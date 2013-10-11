@@ -132,10 +132,9 @@ percept_t Agent::genPercept(void) const {
         }
 	}
 	
-	// TODO At present, the CTW has been left with the generated percept updated.
-	// Users of this function need to be aware that this is the case,
-	// if a percept needs to be generated without updating, then a revert loop
-	// can be done here.
+	for (unsigned int b = 0; b < m_obs_bits + m_rew_bits; ++b) {
+	    m_ct->revert();
+	}
 	
 	return decode(symbols, m_obs_bits + m_rew_bits);
 }
@@ -183,6 +182,10 @@ void Agent::modelUpdate(action_t action) {
 // to that of a previous time cycle, false on failure
 bool Agent::modelRevert(const ModelUndo &mu) {
 	return NULL; // TODO: implement
+	/*
+	Sequences of m_ct->reverts() to revert obs rew percepts
+	and m_ct->revertHistory()s to revert action history updates.
+	*/
 }
 
 

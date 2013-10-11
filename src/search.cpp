@@ -114,19 +114,22 @@ reward_t SearchNode::sample(Agent &agent, unsigned int dfr) {
     } else if (m_chance_node) {
         // TODO Generate observation reward percept.
         percept_t percept;
-        // TODO decode reward into an int r.
-        int r;
-        // TODO decode whole percept into int percept_int
-        int percept_int;
-        if (m_child[percept_int] == NULL) {
-            m_child[percept_int] = new SearchNode(false,
+        // TODO decode observation from whole percept;
+        percept_t obs;
+        // TODO decode reward from the percept into an int r.
+        percept_t r;
+        if (m_child[percept] == NULL) {
+            m_child[percept] = new SearchNode(false,
                                     agent.numActions(), agent.numPercepts());
         }
-        newReward = r + m_child[percept_int]->sample(agent, dfr - 1);
+        // TODO Make sure the percept is added to the agent's model and history.
+        agent.modelUpdate(obs, r);
+        newReward = r + m_child[percept]->sample(agent, dfr - 1);
     } else if (m_visits == 0) {
         newReward = playout(agent, dfr);
     } else {
         action_t action = selectAction(agent, dfr);
+        agent.modelUpdate(action);
         newReward = m_child[action]->sample(agent, dfr);
     }
     m_mean = (1.0 / (double) (m_visits + 1)) * (newReward + m_visits * m_mean);
@@ -141,6 +144,7 @@ extern action_t search(Agent &agent) {
     // TODO Timing
     while (true /*timeNow < maxGivenTime TODO*/) {
         search_tree.sample(agent, agent.horizon());
+        // TODO revert the agent back to the starting state.
     }
     
     // TODO assumes all actions sampled at least once (children exist).
