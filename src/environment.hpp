@@ -82,12 +82,35 @@ public:
     void printWorld(void);
 
 private:
-    // Maze/world as in assignment spec
-    const static bool maze[19][17];
+    /* Definitions */
+    struct point {
+        int row;
+        int col;
+    };
 
+    // Size of maze
+    const static int size = 19;
+    // Maze as shown by the diagram in the assignment spec
+    const static bool maze[size][size];
+    // Current world
+    int world[size][size];
 
+    /* Entities */
+    // PacMan
+    point pacman;
+    // Ghosts
+    const static int numGhosts = 4;
+    point ghosts[numGhosts];
+
+    // Enums to distinguish between entities
+    const static int e_empty = 0;
+    const static int e_wall = 1;
+    const static int e_pacman = 2;
+    const static int e_food = 3;
+    const static int e_ghost = 4;
+
+    /* Actions */
     // Actions consist of a movement in some direction.
-    // TODO: add a "none" action as in the arcade version?
     const static action_t m_move_left = 0;
     const static action_t m_move_right = 1;
     const static action_t m_move_up = 2;
@@ -109,6 +132,9 @@ private:
     const static percept_t m_reward_food = 10;
     const static percept_t m_reward_win = 100;
     */
+    
+    /* Functions */
+    void updateWorldPositions(void);
 
 };
 
