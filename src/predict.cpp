@@ -9,8 +9,8 @@ static const double log_half = log(0.5);
 
 CTNode::CTNode(void) :
     m_log_prob_est(0.0),
-    m_log_prob_weighted(0.0)
-{
+    m_log_prob_weighted(0.0){
+
     m_count[0] = 0;
     m_count[1] = 0;
     m_child[0] = NULL;
@@ -38,6 +38,7 @@ size_t CTNode::size(void) const {
 double CTNode::logKTMul(symbol_t sym) const {
     return log( (double) (m_count[sym] + 0.5)
                 / (double) (m_count[false] + m_count[true] + 1) );
+    
     //TODO probably needs <cmath> for log.
     // Note, CTNode includes a visits() function, which we could use in place
     // of m_count[false] + m_count[true]. That's optional (they do exactly the
@@ -75,18 +76,22 @@ void CTNode::updateLogProbWeighted() {
     // == log(0.5) + log(P_e)
     //    + log(1 + exp(log(P_w0) + log(P_w1) - log(P_e))
     // TODO check syntax/calculation
+    // Johannes: did check, seems ok to me
+
     double log_w0;
     if (m_child[false] != NULL) {
         log_w0 = m_child[false]->logProbWeighted();
     } else {
-        log_w0 = 0;
+        log_w0 = 0; //set to zero if leaf node
     }
+
     double log_w1;
     if (m_child[true] != NULL) {
         log_w1 = m_child[true]->logProbWeighted();
     } else {
-        log_w1 = 0;
+        log_w1 = 0; //set to zero if leaf node
     }
+
     errno = 0;
     double tmp_exp = exp(log_w0 + log_w1 - m_log_prob_est);
     if (errno == ERANGE) {
@@ -95,8 +100,10 @@ void CTNode::updateLogProbWeighted() {
         // log(1 + exp(log(P_w0) + log(P_w1) - log(P_e)) becomes:
         // log(P_w0) + log(P_w1) - log(P_e)
         // Then log(P_e)'s cancel out.
-        // TODO double check this.
-        m_log_prob_weighted = log_half + log_w0 + log_w1;
+        // TODO double check this. 
+        // Johannes: looks good
+        // log_half is defined static
+        m_log_prob_weighted = log_half + log_w0 + log_w1; //approximate
     } else {
         m_log_prob_weighted = log_half + m_log_prob_est
             + log(1.0 + tmp_exp);
@@ -288,39 +295,23 @@ void ContextTree::genRandomSymbols(symbol_list_t &symbols, size_t bits) {
 // the context tree statistics and update the context tree with the newly
 // generated bits
 void ContextTree::genRandomSymbolsAndUpdate(symbol_list_t &symbols, size_t bits) {
-    // TODO: implement
-
-    // Notes:
     for (size_t i=0; i < bits; i++) {
         //make a symbol somehow
-        symbol_t sym; //TODO
-        /*
-        Get the conditional probabilities for each Symbol:
-        symbolCondProb[numSymbols]
+        symbol_t sym; 
+
         logJointProb = m_root->logProbWeighted();
-        for (each symbol) {
-            update(symbol);
-            logJointWithSymbolProb = m_root->logProbWeighted();
-            revert();
-            symbolCondProb[symbol] = exp (logJointWithSymbolProb - logJointProb)
-        }
         
-        Pick a symbol by those probabilities:
-        random = rand01();
-        sum = 0
-        sym = lastsymbol;
-        for (each symbol) {
-            sum += exp(logSymbolConditionalProb[symbol])
-            if (rand <= sum) {
-                sym = symbol
-                break;
-            }
-        }
+        //add '0' to history, get probability and undo
+        update(false);
+        logJointWithSymbolProb = m_root->logProbWeighted();
+        revert();
+
+        //calc probabilty that '0' follows
+        symbolCondProb = exp (logJointWithSymbolProb - logJointProb);
         
-        */
-        //add this to symbols
+        sym = rand01() > symbolCondProb;
+        
         symbols.push_back(sym);
-        //update
         update(sym);
     }
 }
