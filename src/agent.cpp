@@ -99,6 +99,7 @@ action_t Agent::genRandomAction(void) const {
 action_t Agent::genAction(void) const {
     //generate a random action wrt our ct-model
     //remark: the ct is action conditional but nevertheless encodes actions
+    assert(!m_last_update_percept);
     symbol_list_t action_symbols;
 	m_ct->genRandomSymbols(action_symbols, m_actions_bits);
     return decodeAction(action_symbols); 
