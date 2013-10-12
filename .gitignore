@@ -12,5 +12,8 @@
 *.la
 *.a
 
+# vi .swp files
+*.swp
+
 # Executables
 aixi
