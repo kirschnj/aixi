@@ -124,6 +124,18 @@ percept_t Agent::genPercept(void) const {
 // generate a percept distributed to our history statistics, and
 // update our mixture environment model with it
 percept_t Agent::genPerceptAndUpdate(void) {
+    symbol_list_t obs_symbols;
+    symbol_list_t rew_symbols;
+    
+    m_ct->genRandomSymbolsAndUpdate(obs_symbols, m_obs_bits);
+    m_ct->genRandomSymbolsAndUpdate(rew_symbols, m_rew_bits);
+
+    percept_t reward = decodeReward(rew_symbols);
+
+    m_last_update_percept=true;
+    m_total_reward += reward;
+
+    //again, what do we want to return? where is this function used?
 	return NULL; // TODO: implement
 }
 
@@ -135,7 +147,6 @@ void Agent::modelUpdate(percept_t observation, percept_t reward) {
 	encodePercept(percept, observation, reward);
 
 	m_ct->update(percept);
-
 
 	// Update other properties
 	m_total_reward += reward;
