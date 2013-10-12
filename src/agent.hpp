@@ -42,6 +42,12 @@ public:
 	
 	// number of distinct percepts that can be observed
 	unsigned int numPercepts(void) const;
+	
+	// number of observation bits
+	unsigned int numObsBits(void) const;
+	
+	// number of reward bits
+	unsigned int numRewBits(void) const;
 
 	// the length of the stored history for an agent
 	size_t historySize(void) const;

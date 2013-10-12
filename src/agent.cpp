@@ -79,6 +79,15 @@ unsigned int Agent::numPercepts(void) const {
 	return m_percepts;
 }
 
+// number of distinct percepts that can be observed
+unsigned int Agent::numObsBits(void) const {
+	return m_obs_bits;
+}
+
+// number of distinct percepts that can be observed
+unsigned int Agent::numRewBits(void) const {
+	return m_rew_bits;
+}
 
 // the length of the stored history for an agent
 size_t Agent::historySize(void) const {

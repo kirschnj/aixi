@@ -34,10 +34,11 @@ void Pacman::printWorld(void) {
         for (int j = 0; j < size; j++) {
             switch (world[i][j]) {
                 case e_empty    : std::cout << " "; break;
-                case e_wall     : std::cout << "W"; break;
+                case e_wall     : std::cout << "\u2588"; break;
+                case e_food     : std::cout << "\u2022"; break;
                 case e_pacman   : std::cout << "P"; break;
                 case e_ghost    : std::cout << "G"; break;
-                case e_food     : std::cout << "."; break;
+                case e_gf       : std::cout << "G"; break;
                 default         : std::cout << "x"; break;
             }
         }
@@ -45,10 +46,13 @@ void Pacman::printWorld(void) {
     }
 }
 
+// Update entity positions only
 void Pacman::updateWorldPositions(void) {
     world[pacman.row][pacman.col] = e_pacman;
     for (int i = 0; i < numGhosts; i++) {
-        world[ghosts[i].row][ghosts[i].col] = e_ghost;
+        int y = ghosts[i].row;
+        int x = ghosts[i].col;
+        world[y][x] = world[y][x] == e_food ? (int) e_gf : e_ghost;
     }
 }
 
@@ -63,7 +67,12 @@ Pacman::Pacman(options_t &options) {
     // TODO: options
     for (int i = 0; i < size; i++) {
         for (int j = 0; j < size; j++) {
-            world[i][j] = maze[i][j];
+            int entity = maze[i][j];
+            // Place food in empty locations with 0.5 probability
+            if (entity == 0) {
+                entity = rand01() < 0.5 ? (int) e_food : 0;
+            }
+            world[i][j] = entity;
         }
     }
     // initial locations

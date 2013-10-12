@@ -64,16 +64,25 @@ SearchNode::SearchNode(bool is_chance_node,
 // simulate a path through a hypothetical future for the agent within it's
 // internal model of the world, returning the accumulated reward.
 static reward_t playout(Agent &agent, unsigned int playout_len) {
-	return 0; // TODO: implement
-	/*
-		'RollOut' function from the paper.
-		Pick actions randomly until playout_len is reached.
-		Use agent.getRandomAction() and .genPercept();
-		Question: Would the agent's CTW of the environment need to be updated
-			while doing this, (and then reverted) or is it not relevant?
-
-        Johannes: I think if we sample according to the ctw we don't need to feed that back into the ct as it does not change the expectation values.
-	*/
+	if (playout_len == 0) {
+	    return 0;
+	}
+	// Pick a random action
+	action_t a = agent.genRandomAction();
+	agent.modelUpdate(a);
+	// random percept
+	percept_t percept = agent.genPerceptAndUpdate();
+    symbol_list_t symbols;
+    encode(symbols, percept, agent.numObsBits() + agent.numRewBits());
+    // Decode reward from the whole percept.
+    symbol_list_t rew_symbols;
+    for (unsigned int i = agent.numObsBits();
+            i < agent.numObsBits() + agent.numRewBits(); ++i) {
+        rew_symbols.push_back(symbols[i]);
+    }
+    reward_t r = decode(rew_symbols, agent.numRewBits());
+	
+	return r + playout(agent, playout_len - 1);
 }
 
 action_t SearchNode::selectAction(Agent& agent, unsigned int dfr) {
@@ -118,18 +127,28 @@ reward_t SearchNode::sample(Agent &agent, unsigned int dfr) {
         return 0;// TODO catch this earlier, no point generating any nodes at 
                 // this depth. Waste of space.
     } else if (m_chance_node) {
-        // TODO Generate observation reward percept.
-        percept_t percept;
-        // TODO decode observation from whole percept;
-        percept_t obs;
-        // TODO decode reward from the percept into an int r.
-        percept_t r;
+        // Generate whole observation-reward percept.
+        // Make sure the percept is added to the agent's model and history.
+        percept_t percept = agent.genPerceptAndUpdate();
+        symbol_list_t symbols;
+        encode(symbols, percept, agent.numObsBits() + agent.numRewBits());
+        // Decode observation from whole percept.
+        symbol_list_t obs_symbols;
+        for (unsigned int i = 0; i < agent.numObsBits(); ++i) {
+            obs_symbols.push_back(symbols[i]);
+        }
+        percept_t obs = decode(obs_symbols, agent.numObsBits());
+        // Decode reward from the whole percept.
+        symbol_list_t rew_symbols;
+        for (unsigned int i = agent.numObsBits();
+                i < agent.numObsBits() + agent.numRewBits(); ++i) {
+            rew_symbols.push_back(symbols[i]);
+        }
+        percept_t r = decode(rew_symbols, agent.numRewBits());
         if (m_child[percept] == NULL) {
             m_child[percept] = new SearchNode(false,
                                     agent.numActions(), agent.numPercepts());
         }
-        // TODO Make sure the percept is added to the agent's model and history.
-        agent.modelUpdate(obs, r);
         newReward = r + m_child[percept]->sample(agent, dfr - 1);
     } else if (m_visits == 0) {
         newReward = playout(agent, dfr);
