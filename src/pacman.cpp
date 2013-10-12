@@ -32,8 +32,16 @@ const bool Pacman::maze[size][size] = {
 void Pacman::printWorld(void) {
     for (int i = 0; i < size; i++) {
         for (int j = 0; j < size; j++) {
-
+            switch (world[i][j]) {
+                case e_empty    : std::cout << " "; break;
+                case e_wall     : std::cout << "W"; break;
+                case e_pacman   : std::cout << "P"; break;
+                case e_ghost    : std::cout << "G"; break;
+                case e_food     : std::cout << "."; break;
+                default         : std::cout << "x"; break;
+            }
         }
+        std::cout << std::endl;
     }
 }
 
@@ -53,16 +61,16 @@ Pacman::Pacman(options_t &options) {
     }
     // initial locations
     pacman.row = 12;
-    pacman.col = 10;
+    pacman.col = 9;
 
-    ghosts[0].row = 8;
-    ghosts[0].col = 10;
-    ghosts[1].row = 8;
-    ghosts[1].col = 11;
-    ghosts[2].row = 9;
-    ghosts[2].col = 10;
-    ghosts[3].row = 9;
-    ghosts[3].col = 11;
+    ghosts[0].row = 7;
+    ghosts[0].col = 9;
+    ghosts[1].row = 7;
+    ghosts[1].col = 10;
+    ghosts[2].row = 8;
+    ghosts[2].col = 9;
+    ghosts[3].row = 8;
+    ghosts[3].col = 10;
 
     updateWorldPositions();
 

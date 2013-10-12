@@ -48,10 +48,10 @@ void Tiger::performAction(action_t action) {
 
 	if (action == m_listen_action) {
 		if (rand01() < 0.85) { //answer truthful
-            m_observation = m_tiger_left ?  m_hear_tiger_left : m_hear_tiger_right; 
+            m_observation = (m_tiger_left ? (percept_t) m_hear_tiger_left : m_hear_tiger_right);
 		}
-        else{
-            m_observation = m_tiger_left ?  m_hear_tiger_right: m_hear_tiger_left; 
+        else {
+            m_observation = (m_tiger_left ? (percept_t) m_hear_tiger_right : m_hear_tiger_left);
         }
 		m_reward = 99;
 	} else {
