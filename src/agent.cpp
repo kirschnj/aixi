@@ -53,6 +53,10 @@ reward_t Agent::averageReward(void) const {
     return age() > 0 ? reward() / reward_t(age()) : 0.0;
 }
 
+bool Agent::lastUpdatePercept(void) const {
+    return m_last_update_percept;
+}
+
 // maximum reward in a single time instant
 reward_t Agent::maxReward(void) const {
 	return reward_t((1 << m_rew_bits) - 1);
@@ -124,7 +128,7 @@ percept_t Agent::genPercept(void) const {
 
 // generate a percept distributed to our history statistics, and
 // update our mixture environment model with it
-percept_t Agent::genPerceptAndUpdate(void) {
+void Agent::genPerceptAndUpdate(percept_t &obs, percept_t &rew) {
     symbol_list_t obs_symbols;
     symbol_list_t rew_symbols;
     
@@ -135,9 +139,9 @@ percept_t Agent::genPerceptAndUpdate(void) {
 
     m_last_update_percept=true;
     m_total_reward += reward;
-
-    //again, what do we want to return? where is this function used?
-	return NULL; // TODO: implement
+    
+    rew = decodeReward(rew_symbols);
+    obs = decodeObservation(obs_symbols);
 }
 
 
@@ -174,11 +178,37 @@ void Agent::modelUpdate(action_t action) {
 // revert the agent's internal model of the world
 // to that of a previous time cycle, false on failure
 bool Agent::modelRevert(const ModelUndo &mu) {
-	return NULL; // TODO: implement
-	/*
-	Sequences of m_ct->reverts() to revert obs rew percepts
-	and m_ct->revertHistory()s to revert action history updates.
-	*/
+    if(m_time_cycle < mu.age())
+        return false;
+
+    //TODO: check this
+    
+    //go back in history and revert actions and percepts
+    while(historySize() > mu.historySize() + 1){
+        if(m_last_update_percept){
+            m_ct->revert(m_rew_bits + m_obs_bits);
+            m_last_update_percept = false;
+        }
+        else{
+            m_ct->revertHistory(m_actions_bits);
+            m_last_update_percept = true;
+        }
+    }
+
+    //revert one more action
+    m_ct->revertHistory(m_actions_bits);
+    m_last_update_percept = true;
+
+    //if last state was action state, revert one more percept
+    if(!mu.lastUpdatePercept()){
+        m_ct->revert(m_rew_bits + m_obs_bits);
+        m_last_update_percept = false;
+    }
+
+    m_time_cycle = mu.age();
+    m_total_reward = mu.reward();
+
+    return true;
 }
 
 
@@ -238,15 +268,19 @@ action_t Agent::decodeAction(const symbol_list_t &symlist) const {
 
 // Decodes the reward from a list of symbols
 percept_t Agent::decodeReward(const symbol_list_t &symlist) const {
-	return decode(symlist, m_rew_bits);
+    return decode(symlist, m_rew_bits);
+}
+
+// Decodes the observation from a list of symbols
+percept_t Agent::decodeObservation(const symbol_list_t &symlist) const {
+    return decode(symlist, m_obs_bits);
 }
 
 
 // used to revert an agent to a previous state
 ModelUndo::ModelUndo(const Agent &agent) {
-
     m_age          = agent.age();
     m_reward       = agent.reward();
     m_history_size = agent.historySize();
-
+    m_last_update_percept = agent.lastUpdatePercept();
 }

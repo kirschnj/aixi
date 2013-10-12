@@ -28,6 +28,9 @@ public:
 	// the average reward received by the agent at each time step
 	reward_t averageReward(void) const;
 
+    // true if last update was a percept update
+    bool lastUpdatePercept(void) const;
+
 	// maximum reward in a single time instant
 	reward_t maxReward(void) const;
 
@@ -59,7 +62,7 @@ public:
 
 	// generate a percept distributed to our history statistics, and
 	// update our mixture environment model with it
-	percept_t genPerceptAndUpdate(void); // TODO: implement in agent.cpp
+	void genPerceptAndUpdate(percept_t &obs, percept_t &rew); // TODO: implement in agent.cpp
 
 	// update the internal agent's model of the world
 	// due to receiving a percept or performing an action
@@ -68,7 +71,7 @@ public:
 
 	// revert the agent's internal model of the world
 	// to that of a previous time cycle, false on failure
-	bool modelRevert(const ModelUndo &mu); // TODO: implement in agent.cpp
+	bool modelRevert(const ModelUndo &mu);
 
 	// resets the agent
 	void reset(void);
@@ -92,6 +95,7 @@ private:
 	void encodePercept(symbol_list_t &symlist, percept_t observation, percept_t reward) const;
 	action_t decodeAction(const symbol_list_t &symlist) const;
 	percept_t decodeReward(const symbol_list_t &symlist) const;
+	percept_t decodeObservation(const symbol_list_t &symlist) const;
 
 
 	// agent properties
@@ -133,7 +137,7 @@ class ModelUndo {
         // saved state history size accessor
         size_t historySize(void) const { return m_history_size; }
 
-        bool lastUpdate(void) const { return m_last_update_percept; }
+        bool lastUpdatePercept(void) const { return m_last_update_percept; }
 
     private:
         age_t m_age;

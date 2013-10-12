@@ -271,12 +271,19 @@ void ContextTree::revert(void) {
     }
 }
 
+//revert n bits in
+void ContextTree::revert(size_t bits){
+    for(int i=0; i< bits; ++i){
+        revert();
+    }
+}
 
-// shrinks the history down to a former size
-void ContextTree::revertHistory(size_t newsize) {
-
-    assert(newsize <= m_history.size());
-    while (m_history.size() > newsize) m_history.pop_back();
+//revert last bits in history without changing the ct
+void ContextTree::revertHistory(size_t bits) {
+    assert(bits <= m_history.size());
+    for(int i = 0; i < bits; ++i){
+        m_history.pop_back();
+    }
 }
 
 

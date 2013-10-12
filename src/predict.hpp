@@ -72,9 +72,11 @@ public:
 
     // removes the most recently observed symbol from the context tree
     void revert(void); // TODO: implement in predict.cpp
+    //removes n most recently observed symbols from the context tree
+    void revert(size_t bits); 
 
-    // shrinks the history down to a former size
-    void revertHistory(size_t newsize);
+    // shrinks the history down by n bits with changing the ct
+    void revertHistory(size_t bits);
 
     // the estimated probability of observing a particular symbol or sequence
     double predict(symbol_t sym); // TODO: implement in predict.cpp
