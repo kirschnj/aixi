@@ -97,13 +97,11 @@ action_t Agent::genRandomAction(void) const {
 // generate an action distributed according
 // to our history statistics
 action_t Agent::genAction(void) const {
-	return NULL; // TODO: implement
-	/*
-		TODO Note: the CTW is 'action-conditional', which means it doesn't
-			encode the probabilities of actions. it encodes P((o,r)1:n | a1:n)
-			So I'm not sure what this function is
-			meant to actually mean.
-	*/
+    //generate a random action wrt our ct-model
+    //remark: the ct is action conditional but nevertheless encodes actions
+    symbol_list_t action_symbols;
+	m_ct->genRandomSymbols(action_symbols, m_actions_bits);
+    return decodeAction(action_symbols); 
 }
 
 
