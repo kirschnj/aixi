@@ -3,6 +3,7 @@
 #include <cassert>
 #include <cmath>
 #include <errno.h>
+#include "util.hpp"
 
 // compute log(0.5)
 static const double log_half = log(0.5);
@@ -299,15 +300,15 @@ void ContextTree::genRandomSymbolsAndUpdate(symbol_list_t &symbols, size_t bits)
         //make a symbol somehow
         symbol_t sym; 
 
-        logJointProb = m_root->logProbWeighted();
+        double logJointProb = m_root->logProbWeighted();
         
         //add '0' to history, get probability and undo
         update(false);
-        logJointWithSymbolProb = m_root->logProbWeighted();
+        double logJointWithSymbolProb = m_root->logProbWeighted();
         revert();
 
         //calc probabilty that '0' follows
-        symbolCondProb = exp (logJointWithSymbolProb - logJointProb);
+        double symbolCondProb = exp (logJointWithSymbolProb - logJointProb);
         
         sym = rand01() > symbolCondProb;
         
