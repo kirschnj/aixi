@@ -38,8 +38,14 @@ void mainLoop(Agent &ai, Environment &env, options_t &options) {
 	}
 
     // Determine mc-timelimit
-    visits_t mc_timelmit;
+    timelimit_t mc_timelimit;
     strExtract(options["mc-timelimit"], mc_timelimit);
+    //if we assume that time_limit > agent.numActions() we can be sure 
+    //that every action is selected at least once
+    if(mc_timelimit < ai.numActions()){
+        std::cerr << "WARNING: time_limit not large enough to sample all actions" << std::endl;
+    }
+
 
 	// Agent/environment interaction loop
 	for (unsigned int cycle = 1; !env.isFinished(); cycle++) {
@@ -65,7 +71,7 @@ void mainLoop(Agent &ai, Environment &env, options_t &options) {
 			action = ai.genRandomAction();
 		}
 		else {
-			action = search(ai); // TODO: implement in search.cpp
+			action = search(ai, mc_timelimit); // TODO: implement in search.cpp
 		}
 
 		// Send an action to the environment
@@ -178,7 +184,7 @@ int main(int argc, char *argv[]) {
 	options["agent-horizon"] = "16";
 	options["exploration"] = "0";     // do not explore
 	options["explore-decay"] = "1.0"; // exploration rate does not decay
-    options["mc-timelimit"] = 1000; //number of mc simulations per search ... is there a better way to dedicated time to mc-simulations?
+    options["mc-timelimit"] = "1000"; //number of mc simulations per search ... is there a better way to dedicated time to mc-simulations?
 
 	// Read configuration options
 	std::ifstream conf(argv[1]);

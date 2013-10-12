@@ -28,6 +28,8 @@ typedef unsigned long long age_t;
 // describes an agent action
 typedef unsigned int action_t;
 
+// describe the timelimit for mc-search
+typedef unsigned long long timelimit_t;
 // the program's keyword/value option pairs
 typedef std::map<std::string, std::string> options_t;
 

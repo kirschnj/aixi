@@ -71,6 +71,8 @@ static reward_t playout(Agent &agent, unsigned int playout_len) {
 		Use agent.getRandomAction() and .genPercept();
 		Question: Would the agent's CTW of the environment need to be updated
 			while doing this, (and then reverted) or is it not relevant?
+
+        Johannes: I think if we sample according to the ctw we don't need to feed that back into the ct as it does not change the expectation values.
 	*/
 }
 
@@ -142,16 +144,20 @@ reward_t SearchNode::sample(Agent &agent, unsigned int dfr) {
 }
 
 // determine the best action by searching ahead using MCTS
-extern action_t search(Agent &agent) {
+extern action_t search(Agent &agent, timelimit_t time_limit) {
+
+    //save agent's state
+    ModelUndo undo = ModelUndo(agent);
+
     SearchNode search_tree(false, agent.numActions(), agent.numPercepts());
-    
-    // TODO Timing
-    while (true /*timeNow < maxGivenTime TODO*/) {
+
+    //sample time_limit times
+    for(visits_t i = 0; i < time_limit; ++i){    
         search_tree.sample(agent, agent.horizon());
-        // TODO revert the agent back to the starting state.
+        agent.modelRevert(undo);
     }
     
-    // TODO assumes all actions sampled at least once (children exist).
+    // we assume timelimit is large enough so that every action was sampled. this is checked in main_loop.
     double best_reward = search_tree.child(0)->expectation();
     unsigned int best_action = 0;
     for (unsigned int i = 1; i < agent.numActions(); ++i) {
@@ -162,17 +168,5 @@ extern action_t search(Agent &agent) {
     }
     
     return best_action;
-    
-    
-	return agent.genRandomAction(); // TODO: implement
-	/*
-		Initialise the search tree (non-chance node)
-		start timing up to cycle-length-millis
-		while ( still more time || less than mc-simulations completed) {
-			searchTree.sample(agent, max distance from root));
-		}
-		look through all the successors of the root of our search tree:
-		pick the action corresponding to the successor with highest m_mean/expectation().
-	*/
 }
 
