@@ -105,9 +105,11 @@ private:
     // Enums to distinguish between entities
     const static int e_empty = 0;
     const static int e_wall = 1;
-    const static int e_pacman = 2;
-    const static int e_food = 3;
+    const static int e_food = 2;
+    const static int e_pacman = 3;
     const static int e_ghost = 4;
+    // Ghost and food on the same location
+    const static int e_gf = 5;
 
     /* Actions */
     // Actions consist of a movement in some direction.
