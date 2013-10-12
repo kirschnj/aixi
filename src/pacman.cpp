@@ -52,6 +52,13 @@ void Pacman::updateWorldPositions(void) {
     }
 }
 
+percept_t Pacman::getObservation(void) {
+    // TODO, check local squares around pacman...
+    // I'll do this tomorrow.
+
+}
+
+/* Implementations required by Environment */
 Pacman::Pacman(options_t &options) {
     // TODO: options
     for (int i = 0; i < size; i++) {

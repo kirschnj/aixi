@@ -70,7 +70,7 @@ private:
 	const static percept_t m_hear_tiger_right = 2;
 };
 
-// Pacman environment // TODO: I'll start implementing this later tonight.
+// Pacman environment
 class Pacman : public Environment {
 public:
 	// set up the initial environment percept
@@ -135,6 +135,7 @@ private:
     
     /* Functions */
     void updateWorldPositions(void);
+    percept_t getObservation(void);
 
 };
 
