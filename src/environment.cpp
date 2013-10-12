@@ -43,23 +43,16 @@ Tiger::Tiger(options_t &options) {
 }
 
 // Note: rewards translated to be positive.
-// TODO describe the Tiger environment.
 void Tiger::performAction(action_t action) {
 	assert(action < m_num_actions);
+
 	if (action == m_listen_action) {
-		if (m_tiger_left) {
-			if (rand01() < 0.85) {
-				m_observation = m_hear_tiger_left;
-			} else {
-				m_observation = m_hear_tiger_right;
-			}
-		} else {
-			if (rand01() < 0.85) {
-				m_observation = m_hear_tiger_right;
-			} else {
-				m_observation = m_hear_tiger_left;
-			}
+		if (rand01() < 0.85) { //answer truthful
+            m_observation = m_tiger_left ?  m_hear_tiger_left : m_hear_tiger_right; 
 		}
+        else{
+            m_observation = m_tiger_left ?  m_hear_tiger_right: m_hear_tiger_left; 
+        }
 		m_reward = 99;
 	} else {
 		m_observation = m_no_observation;
