@@ -76,11 +76,14 @@ static reward_t playout(Agent &agent, unsigned int playout_len) {
 
 action_t SearchNode::selectAction(Agent& agent, unsigned int dfr) {
     std::vector<action_t> unexplored_actions;
+    
+    //find unexplored actions
     for (action_t a = 0; a < agent.numActions(); ++a) {
         if (m_child[a] == NULL) {
             unexplored_actions.push_back(a);
         }
     }
+    //choose unexplored action at random if any and append to tree
     if (!unexplored_actions.empty()) {
         action_t action = unexplored_actions.at(
                                 randRange(unexplored_actions.size()));
@@ -91,6 +94,7 @@ action_t SearchNode::selectAction(Agent& agent, unsigned int dfr) {
         double C = 1;
         double max = (1.0 / (dfr * agent.maxReward())) * m_child[0]->m_mean
                     + C * sqrt((log(m_visits)/m_child[0]->m_visits));
+        //search for argmax
         for (action_t a = 1; a < agent.numActions(); ++a) {
             double f = (1.0 / (dfr * agent.maxReward())) * m_child[a]->m_mean
                     + C * sqrt((log(m_visits)/m_child[a]->m_visits));
