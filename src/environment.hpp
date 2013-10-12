@@ -79,13 +79,19 @@ public:
 	// receives the agent's action and calculates the new environment percept
 	virtual void performAction(action_t action);
 
+    void printWorld(void);
+
 private:
+    // Maze/world as in assignment spec
+    const static bool maze[19][17];
+
+
     // Actions consist of a movement in some direction.
     // TODO: add a "none" action as in the arcade version?
-    const static action_t m_move_left = 0
-    const static action_t m_move_right = 1
-    const static action_t m_move_up = 2
-    const static action_t m_move_down = 3
+    const static action_t m_move_left = 0;
+    const static action_t m_move_right = 1;
+    const static action_t m_move_up = 2;
+    const static action_t m_move_down = 3;
     const static unsigned int m_num_actions = 4;
 
     // TODO percepts, which won't be listed here...
