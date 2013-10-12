@@ -110,30 +110,13 @@ action_t Agent::genAction(void) const {
 percept_t Agent::genPercept(void) const {
 	// Efficient implementation: randomly choose bits sequentially until 
 	// a whole percept worth of bits have been chosen.
+    //
 	
 	symbol_list_t symbols;
-	
-	for (unsigned int b = 0; b < m_obs_bits + m_rew_bits; ++b) {
-        //TODO move probability getting into CTW predict() functions.
-	    double log_joint_prob = m_ct->logBlockProbability();
-        m_ct->update(false);
-        double log_prob_false = m_ct->logBlockProbability() - log_joint_prob;
-        m_ct->revert();
-        
-	    double random = rand01();
-        if (random <= exp(log_prob_false)) {
-            symbols.push_back(false);
-            m_ct->update(false);
-        } else {
-            symbols.push_back(true);
-            m_ct->update(true);
-        }
-	}
-	
-	for (unsigned int b = 0; b < m_obs_bits + m_rew_bits; ++b) {
-	    m_ct->revert();
-	}
-	
+    m_ct->genRandomSymbols(symbols, m_obs_bits + m_rew_bits);
+
+    //Johannes: TODO: We can either decode an observation or a reward but not
+    //both. What is this function to return anyway?
 	return decode(symbols, m_obs_bits + m_rew_bits);
 }
 
