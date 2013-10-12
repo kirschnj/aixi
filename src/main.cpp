@@ -37,6 +37,10 @@ void mainLoop(Agent &ai, Environment &env, options_t &options) {
 		assert(0 <= terminate_age);
 	}
 
+    // Determine mc-timelimit
+    visits_t mc_timelmit;
+    strExtract(options["mc-timelimit"], mc_timelimit);
+
 	// Agent/environment interaction loop
 	for (unsigned int cycle = 1; !env.isFinished(); cycle++) {
 
@@ -174,7 +178,7 @@ int main(int argc, char *argv[]) {
 	options["agent-horizon"] = "16";
 	options["exploration"] = "0";     // do not explore
 	options["explore-decay"] = "1.0"; // exploration rate does not decay
-    options["mc-timelimit"] = 1000; //number of mc simulations per search
+    options["mc-timelimit"] = 1000; //number of mc simulations per search ... is there a better way to dedicated time to mc-simulations?
 
 	// Read configuration options
 	std::ifstream conf(argv[1]);
