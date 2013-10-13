@@ -10,6 +10,9 @@ all: aixi
 debug: $(OBJS)
 	$(CC) $(LDFLAGS) -pg -o aixi $(OBJS)
 
+gdb: $(OBJS)
+	$(CC) $(LDFLAGS) -pg -g $(SRCS) -o aixi 
+
 pacman:
 	$(CC) -c -o pacman.o pacman.cpp
 	$(CC) -c -o environment.o environment.cpp
