@@ -51,4 +51,17 @@ void encode(symbol_list_t &symlist, unsigned int value, unsigned int bits) {
 }
 
 
+// Convert a boolean array into an (unsigned) int
+unsigned int boolToInt(bool *array, int size) {
+    unsigned int mask = 1;
+    unsigned int value = 0;
+
+    // Assume array[0] is MSB
+    for (int i = size - 1; i >= 0; i--) {
+        value |= array[i] ? mask : 0;
+        mask <<= 1;
+    }
+
+    return value;
+}
 

@@ -78,21 +78,25 @@ bool Pacman::lineOfSight(point &p, action_t dir, const int ent) {
     switch (dir) {
         case m_move_left :
             for (int i = p.col; i >= 0; --i) {
+                if (world[p.row][i] == e_wall) return false;
                 if (entityAt(p.row, i, ent)) return true;
             }
             break;
         case m_move_right :
             for (int i = p.col; i < size; ++i) {
+                if (world[p.row][i] == e_wall) return false;
                 if (entityAt(p.row, i, ent)) return true;
             }
             break;
         case m_move_up :
             for (int i = p.row; i >= 0; --i) {
+                if (world[i][p.col] == e_wall) return false;
                 if (entityAt(i, p.col, ent)) return true;
             }
             break;
         case m_move_down :
             for (int i = p.row; i < size; ++i) {
+                if (world[i][p.col] == e_wall) return false;
                 if (entityAt(i, p.col, ent)) return true;
             }
             break;
@@ -102,7 +106,7 @@ bool Pacman::lineOfSight(point &p, action_t dir, const int ent) {
 }
 
 // Output a percept corresponding to pacman's current observation
-percept_t Pacman::getObservation(void) {
+percept_t Pacman::genObservation(void) {
     percept_t observation;
     // Hardcoded observation size
     bool bits[16];
@@ -141,6 +145,15 @@ percept_t Pacman::getObservation(void) {
     // 1 bit for power pellet
     bits[15] = power;
 
+    // TODO: DEBUG
+    /*
+    for (int i = 0; i < 16; i++) {
+        std::cout << bits[i] << std::endl;
+    }
+    */
+
+    // Convert bits into an unsigned int (percept_t)
+    return boolToInt(bits, 16);
 }
 
 /* Implementations required by Environment */
@@ -173,7 +186,7 @@ Pacman::Pacman(options_t &options) {
 
     updateWorldPositions();
 
-    m_observation = getObservation();
+    m_observation = genObservation();
     m_reward = 0;
 }
 

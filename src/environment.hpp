@@ -122,20 +122,17 @@ private:
     const static action_t m_move_down = 3;
     const static unsigned int m_num_actions = 4;
 
-    // TODO scale rewards, so that they are all positive.
-    /*
-    const static percept_t m_reward_move = -1;
-    const static percept_t m_reward_wall = -10;
-    const static percept_t m_reward_ghost = -50;
-    const static percept_t m_reward_food = 10;
-    const static percept_t m_reward_win = 100;
-    */
+    const static percept_t m_reward_move = 49;
+    const static percept_t m_reward_wall = 40;
+    const static percept_t m_reward_ghost = 0;
+    const static percept_t m_reward_food = 60;
+    const static percept_t m_reward_win = 150;
     
     /* Functions */
     void updateWorldPositions(void);
     bool entityAt(int row, int col, const int ent);
     bool lineOfSight(point &p, action_t dir, const int ent);
-    percept_t getObservation(void);
+    percept_t genObservation(void);
 
 };
 
