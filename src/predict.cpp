@@ -148,8 +148,9 @@ void ContextTree::update(symbol_t sym) {
     CTNode *context_nodes[m_depth];
 
     context_nodes[0] = m_root;
-    for (size_t n = 1; n < m_depth; ++n) {
-        symbol_t context_symbol = m_history[m_history.size() - n];
+    history_t::iterator hist_it = m_history.end() - 1;
+    for (size_t n = 1; n < m_depth; ++n, --hist_it) {
+        symbol_t context_symbol = *hist_it;//m_history[m_history.size() - n];
         // Create children as they are needed.
         if (context_nodes[n-1]->m_child[context_symbol] == NULL) {
             context_nodes[n-1]->m_child[context_symbol] = new CTNode();
@@ -226,9 +227,6 @@ void ContextTree::revert(void) {
             delete whatever nodes were added by the last symbol.
             recalculate estimates.
     */
-
-    // ensure we have a recently observed symbol
-    assert(historySize() != 0);
     
     // Get latest symbol (to update counts) and remove from history
     symbol_t latest_sym = m_history.back();
@@ -239,9 +237,10 @@ void ContextTree::revert(void) {
 
     context_nodes[0] = m_root;
     // Traverse tree to leaf
-    for (size_t n = 1; n < m_depth; ++n) {
+    history_t::iterator hist_it = m_history.end() - 1;
+    for (size_t n = 1; n < m_depth; ++n, --hist_it) {
         symbol_t context_symbol;
-        context_symbol = m_history[m_history.size() - n];
+        context_symbol = *hist_it;//m_history[m_history.size() - n];
         context_nodes[n] = context_nodes[n-1]->m_child[context_symbol];
     }
 
