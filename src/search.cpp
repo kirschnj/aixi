@@ -73,18 +73,19 @@ SearchNode::~SearchNode() {
 // simulate a path through a hypothetical future for the agent within it's
 // internal model of the world, returning the accumulated reward.
 static reward_t playout(Agent &agent, unsigned int playout_len) {
-	if (playout_len == 0) {
-	    return 0;
-	}
-	// Pick a random action
-	action_t a = agent.genRandomAction();
-	agent.modelUpdate(a);
+	reward_t r = 0;
+	for (unsigned int i = 0; i < playout_len; ++i) {
+	    // Pick a random action
+	    action_t a = agent.genRandomAction();
+	    agent.modelUpdate(a);
 
-    percept_t rew;
-    percept_t obs;
-	agent.genPerceptAndUpdate(obs, rew); // random percept
-    
-	return rew + playout(agent, playout_len - 1);
+        percept_t rew;
+        percept_t obs;
+	    agent.genPerceptAndUpdate(obs, rew); // random percept
+	    
+	    r = r + rew;
+    }
+	return r;
 }
 
 action_t SearchNode::selectAction(Agent& agent, unsigned int dfr) {
