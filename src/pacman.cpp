@@ -72,7 +72,7 @@ bool Pacman::entityAt(int row, int col, const int ent) {
 bool Pacman::entityScan(point &p, int range, const int ent) {
     // Start with square of length "range" centered on p
     for (int i = p.row - range; i < p.row + range; i++) {
-        for (int j = p.col - range; i < p.col + range; i++) {
+        for (int j = p.col - range; j < p.col + range; j++) {
             // Only check locations within the maze
             if (i < 0 || i >= size) continue;
             if (j < 0 || j >= size) continue;
@@ -167,11 +167,10 @@ percept_t Pacman::genObservation(void) {
     bits[15] = power;
 
     // TODO: DEBUG
-    /*
     for (int i = 0; i < 16; i++) {
-        std::cout << bits[i] << std::endl;
+        std::cout << bits[i];
     }
-    */
+    std::cout << std::endl;
 
     // Convert bits into an unsigned int (percept_t)
     return boolToInt(bits, 16);
