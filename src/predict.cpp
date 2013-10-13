@@ -131,6 +131,10 @@ ContextTree::~ContextTree(void) {
 // clear the entire context tree
 void ContextTree::clear(void) {
     m_history.clear();
+    // Create a fictional history of 'depth' number of 0s.
+    for (size_t i = 0; i < depth; ++i) {
+        m_history.push_back(false);
+    }
     if (m_root) delete m_root;
     m_root = new CTNode();
 }
