@@ -313,18 +313,22 @@ void ContextTree::genRandomSymbolsAndUpdate(symbol_list_t &symbols, size_t bits)
 
         double logJointProb = m_root->logProbWeighted();
         
-        //add '0' to history, get probability and undo
+        //add '0' to history, get probability
         update(false);
         double logJointWithSymbolProb = m_root->logProbWeighted();
-        revert();
-
+        
         //calc probabilty that '0' follows
         double symbolCondProb = exp (logJointWithSymbolProb - logJointProb);
         
         sym = rand01() > symbolCondProb;
         
+        // Only undo if necessary.
+        if (sym) {
+            revert();
+            update(sym);
+        }
+        
         symbols.push_back(sym);
-        update(sym);
     }
 }
 
