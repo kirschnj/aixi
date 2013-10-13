@@ -241,12 +241,7 @@ void ContextTree::revert(void) {
     // Traverse tree to leaf
     for (size_t n = 1; n < m_depth; ++n) {
         symbol_t context_symbol;
-        // Default to false if history does not exist
-        if (m_history.size() - n < 0) {
-            context_symbol = false;
-        } else {
-            context_symbol = m_history[m_history.size() - n];
-        }
+        context_symbol = m_history[m_history.size() - n];
         context_nodes[n] = context_nodes[n-1]->m_child[context_symbol];
     }
 
@@ -255,14 +250,15 @@ void ContextTree::revert(void) {
         // Remove effects of last update
         --context_nodes[n]->m_count[latest_sym];
         // TODO: consider deleting this node if it contains no visits.
-        /*
+        // Definitely, the paper has CTW of depth 96, memory needs to be
+        // tightly managed.
 
-        if (context_nodes[n].visits() == 0) {
+        if (context_nodes[n]->visits() == 0) {
+            context_nodes[n-1]->m_child[m_history[m_history.size() - n]] = NULL;
             delete context_nodes[n];
             continue;
         }
 
-        */
         context_nodes[n]->m_log_prob_est -= context_nodes[n]->logKTMul(latest_sym);
 
         // Update weighted probabilities
