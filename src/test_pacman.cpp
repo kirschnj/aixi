@@ -1,10 +1,12 @@
 #include "environment.cpp"
 
 #include <cassert>
+#include <cstdlib>
 
 #include "util.hpp"
 
 int main(int argc, char *argv[]) {
+    std::system("clear");
     std::cout << "Pacman testing." << std::endl;
     options_t options;
 
