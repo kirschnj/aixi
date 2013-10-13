@@ -13,7 +13,7 @@ static size_t             MaxSearchNodes;
 
 SearchNode::SearchNode(bool is_chance_node,
     unsigned int num_actions, unsigned int num_percepts)
-: m_chance_node(is_chance_node) {
+    : m_chance_node(is_chance_node), m_visits(0) {
     //make child field the right size
     int num_children = m_chance_node ? num_percepts : num_actions;
     m_child.resize(num_children, NULL);
@@ -47,7 +47,7 @@ static reward_t playout(Agent &agent, unsigned int playout_len) {
 }
 
 action_t SearchNode::selectAction(Agent& agent, unsigned int dfr) {
-    std::vector<action_t> unexplored_actions(agent.numActions());
+    std::vector<action_t> unexplored_actions;
     
     //find unexplored actions
     for (action_t a = 0; a < agent.numActions(); ++a) {
