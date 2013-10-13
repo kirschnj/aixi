@@ -1,5 +1,5 @@
 CC=g++
-CFLAGS=-Wall
+CXXFLAGS=-Wall
 LDFLAGS=-Wall
 
 SRCS=main.cpp agent.cpp pacman.cpp environment.cpp predict.cpp search.cpp util.cpp
