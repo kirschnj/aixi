@@ -7,7 +7,10 @@ OBJS=$(SRCS:.cpp=.o)
 
 all: aixi
 
-pacman: $(OBJS)
+pacman:
+	$(CC) -c -o pacman.o pacman.cpp
+	$(CC) -c -o environment.o environment.cpp
+	$(CC) -c -o util.o util.cpp
 	$(CC) -c -o test_pacman.o test_pacman.cpp
 	$(CC) $(LDFLAGS) -o test pacman.o util.o test_pacman.o
 
