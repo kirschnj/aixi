@@ -111,9 +111,7 @@ action_t Agent::genRandomAction(void) const {
 // generate an action distributed according
 // to our history statistics
 action_t Agent::genAction(void) const {
-    //generate a random action wrt our ct-model
-    //remark: the ct is action conditional but nevertheless encodes actions
-    assert(!m_last_update_percept);
+    assert(!m_last_update_percept); 
     symbol_list_t action_symbols;
 	m_ct->genRandomSymbols(action_symbols, m_actions_bits);
     return decodeAction(action_symbols); 
@@ -123,13 +121,7 @@ action_t Agent::genAction(void) const {
 // generate a percept distributed according
 // to our history statistics
 void Agent::genPercept(percept_t &obs, percept_t &rew) const {
-	symbol_list_t obs_symbols;
-    symbol_list_t rew_symbols;
-    m_ct->genRandomSymbols(obs_symbols, m_obs_bits);
-    m_ct->genRandomSymbols(rew_symbols, m_rew_bits);
-
-    obs = decodeObservation(obs_symbols);
-    rew = decodeReward(rew_symbols);
+ //TODO: Implement
 }
 
 
@@ -147,10 +139,9 @@ void Agent::genPerceptAndUpdate(percept_t &obs, percept_t &rew) {
     m_last_update_percept=true;
     m_total_reward += reward;
     
-    rew = decodeReward(rew_symbols);
+    rew = reward; 
     obs = decodeObservation(obs_symbols);
 }
-
 
 // Update the agent's internal model of the world after receiving a percept
 void Agent::modelUpdate(percept_t observation, percept_t reward) {
