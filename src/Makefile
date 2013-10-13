@@ -7,6 +7,9 @@ OBJS=$(SRCS:.cpp=.o)
 
 all: aixi
 
+debug: $(OBJS)
+	$(CC) $(LDFLAGS) -pg -o aixi $(OBJS)
+
 pacman:
 	$(CC) -c -o pacman.o pacman.cpp
 	$(CC) -c -o environment.o environment.cpp
