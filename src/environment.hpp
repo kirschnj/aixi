@@ -78,6 +78,7 @@ public:
 
 	// receives the agent's action and calculates the new environment percept
 	virtual void performAction(action_t action);
+    virtual bool isFinished(void);
 
     void printWorld(void);
 
@@ -87,6 +88,9 @@ private:
         int row;
         int col;
     };
+
+    // State of the game
+    bool endState;
 
     // Size of maze
     const static int size = 19;

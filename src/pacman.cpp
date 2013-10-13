@@ -183,10 +183,19 @@ int Pacman::genReward(void) {
     int reward = 0;
 
     switch (value) {
-        case e_wall : reward -= m_reward_wall;
-        case e_food : reward += m_reward_food;
-        case e_ghost : reward -= m_reward_ghost;
-        case e_gf : reward = reward + m_reward_food - m_reward_ghost;
+        case e_wall : reward -= m_reward_wall; break;
+        case e_food :
+            reward += m_reward_food;
+            --numFood;
+            break;
+        case e_ghost :
+            reward -= m_reward_ghost;
+            endState = true;
+            break;
+        case e_gf :
+            reward = reward + m_reward_food - m_reward_ghost;
+            endState = true;
+            break;
         default : break;
     }
     return reward;
@@ -195,7 +204,12 @@ int Pacman::genReward(void) {
 /* Implementations required by Environment */
 Pacman::Pacman(options_t &options) {
     // TODO: options
+
+    // Start the game
+    endState = false;
     numFood = 0;
+
+    // Initial world configuration
     for (int i = 0; i < size; i++) {
         for (int j = 0; j < size; j++) {
             int entity = maze[i][j];
@@ -230,36 +244,44 @@ Pacman::Pacman(options_t &options) {
 
 void Pacman::performAction(action_t action) {
     assert(action < 4);
+    assert(!endState);
     // Cumulative reward
     int reward = m_reward_init;
 
     // Move pacman (hold position if wall is in the way)
+    int newrow, newcol;
     switch (action) {
+        // Wrap around possible for left/right movements
         case m_move_left :
-            if (!maze[pacman.row][pacman.col - 1]) {
+            newcol = (pacman.col == 0) ? size - 1 : pacman.col - 1;
+            if (!maze[pacman.row][newcol]) {
                 world[pacman.row][pacman.col] = e_empty;
-                --pacman.col;
+                pacman.col = newcol;
                 reward += getReward();
             } else reward -= m_reward_wall;
             break;
         case m_move_right :
-            if (!maze[pacman.row][pacman.col + 1]) {
+            newcol = (pacman.col == size - 1) ? 0 : pacman.col + 1;
+            if (!maze[pacman.row][newcol]) {
                 world[pacman.row][pacman.col] = e_empty;
-                --pacman.col;
+                pacman.col = newcol;
                 reward += getReward();
             } else reward -= m_reward_wall;
             break;
+        // No wrap-around for up/down movements
         case m_move_up :
-            if (!maze[pacman.row - 1][pacman.col]) {
+            newrow = pacman.row - 1;
+            if (newrow >= 0 && !maze[newrow][pacman.col]) {
                 world[pacman.row][pacman.col] = e_empty;
-                --pacman.col;
+                --pacman.row;
                 reward += getReward();
             } else reward -= m_reward_wall;
             break;
         case m_move_down :
-            if (!maze[pacman.row + 1][pacman.col]) {
+            newrow = pacman.row + 1;
+            if (newrow < size && !maze[newrow][pacman.col]) {
                 world[pacman.row][pacman.col] = e_empty;
-                --pacman.col;
+                ++pacman.row;
                 reward += getReward();
             } else reward -= m_reward_wall;
             break;
@@ -276,8 +298,16 @@ void Pacman::performAction(action_t action) {
     }
 
     // TODO: make ghosts move...
+    // must include reward update, if a ghost eats pacman
 
 
+    // Update world and values based on results of move
     updateWorldPositions();
+    m_observation = genObservation();
+    m_reward = reward;
+}
 
+
+bool Pacman::isFinished(void) {
+    return endState;
 }
