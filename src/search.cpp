@@ -14,12 +14,8 @@ static size_t             MaxSearchNodes;
 SearchNode::SearchNode(bool is_chance_node,
     unsigned int num_actions, unsigned int num_percepts)
 : m_chance_node(is_chance_node) {
-    int num_children;
-    if (m_chance_node) {
-        num_children = num_percepts;
-    } else {
-        num_children = num_actions;
-    }
+    //make child field the right size
+    int num_children = m_chance_node ? num_percepts : num_actions;
     m_child.resize(num_children, NULL);
 }
 
