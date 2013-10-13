@@ -2,6 +2,7 @@
 
 #include <cassert>
 #include <cmath>
+#include <curses.h>
 
 #include "util.hpp"
 
@@ -30,6 +31,7 @@ const bool Pacman::maze[size][size] = {
 
 
 /* Utilities */
+// Print world to stdout
 void Pacman::printWorld(void) {
     for (int i = 0; i < size; i++) {
         for (int j = 0; j < size; j++) {
@@ -47,13 +49,36 @@ void Pacman::printWorld(void) {
     }
 }
 
+// Print a world to a curses window
+void Pacman::printCurses(void) {
+    for (int i = 0; i < size; i++) { addch(ACS_CKBOARD); }
+    addch('\n');
+    for (int i = 0; i < size; i++) {
+        for (int j = 0; j < size; j++) {
+            switch (world[i][j]) {
+                case e_empty    : addch(' '); break;
+                case e_wall     : addch(ACS_CKBOARD); break;
+                case e_food     : addch(ACS_BULLET); break;
+                case e_pacman   : addch('P'); break;
+                case e_ghost    : addch('G'); break;
+                case e_gf       : addch('G'); break;
+                default         : addch('x'); break;
+            }
+        }
+        addch('\n');
+    }
+    for (int i = 0; i < size; i++) { addch(ACS_CKBOARD); }
+    printw("\n%d food pellets left.", numFood);
+    addch('\n');
+}
+
 // Update entity positions only
 void Pacman::updateWorldPositions(void) {
     world[pacman.row][pacman.col] = e_pacman;
     for (int i = 0; i < numGhosts; i++) {
         int y = ghosts[i].row;
         int x = ghosts[i].col;
-        world[y][x] = world[y][x] == e_food ? (int) e_gf : e_ghost;
+        world[y][x] = (world[y][x] == e_food) ? (int) e_gf : e_ghost;
     }
 }
 
@@ -190,6 +215,7 @@ int Pacman::genReward(void) {
             break;
         case e_ghost :
             reward -= m_reward_ghost;
+            addstr("HIT GHOST END GAME");
             endState = true;
             break;
         case e_gf :
@@ -212,13 +238,7 @@ Pacman::Pacman(options_t &options) {
     // Initial world configuration
     for (int i = 0; i < size; i++) {
         for (int j = 0; j < size; j++) {
-            int entity = maze[i][j];
-            // Place food in empty locations with 0.5 probability
-            if (entity == 0) {
-                entity = rand01() < 0.5 ? (int) e_food : 0;
-                ++numFood;
-            }
-            world[i][j] = entity;
+            world[i][j] = maze[i][j];
         }
     }
     // initial locations
@@ -237,6 +257,19 @@ Pacman::Pacman(options_t &options) {
     ghosts[3].col = 10;
 
     updateWorldPositions();
+
+    for (int i = 0; i < size; i++) {
+        for (int j = 0; j < size; j++) {
+            int entity = world[i][j];
+            // Place food in empty locations with 0.5 probability
+            if (entity == e_empty) {
+                if (rand01() < 0.5) {
+                    ++numFood;
+                    world[i][j] = e_food;
+                }
+            }
+        }
+    }
 
     m_observation = genObservation();
     m_reward = 0;
@@ -257,7 +290,7 @@ void Pacman::performAction(action_t action) {
             if (!maze[pacman.row][newcol]) {
                 world[pacman.row][pacman.col] = e_empty;
                 pacman.col = newcol;
-                reward += getReward();
+                reward += genReward();
             } else reward -= m_reward_wall;
             break;
         case m_move_right :
@@ -265,7 +298,7 @@ void Pacman::performAction(action_t action) {
             if (!maze[pacman.row][newcol]) {
                 world[pacman.row][pacman.col] = e_empty;
                 pacman.col = newcol;
-                reward += getReward();
+                reward += genReward();
             } else reward -= m_reward_wall;
             break;
         // No wrap-around for up/down movements
@@ -274,7 +307,7 @@ void Pacman::performAction(action_t action) {
             if (newrow >= 0 && !maze[newrow][pacman.col]) {
                 world[pacman.row][pacman.col] = e_empty;
                 --pacman.row;
-                reward += getReward();
+                reward += genReward();
             } else reward -= m_reward_wall;
             break;
         case m_move_down :
@@ -282,7 +315,7 @@ void Pacman::performAction(action_t action) {
             if (newrow < size && !maze[newrow][pacman.col]) {
                 world[pacman.row][pacman.col] = e_empty;
                 ++pacman.row;
-                reward += getReward();
+                reward += genReward();
             } else reward -= m_reward_wall;
             break;
         default : break;
@@ -293,6 +326,7 @@ void Pacman::performAction(action_t action) {
     // Check if all pellets have been eaten
     if (numFood = 0) {
         reward += m_reward_win;
+        endState = true;
         // TODO: reset world
         return;
     }

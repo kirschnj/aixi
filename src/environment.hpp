@@ -81,6 +81,8 @@ public:
     virtual bool isFinished(void);
 
     void printWorld(void);
+    // Save as above, but for a curses screen
+    void printCurses(void);
 
 private:
     /* Definitions */

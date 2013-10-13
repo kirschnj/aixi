@@ -2,6 +2,7 @@
 
 #include <cassert>
 #include <cstdlib>
+#include <curses.h>
 
 #include "util.hpp"
 
@@ -9,28 +10,36 @@ using namespace std;
 
 // Very basic testing..
 int main(int argc, char *argv[]) {
-    system("clear");
     options_t options;
 
-    // Test bool to int conversion
-    /*
-    const int n = 4;
-    bool a[n] = {true, true, false, true};
-    std::cout << "boolean to int: " << boolToInt(a, n) << std::endl;
-    */
-
+    // Initialise
+    initscr();
+    clear();
     Pacman *p = new Pacman(options);
-    cout << "Pacman initial world." << endl;
-    p->printWorld();
-    cout << "Observation: " << p->getObservation() << endl;
-    cout << "Reward: " << p->getReward() << endl;
+
+    // Screen variables
+    int width, height;
+    getmaxyx(stdscr, height, width);
+    if (width < 60 || height < 20) {
+        endwin();
+        cout << "Please increase your terminal size and run again." << endl;
+        return 1;
+    }
+
+    p->printCurses();
+    move(0, 20);
+    addstr("Observation: ");
+    printw("%d", p->getObservation());
+    move(1, 20);
+    addstr("Reward: ");
+    printw("%d", p->getReward());
 
     char input;
     while (!p->isFinished()) {
-        cout << "Make a move (wasd): ";
-        cin >> input;
-        cout << input << endl;
-        system("clear");
+        move(2, 20);
+        addstr("Move using (wasd).");
+        input = getch();
+        clear();
         switch (input) {
             case 'w' : p->performAction((action_t) 2); break;
             case 'a' : p->performAction((action_t) 0); break;
@@ -38,11 +47,21 @@ int main(int argc, char *argv[]) {
             case 'd' : p->performAction((action_t) 1); break;
             default : p->performAction((action_t) 0); break;
         };
-        p->printWorld();
-        cout << "Observation: " << p->getObservation() << endl;
-        cout << "Reward: " << p->getReward() << endl;
+        p->printCurses();
+        move(0, 20);
+        addstr("Observation: ");
+        printw("%d", p->getObservation());
+        move(1, 20);
+        addstr("Reward: ");
+        printw("%d", p->getReward());
     }
 
+    clear();
+    p->printCurses();
+    addstr("Game over.\n");
+    addstr("Press a key to quit...");
+    input = getch();
+
+    endwin();
     return 0;
 }
-

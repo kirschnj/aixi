@@ -18,7 +18,7 @@ pacman:
 	$(CC) -c -o environment.o environment.cpp
 	$(CC) -c -o util.o util.cpp
 	$(CC) -c -o test_pacman.o test_pacman.cpp
-	$(CC) $(LDFLAGS) -o test pacman.o util.o test_pacman.o
+	$(CC) $(LDFLAGS) -o test pacman.o util.o test_pacman.o -lncurses
 
 aixi: $(OBJS)
 	$(CC) $(LDFLAGS) -o aixi $(OBJS)
