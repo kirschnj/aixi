@@ -98,11 +98,14 @@ private:
     /* Entities */
     // PacMan
     point pacman;
+    // Power pellet
+    bool power;
     // Ghosts
     const static int numGhosts = 4;
     point ghosts[numGhosts];
 
     // Enums to distinguish between entities
+    // TODO: power pellets?
     const static int e_empty = 0;
     const static int e_wall = 1;
     const static int e_food = 2;
@@ -119,13 +122,6 @@ private:
     const static action_t m_move_down = 3;
     const static unsigned int m_num_actions = 4;
 
-    // TODO percepts, which won't be listed here...
-    // 4 bits for wall configuration
-    // 4 bits for ghost visibility via direct line of sight
-    // 3 bits for food ("smelt" within Manhattan distance of 2, 3 or 4)
-    // 4 bits if food is in direct line of sight
-    // 1 bit if under effects of power pill
-
     // TODO scale rewards, so that they are all positive.
     /*
     const static percept_t m_reward_move = -1;
@@ -137,6 +133,8 @@ private:
     
     /* Functions */
     void updateWorldPositions(void);
+    bool entityAt(int row, int col, const int ent);
+    bool lineOfSight(point &p, action_t dir, const int ent);
     percept_t getObservation(void);
 
 };
