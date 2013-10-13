@@ -20,7 +20,9 @@ public:
 
 	SearchNode(bool is_chance_node, unsigned int num_actions,
 	    unsigned int num_percepts);
-
+    
+    ~SearchNode();
+    
 	// determine the next action to play
 	action_t selectAction(Agent &agent, unsigned int dfr); // TODO: implement
 
@@ -58,6 +60,15 @@ SearchNode::SearchNode(bool is_chance_node,
     }
     for (int i = 0; i < num_children; ++i) {
         m_child.push_back(NULL);
+    }
+}
+
+SearchNode::~SearchNode() {
+    // Destroy any allocated children.
+    for (int i = 0; i < m_child.size(); ++i) {
+        if (m_child[i] != NULL) {
+            delete m_child[i];
+        }
     }
 }
 
