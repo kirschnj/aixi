@@ -234,14 +234,16 @@ void ContextTree::revert(void) {
 
     // Path based on context
     CTNode *context_nodes[m_depth];
+    // context
+    symbol_t context_symbols[m_depth];
 
     context_nodes[0] = m_root;
     // Traverse tree to leaf
     history_t::iterator hist_it = m_history.end() - 1;
     for (size_t n = 1; n < m_depth; ++n, --hist_it) {
         symbol_t context_symbol;
-        context_symbol = *hist_it;//m_history[m_history.size() - n];
-        context_nodes[n] = context_nodes[n-1]->m_child[context_symbol];
+        context_symbols[n] = *hist_it;//m_history[m_history.size() - n];
+        context_nodes[n] = context_nodes[n-1]->m_child[context_symbols[n]];
     }
 
     // Update estimates
@@ -253,7 +255,7 @@ void ContextTree::revert(void) {
         // tightly managed.
 
         if (context_nodes[n]->visits() == 0) {
-            context_nodes[n-1]->m_child[m_history[m_history.size() - n]] = NULL;
+            context_nodes[n-1]->m_child[context_symbols[n]] = NULL;
             delete context_nodes[n];
             continue;
         }
