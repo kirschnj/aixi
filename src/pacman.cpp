@@ -74,6 +74,7 @@ void Pacman::printCurses(void) {
 
 // Update entity positions only
 void Pacman::updateWorldPositions(void) {
+    // It is important to do ghosts after pacman.
     world[pacman.row][pacman.col] = e_pacman;
     for (int i = 0; i < numGhosts; i++) {
         int y = ghosts[i].row;
@@ -201,21 +202,24 @@ percept_t Pacman::genObservation(void) {
 }
 
 
-// Generate a reward, after pacman moves to a new square
-// Must be called before updating world positions.
+// Generate a reward, after entity position changes.
+// Should be called immediately after pacman moves.
+// Should also be called after moving ghosts.
 int Pacman::genReward(void) {
     int value = world[pacman.row][pacman.col];
     int reward = 0;
 
+    // note e_wall should never occur
     switch (value) {
         case e_wall : reward -= m_reward_wall; break;
         case e_food :
             reward += m_reward_food;
+            // delete food (do not add pacman here yet)
+            world[pacman.row][pacman.col] = e_empty;
             --numFood;
             break;
         case e_ghost :
             reward -= m_reward_ghost;
-            addstr("HIT GHOST END GAME");
             endState = true;
             break;
         case e_gf :
@@ -225,6 +229,50 @@ int Pacman::genReward(void) {
         default : break;
     }
     return reward;
+}
+
+
+// Move a ghost
+// TODO: bfs if within 5 manhattan distance to chase pacman
+// TODO: might want an adjacency matrix
+void Pacman::moveGhost(int index) {
+    int curRow = ghosts[index].row;
+    int curCol = ghosts[index].col;
+
+    // TODO: is there a better way of doing this?
+    // Get available movements
+    std::vector<action_t> actions;
+    if (curCol > 0 && !maze[curRow][curCol - 1]) {
+        actions.push_back((action_t) m_move_left);
+    }
+    if (curCol < size && !maze[curRow][curCol + 1]) {
+        actions.push_back((action_t) m_move_right);
+    }
+    if (curRow > 0 && !maze[curRow - 1][curCol]) {
+        actions.push_back((action_t) m_move_up);
+    }
+    if (curRow < size && !maze[curRow + 1][curCol]) {
+        actions.push_back((action_t) m_move_down);
+    }
+
+    // Randomly pick a move
+    action_t a = actions.at(randRange((unsigned int) actions.size()));
+
+    switch (a) {
+        case m_move_left    : ghosts[index].col = curCol - 1; break;
+        case m_move_right   : ghosts[index].col = curCol + 1; break;
+        case m_move_up      : ghosts[index].row = curRow - 1; break;
+        case m_move_down    : ghosts[index].row = curRow + 1; break;
+        // Don't move
+        default : break;
+    };
+
+    // Clear square
+    // TODO: power pellets
+    switch (world[curRow][curCol]) {
+        case e_gf : world[curRow][curCol] = e_food; break;
+        default : world[curRow][curCol] = e_empty; break;
+    };
 }
 
 /* Implementations required by Environment */
@@ -332,11 +380,16 @@ void Pacman::performAction(action_t action) {
     }
 
     // TODO: make ghosts move...
-    // must include reward update, if a ghost eats pacman
-
-
-    // Update world and values based on results of move
+    for (int i = 0; i < numGhosts; i++) {
+        moveGhost(i);
+    }
+    // Update world based on results of move
     updateWorldPositions();
+
+    // Check if a ghost has caught pacman
+    reward += genReward();
+
+    // Update percepts
     m_observation = genObservation();
     m_reward = reward;
 }

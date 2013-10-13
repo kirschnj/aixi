@@ -146,6 +146,8 @@ private:
     bool lineOfSight(point &p, action_t dir, const int ent);
     int genReward(void);
     percept_t genObservation(void);
+    void moveGhost(int index);
+    void checkGhosts();
 
 };
 
