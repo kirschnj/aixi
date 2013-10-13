@@ -37,7 +37,7 @@ int main(int argc, char *argv[]) {
     char input;
     while (!p->isFinished()) {
         move(2, 20);
-        addstr("Move using (wasd).");
+        addstr("Move using (wasd). q to quit.");
         input = getch();
         clear();
         switch (input) {
@@ -45,6 +45,7 @@ int main(int argc, char *argv[]) {
             case 'a' : p->performAction((action_t) 0); break;
             case 's' : p->performAction((action_t) 3); break;
             case 'd' : p->performAction((action_t) 1); break;
+            case 'q' : endwin(); return 0;
             default : p->performAction((action_t) 0); break;
         };
         p->printCurses();
@@ -58,8 +59,7 @@ int main(int argc, char *argv[]) {
 
     clear();
     p->printCurses();
-    addstr("Game over.\n");
-    addstr("Press a key to quit...");
+    addstr("Game over. Press any key to quit...");
     input = getch();
 
     endwin();

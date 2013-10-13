@@ -324,7 +324,7 @@ void Pacman::performAction(action_t action) {
     reward -= m_reward_move;
     
     // Check if all pellets have been eaten
-    if (numFood = 0) {
+    if (numFood == 0) {
         reward += m_reward_win;
         endState = true;
         // TODO: reset world
