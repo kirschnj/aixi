@@ -58,14 +58,12 @@ SearchNode::SearchNode(bool is_chance_node,
     } else {
         num_children = num_actions;
     }
-    for (int i = 0; i < num_children; ++i) {
-        m_child.push_back(NULL);
-    }
+    m_child.resize(num_children, NULL);
 }
 
 SearchNode::~SearchNode() {
     // Destroy any allocated children.
-    for (int i = 0; i < m_child.size(); ++i) {
+    for (unsigned int i = 0; i < m_child.size(); ++i) {
         if (m_child[i] != NULL) {
             delete m_child[i];
         }
@@ -90,7 +88,7 @@ static reward_t playout(Agent &agent, unsigned int playout_len) {
 }
 
 action_t SearchNode::selectAction(Agent& agent, unsigned int dfr) {
-    std::vector<action_t> unexplored_actions;
+    std::vector<action_t> unexplored_actions(agent.numActions());
     
     //find unexplored actions
     for (action_t a = 0; a < agent.numActions(); ++a) {
