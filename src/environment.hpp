@@ -131,6 +131,7 @@ private:
     /* Functions */
     void updateWorldPositions(void);
     bool entityAt(int row, int col, const int ent);
+    bool entityScan(point &p, int range, const int ent);
     bool lineOfSight(point &p, action_t dir, const int ent);
     percept_t genObservation(void);
 

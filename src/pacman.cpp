@@ -1,6 +1,7 @@
 #include "environment.hpp"
 
 #include <cassert>
+#include <cmath>
 
 #include "util.hpp"
 
@@ -67,6 +68,24 @@ bool Pacman::entityAt(int row, int col, const int ent) {
     return false;
 }
 
+// Check if a particular entity exists within "range" units away from p 
+bool Pacman::entityScan(point &p, int range, const int ent) {
+    // Start with square of length "range" centered on p
+    for (int i = p.row - range; i < p.row + range; i++) {
+        for (int j = p.col - range; i < p.col + range; i++) {
+            // Only check locations within the maze
+            if (i < 0 || i >= size) continue;
+            if (j < 0 || j >= size) continue;
+            // Discard corners (outside "range" in Manhattan distance)
+            if (std::abs(i - p.row) + std::abs(j - p.col) > range) continue;
+
+            if (entityAt(i, j, ent)) return true;
+        }
+    }
+    return false;
+}
+
+
 /** Check if an entity is in line of sight
     @param p Current position
     @param dir Cardinal direction for sight
@@ -131,10 +150,12 @@ percept_t Pacman::genObservation(void) {
     bits[7] = lineOfSight(pacman, m_move_down, e_ghost);
 
     // 3 bits for food "smell" (Manhattan Distance)
-    // TODO
-    bits[8] = 0;
-    bits[9] = 0;
-    bits[10] = 0;
+    // Does food exist within 2 units?
+    bits[8] = entityScan(pacman, 2, e_food);
+    // Does food exist within 3 units?
+    bits[9] = entityScan(pacman, 3, e_food);
+    // Does food exist within 4 units?
+    bits[10] = entityScan(pacman, 4, e_food);
 
     // 4 bits for food visibility (line of sight)
     bits[11] = lineOfSight(pacman, m_move_left, e_food);
@@ -192,5 +213,7 @@ Pacman::Pacman(options_t &options) {
 
 void Pacman::performAction(action_t action) {
     assert(action < 4);
+    // Cumulative reward
+    int reward = m_reward_move;
 
 }
