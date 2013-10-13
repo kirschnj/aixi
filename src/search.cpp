@@ -137,7 +137,7 @@ reward_t SearchNode::sample(Agent &agent, unsigned int dfr) {
         agent.genPerceptAndUpdate(obs, rew);
 
         //calc index of whole percept
-        percept_t percept = (obs << agent.numObsBits()) & obs;
+        percept_t percept = (rew << agent.numObsBits()) | obs;
         
         if (m_child[percept] == NULL) {
             m_child[percept] = new SearchNode(false,
