@@ -180,12 +180,12 @@ int main(int argc, char *argv[]) {
 	options_t options;
 
 	// Default configuration values
-	options["ct-depth"] = "3";
-	options["agent-horizon"] = "16";
+	options["ct-depth"] = "16";
+	options["agent-horizon"] = "3";
 	options["exploration"] = "0";     // do not explore
 	options["explore-decay"] = "1.0"; // exploration rate does not decay
-    options["mc-timelimit"] = "1000"; //number of mc simulations per search ... is there a better way to dedicated time to mc-simulations?
-    options["terminate-age"] = "6400";
+    options["mc-timelimit"] = "500"; //number of mc simulations per search ... is there a better way to dedicated time to mc-simulations?
+    options["terminate-age"] = "10000";
 
 	// Read configuration options
 	std::ifstream conf(argv[1]);
