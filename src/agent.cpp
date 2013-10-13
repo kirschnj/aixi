@@ -229,15 +229,15 @@ void Agent::reset(void) {
 
 // probability of selecting an action according to the
 // agent's internal model of it's own behaviour
-double Agent::getPredictedActionProb(action_t action) {
-	return NULL; // TODO: implement
-}
+//double Agent::getPredictedActionProb(action_t action) {
+//	return NULL; // TODO: implement
+//} NOTE: agent gets probability straight from model when it is needed
 
 
 // get the agent's probability of receiving a particular percept
-double Agent::perceptProbability(percept_t observation, percept_t reward) const {
-	return NULL; // TODO: implement
-}
+//double Agent::perceptProbability(percept_t observation, percept_t reward) const {
+//	return NULL; // TODO: implement
+//} NOTE: agent gets probability straight from model when it is needed
 
 
 // action sanity check

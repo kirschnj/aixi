@@ -185,6 +185,7 @@ int main(int argc, char *argv[]) {
 	options["exploration"] = "0";     // do not explore
 	options["explore-decay"] = "1.0"; // exploration rate does not decay
     options["mc-timelimit"] = "1000"; //number of mc simulations per search ... is there a better way to dedicated time to mc-simulations?
+    options["terminate-age"] = "64";
 
 	// Read configuration options
 	std::ifstream conf(argv[1]);
