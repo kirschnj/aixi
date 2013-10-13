@@ -126,7 +126,6 @@ bool Pacman::lineOfSight(point &p, action_t dir, const int ent) {
 
 // Output a percept corresponding to pacman's current observation
 percept_t Pacman::genObservation(void) {
-    percept_t observation;
     // Hardcoded observation size
     bool bits[16];
 
@@ -176,15 +175,34 @@ percept_t Pacman::genObservation(void) {
     return boolToInt(bits, 16);
 }
 
+
+// Generate a reward, after pacman moves to a new square
+// Must be called before updating world positions.
+int Pacman::genReward(void) {
+    int value = world[pacman.row][pacman.col];
+    int reward = 0;
+
+    switch (value) {
+        case e_wall : reward -= m_reward_wall;
+        case e_food : reward += m_reward_food;
+        case e_ghost : reward -= m_reward_ghost;
+        case e_gf : reward = reward + m_reward_food - m_reward_ghost;
+        default : break;
+    }
+    return reward;
+}
+
 /* Implementations required by Environment */
 Pacman::Pacman(options_t &options) {
     // TODO: options
+    numFood = 0;
     for (int i = 0; i < size; i++) {
         for (int j = 0; j < size; j++) {
             int entity = maze[i][j];
             // Place food in empty locations with 0.5 probability
             if (entity == 0) {
                 entity = rand01() < 0.5 ? (int) e_food : 0;
+                ++numFood;
             }
             world[i][j] = entity;
         }
@@ -213,6 +231,53 @@ Pacman::Pacman(options_t &options) {
 void Pacman::performAction(action_t action) {
     assert(action < 4);
     // Cumulative reward
-    int reward = m_reward_move;
+    int reward = m_reward_init;
+
+    // Move pacman (hold position if wall is in the way)
+    switch (action) {
+        case m_move_left :
+            if (!maze[pacman.row][pacman.col - 1]) {
+                world[pacman.row][pacman.col] = e_empty;
+                --pacman.col;
+                reward += getReward();
+            } else reward -= m_reward_wall;
+            break;
+        case m_move_right :
+            if (!maze[pacman.row][pacman.col + 1]) {
+                world[pacman.row][pacman.col] = e_empty;
+                --pacman.col;
+                reward += getReward();
+            } else reward -= m_reward_wall;
+            break;
+        case m_move_up :
+            if (!maze[pacman.row - 1][pacman.col]) {
+                world[pacman.row][pacman.col] = e_empty;
+                --pacman.col;
+                reward += getReward();
+            } else reward -= m_reward_wall;
+            break;
+        case m_move_down :
+            if (!maze[pacman.row + 1][pacman.col]) {
+                world[pacman.row][pacman.col] = e_empty;
+                --pacman.col;
+                reward += getReward();
+            } else reward -= m_reward_wall;
+            break;
+        default : break;
+    };
+    // Penalty for moving
+    reward -= m_reward_move;
+    
+    // Check if all pellets have been eaten
+    if (numFood = 0) {
+        reward += m_reward_win;
+        // TODO: reset world
+        return;
+    }
+
+    // TODO: make ghosts move...
+
+
+    updateWorldPositions();
 
 }
