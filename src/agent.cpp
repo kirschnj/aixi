@@ -136,8 +136,8 @@ void Agent::genPercept(percept_t &obs, percept_t &rew) const {
 // generate a percept distributed to our history statistics, and
 // update our mixture environment model with it
 void Agent::genPerceptAndUpdate(percept_t &obs, percept_t &rew) {
-    symbol_list_t obs_symbols(m_obs_bits);
-    symbol_list_t rew_symbols(m_rew_bits);
+    symbol_list_t obs_symbols;
+    symbol_list_t rew_symbols;
     
     m_ct->genRandomSymbolsAndUpdate(obs_symbols, m_obs_bits);
     m_ct->genRandomSymbolsAndUpdate(rew_symbols, m_rew_bits);
