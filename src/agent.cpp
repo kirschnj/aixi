@@ -79,14 +79,15 @@ unsigned int Agent::numPercepts(void) const {
 	return m_percepts;
 }
 
+
 // number of distinct percepts that can be observed
 unsigned int Agent::numObsBits(void) const {
-	return m_obs_bits;
+    return m_obs_bits;
 }
 
 // number of distinct percepts that can be observed
 unsigned int Agent::numRewBits(void) const {
-	return m_rew_bits;
+    return m_rew_bits;
 }
 
 // the length of the stored history for an agent
@@ -121,17 +122,14 @@ action_t Agent::genAction(void) const {
 
 // generate a percept distributed according
 // to our history statistics
-percept_t Agent::genPercept(void) const {
-	// Efficient implementation: randomly choose bits sequentially until 
-	// a whole percept worth of bits have been chosen.
-    //
-	
-	symbol_list_t symbols;
-    m_ct->genRandomSymbols(symbols, m_obs_bits + m_rew_bits);
+void Agent::genPercept(percept_t &obs, percept_t &rew) const {
+	symbol_list_t obs_symbols;
+    symbol_list_t rew_symbols;
+    m_ct->genRandomSymbols(obs_symbols, m_obs_bits);
+    m_ct->genRandomSymbols(rew_symbols, m_rew_bits);
 
-    //Johannes: TODO: We can either decode an observation or a reward but not
-    //both. What is this function to return anyway?
-	return decode(symbols, m_obs_bits + m_rew_bits);
+    obs = decodeObservation(obs_symbols);
+    rew = decodeReward(rew_symbols);
 }
 
 

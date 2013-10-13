@@ -64,7 +64,7 @@ public:
 
 	// generate a percept distributed according
 	// to our history statistics
-	percept_t genPercept(void) const; // TODO: implement in agent.cpp
+	void genPercept(percept_t &obs, percept_t &rew) const; // TODO: implement in agent.cpp
 
 	// generate a percept distributed to our history statistics, and
 	// update our mixture environment model with it
