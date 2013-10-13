@@ -70,19 +70,12 @@ static reward_t playout(Agent &agent, unsigned int playout_len) {
 	// Pick a random action
 	action_t a = agent.genRandomAction();
 	agent.modelUpdate(a);
-	// random percept
-	percept_t percept = agent.genPerceptAndUpdate();
-    symbol_list_t symbols;
-    encode(symbols, percept, agent.numObsBits() + agent.numRewBits());
-    // Decode reward from the whole percept.
-    symbol_list_t rew_symbols;
-    for (unsigned int i = agent.numObsBits();
-            i < agent.numObsBits() + agent.numRewBits(); ++i) {
-        rew_symbols.push_back(symbols[i]);
-    }
-    reward_t r = decode(rew_symbols, agent.numRewBits());
-	
-	return r + playout(agent, playout_len - 1);
+
+    percept_t rew;
+    percept_t obs;
+	agent.genPerceptAndUpdate(obs, rew); // random percept
+    
+	return rew + playout(agent, playout_len - 1);
 }
 
 action_t SearchNode::selectAction(Agent& agent, unsigned int dfr) {
@@ -129,27 +122,18 @@ reward_t SearchNode::sample(Agent &agent, unsigned int dfr) {
     } else if (m_chance_node) {
         // Generate whole observation-reward percept.
         // Make sure the percept is added to the agent's model and history.
-        percept_t percept = agent.genPerceptAndUpdate();
-        symbol_list_t symbols;
-        encode(symbols, percept, agent.numObsBits() + agent.numRewBits());
-        // Decode observation from whole percept.
-        symbol_list_t obs_symbols;
-        for (unsigned int i = 0; i < agent.numObsBits(); ++i) {
-            obs_symbols.push_back(symbols[i]);
-        }
-        percept_t obs = decode(obs_symbols, agent.numObsBits());
-        // Decode reward from the whole percept.
-        symbol_list_t rew_symbols;
-        for (unsigned int i = agent.numObsBits();
-                i < agent.numObsBits() + agent.numRewBits(); ++i) {
-            rew_symbols.push_back(symbols[i]);
-        }
-        percept_t r = decode(rew_symbols, agent.numRewBits());
+        percept_t obs;
+        percept_t rew;
+        agent.genPerceptAndUpdate(obs, rew);
+
+        //calc index of whole percept
+        percept_t percept = (obs << agent.numObsBits()) & obs;
+        
         if (m_child[percept] == NULL) {
             m_child[percept] = new SearchNode(false,
                                     agent.numActions(), agent.numPercepts());
         }
-        newReward = r + m_child[percept]->sample(agent, dfr - 1);
+        newReward = rew + m_child[percept]->sample(agent, dfr - 1);
     } else if (m_visits == 0) {
         newReward = playout(agent, dfr);
     } else {
