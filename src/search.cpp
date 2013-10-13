@@ -58,14 +58,12 @@ SearchNode::SearchNode(bool is_chance_node,
     } else {
         num_children = num_actions;
     }
-    for (int i = 0; i < num_children; ++i) {
-        m_child.push_back(NULL);
-    }
+    m_child.resize(num_children, NULL);
 }
 
 SearchNode::~SearchNode() {
     // Destroy any allocated children.
-    for (int i = 0; i < m_child.size(); ++i) {
+    for (unsigned int i = 0; i < m_child.size(); ++i) {
         if (m_child[i] != NULL) {
             delete m_child[i];
         }
@@ -75,22 +73,23 @@ SearchNode::~SearchNode() {
 // simulate a path through a hypothetical future for the agent within it's
 // internal model of the world, returning the accumulated reward.
 static reward_t playout(Agent &agent, unsigned int playout_len) {
-	if (playout_len == 0) {
-	    return 0;
-	}
-	// Pick a random action
-	action_t a = agent.genRandomAction();
-	agent.modelUpdate(a);
+	reward_t r = 0;
+	for (unsigned int i = 0; i < playout_len; ++i) {
+	    // Pick a random action
+	    action_t a = agent.genRandomAction();
+	    agent.modelUpdate(a);
 
-    percept_t rew;
-    percept_t obs;
-	agent.genPerceptAndUpdate(obs, rew); // random percept
-    
-	return rew + playout(agent, playout_len - 1);
+        percept_t rew;
+        percept_t obs;
+	    agent.genPerceptAndUpdate(obs, rew); // random percept
+	    
+	    r = r + rew;
+    }
+	return r;
 }
 
 action_t SearchNode::selectAction(Agent& agent, unsigned int dfr) {
-    std::vector<action_t> unexplored_actions;
+    std::vector<action_t> unexplored_actions(agent.numActions());
     
     //find unexplored actions
     for (action_t a = 0; a < agent.numActions(); ++a) {
@@ -138,7 +137,7 @@ reward_t SearchNode::sample(Agent &agent, unsigned int dfr) {
         agent.genPerceptAndUpdate(obs, rew);
 
         //calc index of whole percept
-        percept_t percept = (obs << agent.numObsBits()) & obs;
+        percept_t percept = (rew << agent.numObsBits()) | obs;
         
         if (m_child[percept] == NULL) {
             m_child[percept] = new SearchNode(false,

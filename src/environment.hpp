@@ -78,6 +78,7 @@ public:
 
 	// receives the agent's action and calculates the new environment percept
 	virtual void performAction(action_t action);
+    virtual bool isFinished(void);
 
     void printWorld(void);
 
@@ -87,6 +88,9 @@ private:
         int row;
         int col;
     };
+
+    // State of the game
+    bool endState;
 
     // Size of maze
     const static int size = 19;
@@ -100,6 +104,7 @@ private:
     point pacman;
     // Power pellet
     bool power;
+    int numFood;
     // Ghosts
     const static int numGhosts = 4;
     point ghosts[numGhosts];
@@ -122,16 +127,22 @@ private:
     const static action_t m_move_down = 3;
     const static unsigned int m_num_actions = 4;
 
-    const static percept_t m_reward_move = 49;
-    const static percept_t m_reward_wall = 40;
-    const static percept_t m_reward_ghost = 0;
-    const static percept_t m_reward_food = 60;
-    const static percept_t m_reward_win = 150;
+    // Start with a positive reward (init=sum(negative rewards))
+    // Subtract/add rewards as necessary
+    const static percept_t m_reward_move = 1;
+    const static percept_t m_reward_wall = 10;
+    const static percept_t m_reward_ghost = 50;
+    const static percept_t m_reward_food = 10;
+    const static percept_t m_reward_win = 100;
+    const static percept_t m_reward_init =
+            m_reward_move + m_reward_wall + m_reward_ghost;
     
     /* Functions */
     void updateWorldPositions(void);
     bool entityAt(int row, int col, const int ent);
+    bool entityScan(point &p, int range, const int ent);
     bool lineOfSight(point &p, action_t dir, const int ent);
+    int genReward(void);
     percept_t genObservation(void);
 
 };

@@ -136,8 +136,8 @@ void Agent::genPercept(percept_t &obs, percept_t &rew) const {
 // generate a percept distributed to our history statistics, and
 // update our mixture environment model with it
 void Agent::genPerceptAndUpdate(percept_t &obs, percept_t &rew) {
-    symbol_list_t obs_symbols;
-    symbol_list_t rew_symbols;
+    symbol_list_t obs_symbols(m_obs_bits);
+    symbol_list_t rew_symbols(m_rew_bits);
     
     m_ct->genRandomSymbolsAndUpdate(obs_symbols, m_obs_bits);
     m_ct->genRandomSymbolsAndUpdate(rew_symbols, m_rew_bits);
@@ -229,15 +229,15 @@ void Agent::reset(void) {
 
 // probability of selecting an action according to the
 // agent's internal model of it's own behaviour
-double Agent::getPredictedActionProb(action_t action) {
-	return NULL; // TODO: implement
-}
+//double Agent::getPredictedActionProb(action_t action) {
+//	return NULL; // TODO: implement
+//} NOTE: agent gets probability straight from model when it is needed
 
 
 // get the agent's probability of receiving a particular percept
-double Agent::perceptProbability(percept_t observation, percept_t reward) const {
-	return NULL; // TODO: implement
-}
+//double Agent::perceptProbability(percept_t observation, percept_t reward) const {
+//	return NULL; // TODO: implement
+//} NOTE: agent gets probability straight from model when it is needed
 
 
 // action sanity check

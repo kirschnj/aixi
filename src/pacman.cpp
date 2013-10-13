@@ -1,6 +1,7 @@
 #include "environment.hpp"
 
 #include <cassert>
+#include <cmath>
 
 #include "util.hpp"
 
@@ -67,6 +68,24 @@ bool Pacman::entityAt(int row, int col, const int ent) {
     return false;
 }
 
+// Check if a particular entity exists within "range" units away from p 
+bool Pacman::entityScan(point &p, int range, const int ent) {
+    // Start with square of length "range" centered on p
+    for (int i = p.row - range; i < p.row + range; i++) {
+        for (int j = p.col - range; j < p.col + range; j++) {
+            // Only check locations within the maze
+            if (i < 0 || i >= size) continue;
+            if (j < 0 || j >= size) continue;
+            // Discard corners (outside "range" in Manhattan distance)
+            if (std::abs(i - p.row) + std::abs(j - p.col) > range) continue;
+
+            if (entityAt(i, j, ent)) return true;
+        }
+    }
+    return false;
+}
+
+
 /** Check if an entity is in line of sight
     @param p Current position
     @param dir Cardinal direction for sight
@@ -107,7 +126,6 @@ bool Pacman::lineOfSight(point &p, action_t dir, const int ent) {
 
 // Output a percept corresponding to pacman's current observation
 percept_t Pacman::genObservation(void) {
-    percept_t observation;
     // Hardcoded observation size
     bool bits[16];
 
@@ -131,10 +149,12 @@ percept_t Pacman::genObservation(void) {
     bits[7] = lineOfSight(pacman, m_move_down, e_ghost);
 
     // 3 bits for food "smell" (Manhattan Distance)
-    // TODO
-    bits[8] = 0;
-    bits[9] = 0;
-    bits[10] = 0;
+    // Does food exist within 2 units?
+    bits[8] = entityScan(pacman, 2, e_food);
+    // Does food exist within 3 units?
+    bits[9] = entityScan(pacman, 3, e_food);
+    // Does food exist within 4 units?
+    bits[10] = entityScan(pacman, 4, e_food);
 
     // 4 bits for food visibility (line of sight)
     bits[11] = lineOfSight(pacman, m_move_left, e_food);
@@ -146,25 +166,57 @@ percept_t Pacman::genObservation(void) {
     bits[15] = power;
 
     // TODO: DEBUG
-    /*
     for (int i = 0; i < 16; i++) {
-        std::cout << bits[i] << std::endl;
+        std::cout << bits[i];
     }
-    */
+    std::cout << std::endl;
 
     // Convert bits into an unsigned int (percept_t)
     return boolToInt(bits, 16);
 }
 
+
+// Generate a reward, after pacman moves to a new square
+// Must be called before updating world positions.
+int Pacman::genReward(void) {
+    int value = world[pacman.row][pacman.col];
+    int reward = 0;
+
+    switch (value) {
+        case e_wall : reward -= m_reward_wall; break;
+        case e_food :
+            reward += m_reward_food;
+            --numFood;
+            break;
+        case e_ghost :
+            reward -= m_reward_ghost;
+            endState = true;
+            break;
+        case e_gf :
+            reward = reward + m_reward_food - m_reward_ghost;
+            endState = true;
+            break;
+        default : break;
+    }
+    return reward;
+}
+
 /* Implementations required by Environment */
 Pacman::Pacman(options_t &options) {
     // TODO: options
+
+    // Start the game
+    endState = false;
+    numFood = 0;
+
+    // Initial world configuration
     for (int i = 0; i < size; i++) {
         for (int j = 0; j < size; j++) {
             int entity = maze[i][j];
             // Place food in empty locations with 0.5 probability
             if (entity == 0) {
                 entity = rand01() < 0.5 ? (int) e_food : 0;
+                ++numFood;
             }
             world[i][j] = entity;
         }
@@ -192,5 +244,70 @@ Pacman::Pacman(options_t &options) {
 
 void Pacman::performAction(action_t action) {
     assert(action < 4);
+    assert(!endState);
+    // Cumulative reward
+    int reward = m_reward_init;
 
+    // Move pacman (hold position if wall is in the way)
+    int newrow, newcol;
+    switch (action) {
+        // Wrap around possible for left/right movements
+        case m_move_left :
+            newcol = (pacman.col == 0) ? size - 1 : pacman.col - 1;
+            if (!maze[pacman.row][newcol]) {
+                world[pacman.row][pacman.col] = e_empty;
+                pacman.col = newcol;
+                reward += getReward();
+            } else reward -= m_reward_wall;
+            break;
+        case m_move_right :
+            newcol = (pacman.col == size - 1) ? 0 : pacman.col + 1;
+            if (!maze[pacman.row][newcol]) {
+                world[pacman.row][pacman.col] = e_empty;
+                pacman.col = newcol;
+                reward += getReward();
+            } else reward -= m_reward_wall;
+            break;
+        // No wrap-around for up/down movements
+        case m_move_up :
+            newrow = pacman.row - 1;
+            if (newrow >= 0 && !maze[newrow][pacman.col]) {
+                world[pacman.row][pacman.col] = e_empty;
+                --pacman.row;
+                reward += getReward();
+            } else reward -= m_reward_wall;
+            break;
+        case m_move_down :
+            newrow = pacman.row + 1;
+            if (newrow < size && !maze[newrow][pacman.col]) {
+                world[pacman.row][pacman.col] = e_empty;
+                ++pacman.row;
+                reward += getReward();
+            } else reward -= m_reward_wall;
+            break;
+        default : break;
+    };
+    // Penalty for moving
+    reward -= m_reward_move;
+    
+    // Check if all pellets have been eaten
+    if (numFood = 0) {
+        reward += m_reward_win;
+        // TODO: reset world
+        return;
+    }
+
+    // TODO: make ghosts move...
+    // must include reward update, if a ghost eats pacman
+
+
+    // Update world and values based on results of move
+    updateWorldPositions();
+    m_observation = genObservation();
+    m_reward = reward;
+}
+
+
+bool Pacman::isFinished(void) {
+    return endState;
 }
