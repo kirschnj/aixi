@@ -35,4 +35,8 @@ T strExtract(std::string &str) {
 unsigned int decode(const symbol_list_t &symlist, unsigned int bits);
 void encode(symbol_list_t &symlist, unsigned int value, unsigned int bits);
 
+
+// Convert a boolean array into an (unsigned) int
+unsigned int boolToInt(bool *array, int size);
+
 #endif // __UTIL_HPP__
