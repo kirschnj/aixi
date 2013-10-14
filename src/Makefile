@@ -1,5 +1,5 @@
 CC=g++
-CFLAGS=-Wall
+CFLAGS=-Wall -O2
 LDFLAGS=-lncurses
 
 SRCS=main.cpp agent.cpp pacman.cpp environment.cpp predict.cpp search.cpp util.cpp
@@ -21,7 +21,7 @@ pacman:
 	$(CC) $(CFLAGS) -o test pacman.o util.o test_pacman.o $(LDFLAGS)
 
 aixi: $(OBJS)
-	$(CC) $(CFLAGS) -O2 -o aixi $(OBJS) $(LDFLAGS)
+	$(CC) $(CFLAGS) -o aixi $(OBJS) $(LDFLAGS)
 
 .PHONY: clean
 
