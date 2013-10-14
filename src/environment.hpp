@@ -155,6 +155,9 @@ private:
     const static int g_dist_chase = 5;
     // Chase pacman for 10 time steps
     const static int g_init_chase = 10;
+    // Counters for random movements after chasing
+    int ghostWait[numGhosts];
+    const static int g_wait = 3;
 
     // Enums to distinguish between entities
     const static int e_empty = 0;

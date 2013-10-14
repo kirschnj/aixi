@@ -209,7 +209,6 @@ void Pacman::updateWorldPositions(void) {
         // Otherwise, update position in world
         int r = ghosts[i].row;
         int c = ghosts[i].col;
-        int value = world[r][c];
         if (entityAt(r, c, e_food)) {
             world[r][c] = e_gf;
         } else if (entityAt(r, c, e_power)) {
@@ -402,7 +401,8 @@ void Pacman::moveGhost(int index) {
 
     // Chase or move randomly based on ghostState 
     if (ghostState[index] > 0) {
-        --ghostState[index];
+        // If we have just finished chasing, set random movement period
+        if (--ghostState[index] == 0) ghostWait[index] = g_wait;
         // Chase pacman
         a = shortestMove(ghosts[index], pacman);
     } else {
@@ -471,6 +471,12 @@ Pacman::Pacman(options_t &options) {
     ghostState[1] = 0;
     ghostState[2] = 0;
     ghostState[3] = 0;
+
+    // No chasing yet
+    ghostWait[0] = 0;
+    ghostWait[1] = 0;
+    ghostWait[2] = 0;
+    ghostWait[3] = 0;
 
     // Start without effects of power pellet
     powerP = 0;
@@ -562,12 +568,14 @@ void Pacman::performAction(action_t action) {
         for (int i = 0; i < numGhosts; i++) {
             if (ghostState[i] >= 0) {
                 // Start chasing if close enough
-                if (ghostState[i] == 0) {
+                if ((ghostState[i] == 0) && (ghostWait[i] == 0)) {
                     int dist = abs(ghosts[i].row - pacman.row)
                             + abs(ghosts[i].col - pacman.col);
                     if (dist < g_dist_chase) {
                         ghostState[i] = g_init_chase;
                     }
+                } else if (ghostWait[i] > 0) {
+                    --ghostWait[i];
                 }
                 moveGhost(i);
             } else {
