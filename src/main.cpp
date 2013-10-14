@@ -234,7 +234,10 @@ int main(int argc, char *argv[]) {
 		// TODO: instantiate "env" (if appropriate)
 	}
 	else if (environment_name == "biased-rock-paper-scissor") {
-		// TODO: instantiate "env" (if appropriate)
+		env = new BiasedRockPaperScissor(options);
+		options["agent-actions"] = "2";
+		options["observation-bits"] = "2";
+		options["reward-bits"] = "2";
 	}
 	else if (environment_name == "kuhn-poker") {
 		// TODO: instantiate "env" (if appropriate)
