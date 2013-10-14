@@ -90,15 +90,15 @@ void Pacman::updateWorldPositions(void) {
     world[pacman.row][pacman.col] = e_pacman;
     // Update ghosts
     for (int i = 0; i < numGhosts; i++) {
-        int y = ghosts[i].row;
-        int x = ghosts[i].col;
-        int value = world[y][x];
-        if (value == e_food || value == e_gf) {
-            world[y][x] = e_gf;
-        } else if (value == e_power || value == e_gp) {
-            world[y][x] = e_gp;
+        int r = ghosts[i].row;
+        int c = ghosts[i].col;
+        int value = world[r][c];
+        if (entityAt(r, c, e_food)) {
+            world[r][c] = e_gf;
+        } else if (entityAt(r, c, e_power)) {
+            world[r][c] = e_gp;
         } else {
-            world[y][x] = e_ghost;
+            world[r][c] = e_ghost;
         }
     }
 }
@@ -110,8 +110,8 @@ bool Pacman::entityAt(int row, int col, const int ent) {
     int actual = world[row][col];
     if (actual == ent) return true;
     else if (ent == e_ghost) return (actual == e_gf || actual == e_gp);
-    else if (ent == e_food) return actual == e_gf;
-    else if (ent == e_power) return actual == e_gp;
+    else if (ent == e_food) return (actual == e_gf);
+    else if (ent == e_power) return (actual == e_gp);
     return false;
 }
 
@@ -284,16 +284,16 @@ void Pacman::moveGhost(int index) {
     // TODO: is there a better way of doing this?
     // Get available movements
     std::vector<action_t> actions;
-    if (curCol > 0 && !maze[curRow][curCol - 1]) {
+    if ((curCol > 0) && !maze[curRow][curCol - 1]) {
         actions.push_back((action_t) m_move_left);
     }
-    if (curCol < size && !maze[curRow][curCol + 1]) {
+    if ((curCol < size - 1) && !maze[curRow][curCol + 1]) {
         actions.push_back((action_t) m_move_right);
     }
-    if (curRow > 0 && !maze[curRow - 1][curCol]) {
+    if ((curRow > 0) && !maze[curRow - 1][curCol]) {
         actions.push_back((action_t) m_move_up);
     }
-    if (curRow < size && !maze[curRow + 1][curCol]) {
+    if ((curRow < size - 1) && !maze[curRow + 1][curCol]) {
         actions.push_back((action_t) m_move_down);
     }
 
@@ -443,7 +443,7 @@ void Pacman::performAction(action_t action) {
     // Decrement duration of power pill if applicable
     powerP = (powerP > 0) ? powerP - 1 : 0;
 
-    updateWorldPositions();
+    //updateWorldPositions();
     // Update percepts
     m_observation = genObservation();
     m_reward = reward;
