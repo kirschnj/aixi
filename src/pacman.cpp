@@ -2,9 +2,12 @@
 
 #include <cassert>
 #include <cmath>
+
 #include <curses.h>
 
 #include "util.hpp"
+
+using namespace std;
 
 // Wall locations
 const bool Pacman::maze[size][size] = {
@@ -29,6 +32,67 @@ const bool Pacman::maze[size][size] = {
     {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1}
     };
 
+
+// Adjacency list, for bfs
+const vector< vector<int> > Pacman::adjList = Pacman::genAdjList();
+
+// Generate an adjacency list based on maze
+// TODO: this is rather large, at most 361*4 ints
+vector< vector<int> > Pacman::genAdjList(void) {
+    vector< vector<int> > aList;
+
+    // Locations will be indexed using "(row * size) + col"
+    for (int i = 0; i < size; i++) {
+        for (int j = 0; j < size; j++) {
+            vector<int> tmpList;
+            // Add empty list for walls
+            if (!maze[i][j]) {
+                // Check all adjacent locations
+                if ((j > 0) && !maze[i][j - 1]) {
+                    tmpList.push_back((i * size) + j - 1);
+                }
+                if ((j < size - 1) && !maze[i][j + 1]) {
+                    tmpList.push_back((i * size) + j + 1);
+                }
+                if ((i > 0) && !maze[i - 1][j]) {
+                    tmpList.push_back((i - 1) * size + j);
+                }
+                if ((i < size - 1) && !maze[i + 1][j]) {
+                    tmpList.push_back((i + 1) * size + j);
+                }
+            }
+            aList.push_back(tmpList);
+        }
+    }
+
+    return aList;
+}
+
+// TODO: remove this
+void Pacman::printAdjList(void) {
+    for (int i = 0; i < adjList.size(); i++) {
+        vector<int> v = adjList.at(i);
+        for (int j = 0; j < v.size(); j++) {
+            cout << v.at(j) << ", ";
+        }
+        cout << endl;
+    }
+}
+
+
+/** Use BFS to find a shortest path between two points
+    @param src Start point
+    @param dest Destination point
+    @return action_t Corresponding to best move from src
+*/
+action_t Pacman::shortestMove(point &src, point &dest) {
+    // Use a vector as a queue (avoids #include <queue>)
+    vector<int> q;
+
+    return m_move_left;
+}
+
+
 // Initial positions.
 const Pacman::point Pacman::pacman_init = {12, 9};
 const Pacman::point Pacman::g_init[numGhosts] = {{7, 9}, {7, 10},{8, 9}, {8, 10}};
@@ -40,18 +104,18 @@ void Pacman::printWorld(void) {
     for (int i = 0; i < size; i++) {
         for (int j = 0; j < size; j++) {
             switch (world[i][j]) {
-                case e_empty    : std::cout << " "; break;
-                case e_wall     : std::cout << "\u2588"; break;
-                case e_food     : std::cout << "\u2022"; break;
-                case e_power    : std::cout << "+"; break;
-                case e_pacman   : std::cout << "P"; break;
-                case e_ghost    : std::cout << "G"; break;
-                case e_gf       : std::cout << "G"; break;
-                case e_gp       : std::cout << "G"; break;
-                default         : std::cout << "x"; break;
+                case e_empty    : cout << " "; break;
+                case e_wall     : cout << "\u2588"; break;
+                case e_food     : cout << "\u2022"; break;
+                case e_power    : cout << "+"; break;
+                case e_pacman   : cout << "P"; break;
+                case e_ghost    : cout << "G"; break;
+                case e_gf       : cout << "G"; break;
+                case e_gp       : cout << "G"; break;
+                default         : cout << "x"; break;
             }
         }
-        std::cout << std::endl;
+        cout << endl;
     }
 }
 
@@ -123,8 +187,8 @@ void Pacman::eatGhosts(point &p) {
     for (int i = 0; i < numGhosts; i++) {
         if ((ghosts[i].row == p.row) && (ghosts[i].col == p.col)) {
             // Ghost is idle for (manHattan dist to init) time steps
-            ghostState[i] = -(std::abs(ghosts[i].row - g_init[i].row)
-                    + std::abs(ghosts[i].col - g_init[i].col));
+            ghostState[i] = -(abs(ghosts[i].row - g_init[i].row)
+                    + abs(ghosts[i].col - g_init[i].col));
             // Send ghost back to start position
             ghosts[i] = g_init[i];
         }
@@ -140,7 +204,7 @@ bool Pacman::entityScan(point &p, int range, const int ent) {
             if (i < 0 || i >= size) continue;
             if (j < 0 || j >= size) continue;
             // Discard corners (outside "range" in Manhattan distance)
-            if (std::abs(i - p.row) + std::abs(j - p.col) > range) continue;
+            if (abs(i - p.row) + abs(j - p.col) > range) continue;
 
             if (entityAt(i, j, ent)) return true;
         }
@@ -286,7 +350,7 @@ void Pacman::moveGhost(int index) {
 
     // TODO: is there a better way of doing this?
     // Get available movements
-    std::vector<action_t> actions;
+    vector<action_t> actions;
     if ((curCol > 0) && !maze[curRow][curCol - 1]) {
         actions.push_back((action_t) m_move_left);
     }

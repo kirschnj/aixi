@@ -84,6 +84,7 @@ public:
     // Save as above, but for a curses screen
     void printCurses(void);
     bool powerActive(void);
+    static void printAdjList(void);
 
 private:
     /* Definitions */
@@ -99,8 +100,11 @@ private:
     const static int size = 19;
     // Maze as shown by the diagram in the assignment spec
     const static bool maze[size][size];
+    // Adjacency list for non-wall locations
+    const static std::vector< std::vector<int> > adjList;
     // Current world
     int world[size][size];
+    
 
     /* Entities */
     // PacMan current position
@@ -124,6 +128,7 @@ private:
     // Negative indicates idle (eaten under effects of power pill)
     int ghostState[numGhosts];
     const static int g_rand = 0;
+    // Chase pacman for 10 time steps
     const static int g_init_chase = 10;
 
     // Enums to distinguish between entities
@@ -169,6 +174,9 @@ private:
     void moveGhost(int index);
     void checkGhosts();
     void eatGhosts(point &p);
+    // BFS to chase pacman
+    static std::vector< std::vector<int> > genAdjList(void);
+    action_t shortestMove(point &src, point &dest);
 
 };
 
