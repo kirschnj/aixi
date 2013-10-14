@@ -128,24 +128,26 @@ void Agent::genPercept(percept_t &obs, percept_t &rew) const {
 // generate a percept distributed to our history statistics, and
 // update our mixture environment model with it
 void Agent::genPerceptAndUpdate(percept_t &obs, percept_t &rew) {
-    symbol_list_t obs_symbols;
-    symbol_list_t rew_symbols;
+    assert(m_last_update_percept == false);
+    symbol_list_t obs_symbols, rew_symbols;
     
+    //generate obs and reward symbols
     m_ct->genRandomSymbolsAndUpdate(obs_symbols, m_obs_bits);
     m_ct->genRandomSymbolsAndUpdate(rew_symbols, m_rew_bits);
 
-    percept_t reward = decodeReward(rew_symbols);
-
-    m_last_update_percept=true;
-    m_total_reward += reward;
-    
-    rew = reward; 
+    rew = decodeReward(rew_symbols);
     obs = decodeObservation(obs_symbols);
+
+    // Update other properties
+    m_last_update_percept=true;
+    m_total_reward += rew;
 }
 
 // Update the agent's internal model of the world after receiving a percept
 void Agent::modelUpdate(percept_t observation, percept_t reward) {
-	// Update internal model
+    assert(m_last_update_percept == false);
+	
+    // Update internal model
 	symbol_list_t percept;
 	encodePercept(percept, observation, reward);
 
@@ -159,8 +161,8 @@ void Agent::modelUpdate(percept_t observation, percept_t reward) {
 
 // Update the agent's internal model of the world after performing an action
 void Agent::modelUpdate(action_t action) {
-	assert(isActionOk(action));
 	assert(m_last_update_percept == true);
+	assert(isActionOk(action));
 
 	// Update internal model
 	symbol_list_t action_syms;
@@ -215,6 +217,7 @@ void Agent::reset(void) {
 
 	m_time_cycle = 0;
 	m_total_reward = 0.0;
+    m_last_update_percept=false;
 }
 
 
