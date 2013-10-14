@@ -15,6 +15,11 @@
 # vi .swp files
 *.swp
 
+# Latex
+*.log
+*.aux
+*.out
+
 # Executables
 aixi
 test
