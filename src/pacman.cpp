@@ -69,24 +69,12 @@ vector< vector<int> > Pacman::genAdjList(void) {
     return aList;
 }
 
-// TODO: remove this
-void Pacman::printAdjList(void) {
-    for (int i = 0; i < adjList.size(); i++) {
-        vector<int> v = adjList.at(i);
-        for (int j = 0; j < v.size(); j++) {
-            cout << v.at(j) << ", ";
-        }
-        cout << endl;
-    }
-}
-
 
 /** Use BFS to find a shortest path between two points
     @param src Start point
     @param dest Destination point
     @return action_t Corresponding to best move from src
 */
-// TODO: slow...
 action_t Pacman::shortestMove(point &src, point &dest) {
     // Standard queue for unvisited nodes
     queue<int> q;
@@ -445,10 +433,7 @@ void Pacman::moveGhost(int index) {
     };
 }
 
-/* Implementations required by Environment */
-Pacman::Pacman(options_t &options) {
-    // TODO: options
-
+void Pacman::reset(void) {
     // Start the game
     endState = false;
     numFood = 0;
@@ -501,14 +486,19 @@ Pacman::Pacman(options_t &options) {
             }
         }
     }
+}
 
+/* Implementations required by Environment */
+Pacman::Pacman(options_t &options) {
+    reset();
     m_observation = genObservation();
     m_reward = 0;
 }
 
 void Pacman::performAction(action_t action) {
     assert(action < 4);
-    assert(!endState);
+    if (endState) reset();
+
     // Cumulative reward
     int reward = m_reward_init;
 

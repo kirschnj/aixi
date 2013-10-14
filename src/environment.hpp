@@ -108,7 +108,6 @@ public:
     // Save as above, but for a curses screen
     void printCurses(void);
     bool powerActive(void);
-    static void printAdjList(void);
 
 private:
     /* Definitions */
@@ -191,6 +190,7 @@ private:
     
     /* Functions */
     // Basic world utilities
+    void reset(void);
     void updateWorldPositions(void);
     bool entityAt(int row, int col, const int ent);
     bool entityScan(point &p, int range, const int ent);
