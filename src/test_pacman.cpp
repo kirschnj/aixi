@@ -33,11 +33,11 @@ int main(int argc, char *argv[]) {
     move(1, 20);
     addstr("Reward: ");
     printw("%d", p->getReward());
+    move(2, 20);
+    addstr("Move using (wasd). q to quit.");
 
     char input;
     while (!p->isFinished()) {
-        move(2, 20);
-        addstr("Move using (wasd). q to quit.");
         input = getch();
         clear();
         switch (input) {
@@ -46,7 +46,7 @@ int main(int argc, char *argv[]) {
             case 's' : p->performAction((action_t) 3); break;
             case 'd' : p->performAction((action_t) 1); break;
             case 'q' : endwin(); return 0;
-            default : p->performAction((action_t) 0); break;
+            default : break;
         };
         p->printCurses();
         move(0, 20);
@@ -55,6 +55,10 @@ int main(int argc, char *argv[]) {
         move(1, 20);
         addstr("Reward: ");
         printw("%d", p->getReward());
+        if (p->powerActive()) {
+            move(2, 20);
+            addstr("Power pill active.");
+        }
     }
 
     clear();

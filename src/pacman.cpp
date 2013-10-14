@@ -80,14 +80,26 @@ void Pacman::printCurses(void) {
     addch('\n');
 }
 
+// Is pacman under the effects of a power pill
+bool Pacman::powerActive(void) {
+    return (powerP > 0);
+}
+
 // Update entity positions only
 void Pacman::updateWorldPositions(void) {
-    // It is important to do ghosts after pacman.
     world[pacman.row][pacman.col] = e_pacman;
+    // Update ghosts
     for (int i = 0; i < numGhosts; i++) {
         int y = ghosts[i].row;
         int x = ghosts[i].col;
-        world[y][x] = (world[y][x] == e_food) ? (int) e_gf : e_ghost;
+        int value = world[y][x];
+        if (value == e_food || value == e_gf) {
+            world[y][x] = e_gf;
+        } else if (value == e_power || value == e_gp) {
+            world[y][x] = e_gp;
+        } else {
+            world[y][x] = e_ghost;
+        }
     }
 }
 
@@ -212,14 +224,6 @@ percept_t Pacman::genObservation(void) {
     // 1 bit for power pellet
     bits[15] = (powerP > 0);
 
-    // TODO: DEBUG
-    /*
-    for (int i = 0; i < 16; i++) {
-        std::cout << bits[i];
-    }
-    std::cout << std::endl;
-    */
-
     // Convert bits into an unsigned int (percept_t)
     return boolToInt(bits, 16);
 }
@@ -242,21 +246,27 @@ int Pacman::genReward(void) {
             --numFood;
             break;
         case e_power :
+            // TODO:remove
+            addstr("Pacman at power pill");
             powerP = init_power_length;
             world[pacman.row][pacman.col] = e_empty;
             break;
-        case e_ghost :
         case e_gf :
-            // TODO: if under power pill, get food reward.
+            // If under power pill effects, eat food
+            if (powerP > 0) {
+                reward += m_reward_food;
+                --numFood;
+            }
         case e_gp :
-            // TODO: if under effects of power pill, eat ghost
-            // no need to subtract reward.
-            // set ghost state to negative
-
-            // Ghosts take priority over food
-            // Ghosts take priority over power pellets
-            reward -= m_reward_ghost;
-            endState = true;
+        case e_ghost :
+            // If under effects of power pill, eat ghost
+            if (powerP > 0) {
+                eatGhosts(pacman);
+            } else {
+                // Ghosts take priority over food and power pellets
+                reward -= m_reward_ghost;
+                endState = true;
+            }
             break;
         default : break;
     }
@@ -299,9 +309,11 @@ void Pacman::moveGhost(int index) {
         default : break;
     };
 
-    // Clear square
+    // Clear previous square
     switch (world[curRow][curCol]) {
+        case e_food : world[curRow][curCol] = e_food; break;
         case e_gf : world[curRow][curCol] = e_food; break;
+        case e_power : world[curRow][curCol] = e_power; break;
         case e_gp : world[curRow][curCol] = e_power; break;
         default : world[curRow][curCol] = e_empty; break;
     };
@@ -425,12 +437,13 @@ void Pacman::performAction(action_t action) {
     // Update world based on results of move
     updateWorldPositions();
 
-    // Decrement duration of power pill if applicable
-    powerP = (powerP > 0) ? powerP - 1 : 0;
-
     // Check if a ghost has caught pacman
     reward += genReward();
 
+    // Decrement duration of power pill if applicable
+    powerP = (powerP > 0) ? powerP - 1 : 0;
+
+    updateWorldPositions();
     // Update percepts
     m_observation = genObservation();
     m_reward = reward;

@@ -83,6 +83,7 @@ public:
     void printWorld(void);
     // Save as above, but for a curses screen
     void printCurses(void);
+    bool powerActive(void);
 
 private:
     /* Definitions */
@@ -156,12 +157,15 @@ private:
             m_reward_move + m_reward_wall + m_reward_ghost;
     
     /* Functions */
+    // Basic world utilities
     void updateWorldPositions(void);
     bool entityAt(int row, int col, const int ent);
     bool entityScan(point &p, int range, const int ent);
     bool lineOfSight(point &p, action_t dir, const int ent);
+    // Reward function, also updates world based on collisions.
     int genReward(void);
     percept_t genObservation(void);
+    // Functions for ghosts
     void moveGhost(int index);
     void checkGhosts();
     void eatGhosts(point &p);
