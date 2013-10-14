@@ -90,6 +90,9 @@ void Pacman::updateWorldPositions(void) {
     world[pacman.row][pacman.col] = e_pacman;
     // Update ghosts
     for (int i = 0; i < numGhosts; i++) {
+        // Check if ghost is idle
+        if (ghostState[i] < 0) continue;
+        // Otherwise, update position in world
         int r = ghosts[i].row;
         int c = ghosts[i].col;
         int value = world[r][c];
@@ -119,9 +122,11 @@ bool Pacman::entityAt(int row, int col, const int ent) {
 void Pacman::eatGhosts(point &p) {
     for (int i = 0; i < numGhosts; i++) {
         if ((ghosts[i].row == p.row) && (ghosts[i].col == p.col)) {
+            // Ghost is idle for (manHattan dist to init) time steps
+            ghostState[i] = -(std::abs(ghosts[i].row - g_init[i].row)
+                    + std::abs(ghosts[i].col - g_init[i].col));
             // Send ghost back to start position
             ghosts[i] = g_init[i];
-            ghostState[i] = -1; //TODO, make this distance from p to init
         }
     }
 }
@@ -428,11 +433,15 @@ void Pacman::performAction(action_t action) {
         return;
     }
 
-    // TODO: make ghosts move...
     // If under effects of power pellet, move ghosts every 2 "turns"
+    // Also, delays ghost revival
     if ((powerP % 2) == 0) {
         for (int i = 0; i < numGhosts; i++) {
-            moveGhost(i);
+            if (ghostState[i] >=0 ) {
+                moveGhost(i);
+            } else {
+                ++ghostState[i];
+            }
         }
     }
     // Update world based on results of move
@@ -444,7 +453,8 @@ void Pacman::performAction(action_t action) {
     // Decrement duration of power pill if applicable
     powerP = (powerP > 0) ? powerP - 1 : 0;
 
-    //updateWorldPositions();
+    // Ensure we are up to date before generating an observation
+    updateWorldPositions();
     // Update percepts
     m_observation = genObservation();
     m_reward = reward;
