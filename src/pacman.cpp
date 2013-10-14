@@ -2,6 +2,7 @@
 
 #include <cassert>
 #include <cmath>
+#include <queue>
 
 #include <curses.h>
 
@@ -85,11 +86,60 @@ void Pacman::printAdjList(void) {
     @param dest Destination point
     @return action_t Corresponding to best move from src
 */
+// TODO: slow...
 action_t Pacman::shortestMove(point &src, point &dest) {
-    // Use a vector as a queue (avoids #include <queue>)
-    vector<int> q;
+    // Standard queue for unvisited nodes
+    queue<int> q;
+    // Integer representations of src and dest
+    int d = (dest.row * size) + dest.col;
+    int s = (src.row * size) + src.col;
+    q.push(s);
+    // Keep track of visited vertices, also serves to find path
+    int parent[adjList.size()];
+    // Initialise all elements to -1
+    fill_n(parent, adjList.size(), -1);
 
-    return m_move_left;
+    // Main BFS loop
+    int v, n;
+    while (!q.empty()) {
+        // Get first element
+        v = q.front();
+        q.pop();
+
+        // Check neighbours
+        vector<int> neighbours = adjList.at(v);
+        for (int i = 0; i < neighbours.size(); i++) {
+            n = neighbours.at(i);
+            // Update path
+            if (parent[n] < 0) {
+                parent[n] = v;
+                q.push(n);
+            }
+        }
+        // Check if we have reached dest
+        if (parent[d] >= 0) break;
+    }
+
+    // Ensure that we have found a path to dest
+    n = parent[d];
+    assert(n >= 0);
+
+    // Get path
+    vector<int> path;
+    path.push_back(d);
+    while (n != s) {
+        path.push_back(n);
+        n = parent[n];
+    }
+    path.push_back(s);
+
+    // Get first move from src
+    n = path.at(path.size() - 2);
+    // Map this to an action
+    if (n == (s - 1)) return m_move_left;
+    else if (n == (s + 1)) return m_move_right;
+    else if (n < s) return m_move_up;
+    return m_move_down;
 }
 
 

@@ -86,12 +86,14 @@ public:
     bool powerActive(void);
     static void printAdjList(void);
 
-private:
-    /* Definitions */
     struct point {
         int row;
         int col;
     };
+    action_t shortestMove(point &src, point &dest);
+
+private:
+    /* Definitions */
 
     // State of the game
     bool endState;
@@ -176,7 +178,6 @@ private:
     void eatGhosts(point &p);
     // BFS to chase pacman
     static std::vector< std::vector<int> > genAdjList(void);
-    action_t shortestMove(point &src, point &dest);
 
 };
 
