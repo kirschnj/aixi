@@ -102,19 +102,23 @@ private:
     int world[size][size];
 
     /* Entities */
-    // PacMan
+    // PacMan current position
     point pacman;
+    // Startin position
+    const static point pacman_init;
+
     // Power pellet duration
     int powerP;
-    const static int init_power_length = 10;
+    const static int init_power_length = size;
+    // Number of food pellets
     int numFood;
+
     // Ghosts
     const static int numGhosts = 4;
-    const static point g_init1;
-    const static point g_init2;
-    const static point g_init3;
-    const static point g_init4;
+    // Current positions
     point ghosts[numGhosts];
+    // Starting positions
+    const static point g_init[numGhosts];
     // Ghost states (random movement, or actively chasing)
     // Negative indicates idle (eaten under effects of power pill)
     int ghostState[numGhosts];
@@ -160,6 +164,7 @@ private:
     percept_t genObservation(void);
     void moveGhost(int index);
     void checkGhosts();
+    void eatGhosts(point &p);
 
 };
 

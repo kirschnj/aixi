@@ -29,6 +29,10 @@ const bool Pacman::maze[size][size] = {
     {1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1}
     };
 
+// Initial positions.
+const Pacman::point Pacman::pacman_init = {12, 9};
+const Pacman::point Pacman::g_init[numGhosts] = {{7, 9}, {7, 10},{8, 9}, {8, 10}};
+
 
 /* Utilities */
 // Print world to stdout
@@ -97,6 +101,17 @@ bool Pacman::entityAt(int row, int col, const int ent) {
     else if (ent == e_food) return actual == e_gf;
     else if (ent == e_power) return actual == e_gp;
     return false;
+}
+
+// "Eat ghosts" at a particular position p
+void Pacman::eatGhosts(point &p) {
+    for (int i = 0; i < numGhosts; i++) {
+        if ((ghosts[i].row == p.row) && (ghosts[i].col == p.col)) {
+            // Send ghost back to start position
+            ghosts[i] = g_init[i];
+            ghostState[i] = -1; //TODO, make this distance from p to init
+        }
+    }
 }
 
 // Check if a particular entity exists within "range" units away from p 
@@ -198,10 +213,12 @@ percept_t Pacman::genObservation(void) {
     bits[15] = (powerP > 0);
 
     // TODO: DEBUG
+    /*
     for (int i = 0; i < 16; i++) {
         std::cout << bits[i];
     }
     std::cout << std::endl;
+    */
 
     // Convert bits into an unsigned int (percept_t)
     return boolToInt(bits, 16);
@@ -298,31 +315,27 @@ Pacman::Pacman(options_t &options) {
     endState = false;
     numFood = 0;
 
-    // Initial world configuration
+    // Initial world configuration (walls)
     for (int i = 0; i < size; i++) {
         for (int j = 0; j < size; j++) {
             world[i][j] = maze[i][j];
         }
     }
-    // initial locations
-    pacman.row = 12;
-    pacman.col = 9;
-    // Start without effects of power pellet
-    powerP = 0;
+    // Initial locations for pacman and ghosts
+    pacman = (point) pacman_init;
+    ghosts[0] = g_init[0];
+    ghosts[1] = (point) g_init[1];
+    ghosts[2] = (point) g_init[2];
+    ghosts[3] = (point) g_init[3];
 
-    ghosts[0].row = 7;
-    ghosts[0].col = 9;
-    ghosts[1].row = 7;
-    ghosts[1].col = 10;
-    ghosts[2].row = 8;
-    ghosts[2].col = 9;
-    ghosts[3].row = 8;
-    ghosts[3].col = 10;
-
+    // Ghosts start moving randomly
     ghostState[0] = 0;
     ghostState[1] = 0;
     ghostState[2] = 0;
     ghostState[3] = 0;
+
+    // Start without effects of power pellet
+    powerP = 0;
 
     // Place power pellets
     world[1][1] = e_power;
