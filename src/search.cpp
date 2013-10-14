@@ -17,6 +17,13 @@ SearchNode::SearchNode(bool is_chance_node,
     //make child field the right size
     int num_children = m_chance_node ? num_percepts : num_actions;
     m_child.resize(num_children, NULL);
+    
+    //make list of unexplored actions
+    if(!is_chance_node){
+        for(int i = 0; i < num_actions; ++i){
+            m_unexplored_actions.push_back(i);
+        }
+    }
 }
 
 SearchNode::~SearchNode() {
@@ -47,23 +54,18 @@ static reward_t playout(Agent &agent, unsigned int playout_len) {
 }
 
 action_t SearchNode::selectAction(Agent& agent, unsigned int dfr) {
-    std::vector<action_t> unexplored_actions;
-    
-    //find unexplored actions
-    for (action_t a = 0; a < agent.numActions(); ++a) {
-        if (m_child[a] == NULL) {
-            unexplored_actions.push_back(a);
-        }
-    }
     //choose unexplored action at random if any and append to tree
-    if (!unexplored_actions.empty()) {
-        action_t action = unexplored_actions.at(
-                                randRange(unexplored_actions.size()));
+    if (!m_unexplored_actions.empty()) {
+        int action_index = randRange(m_unexplored_actions.size());
+        action_t action = m_unexplored_actions.at(action_index);
+        m_unexplored_actions.erase(m_unexplored_actions.begin() + action_index);
+
         m_child[action] = new SearchNode(true, agent.numActions(), agent.numPercepts());
         return action;
     } else {
         action_t arg_max = 0;
         double C = 1;
+
         double max = (1.0 / (dfr * agent.maxReward())) * m_child[0]->m_mean
                     + C * sqrt((log(m_visits)/m_child[0]->m_visits));
         //search for argmax
@@ -115,15 +117,15 @@ reward_t SearchNode::sample(Agent &agent, unsigned int dfr) {
 }
 
 // determine the best action by searching ahead using MCTS
-extern action_t search(Agent &agent, timelimit_t time_limit) {
+extern action_t search(Agent &agent, timelimit_t timelimit) {
 
     //save agent's state
     ModelUndo undo = ModelUndo(agent);
 
     SearchNode search_tree(false, agent.numActions(), agent.numPercepts());
 
-    //sample time_limit times
-    for(visits_t i = 0; i < time_limit; ++i){    
+    //sample
+    for(visits_t i = 0; i < timelimit; ++i){    
         search_tree.sample(agent, agent.horizon());
         agent.modelRevert(undo);
     }

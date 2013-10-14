@@ -44,6 +44,7 @@ private:
 	// TODO: decide how to reference child nodes
 	//  e.g. a fixed-size array
 	std::vector<SearchNode*> m_child;
+    std::vector<action_t> m_unexplored_actions;
 };
 
 
