@@ -86,14 +86,12 @@ public:
     bool powerActive(void);
     static void printAdjList(void);
 
+private:
+    /* Definitions */
     struct point {
         int row;
         int col;
     };
-    action_t shortestMove(point &src, point &dest);
-
-private:
-    /* Definitions */
 
     // State of the game
     bool endState;
@@ -129,7 +127,8 @@ private:
     // Ghost states (random movement, or actively chasing)
     // Negative indicates idle (eaten under effects of power pill)
     int ghostState[numGhosts];
-    const static int g_rand = 0;
+    // Start chasing pacman if within the following manhattan distance
+    const static int g_dist_chase = 5;
     // Chase pacman for 10 time steps
     const static int g_init_chase = 10;
 
@@ -178,6 +177,7 @@ private:
     void eatGhosts(point &p);
     // BFS to chase pacman
     static std::vector< std::vector<int> > genAdjList(void);
+    action_t shortestMove(point &src, point &dest);
 
 };
 

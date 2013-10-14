@@ -398,24 +398,33 @@ void Pacman::moveGhost(int index) {
     int curRow = ghosts[index].row;
     int curCol = ghosts[index].col;
 
-    // TODO: is there a better way of doing this?
-    // Get available movements
-    vector<action_t> actions;
-    if ((curCol > 0) && !maze[curRow][curCol - 1]) {
-        actions.push_back((action_t) m_move_left);
-    }
-    if ((curCol < size - 1) && !maze[curRow][curCol + 1]) {
-        actions.push_back((action_t) m_move_right);
-    }
-    if ((curRow > 0) && !maze[curRow - 1][curCol]) {
-        actions.push_back((action_t) m_move_up);
-    }
-    if ((curRow < size - 1) && !maze[curRow + 1][curCol]) {
-        actions.push_back((action_t) m_move_down);
-    }
+    action_t a;
 
-    // Randomly pick a move
-    action_t a = actions.at(randRange((unsigned int) actions.size()));
+    // Chase or move randomly based on ghostState 
+    if (ghostState[index] > 0) {
+        --ghostState[index];
+        // Chase pacman
+        a = shortestMove(ghosts[index], pacman);
+    } else {
+        // Make a random move
+        // Get available movements
+        vector<action_t> actions;
+        if ((curCol > 0) && !maze[curRow][curCol - 1]) {
+            actions.push_back((action_t) m_move_left);
+        }
+        if ((curCol < size - 1) && !maze[curRow][curCol + 1]) {
+            actions.push_back((action_t) m_move_right);
+        }
+        if ((curRow > 0) && !maze[curRow - 1][curCol]) {
+            actions.push_back((action_t) m_move_up);
+        }
+        if ((curRow < size - 1) && !maze[curRow + 1][curCol]) {
+            actions.push_back((action_t) m_move_down);
+        }
+
+        // Randomly pick a move
+        a = actions.at(randRange((unsigned int) actions.size()));
+    } 
 
     switch (a) {
         case m_move_left    : ghosts[index].col = curCol - 1; break;
@@ -551,7 +560,15 @@ void Pacman::performAction(action_t action) {
     // Also, delays ghost revival
     if ((powerP % 2) == 0) {
         for (int i = 0; i < numGhosts; i++) {
-            if (ghostState[i] >=0 ) {
+            if (ghostState[i] >= 0) {
+                // Start chasing if close enough
+                if (ghostState[i] == 0) {
+                    int dist = abs(ghosts[i].row - pacman.row)
+                            + abs(ghosts[i].col - pacman.col);
+                    if (dist < g_dist_chase) {
+                        ghostState[i] = g_init_chase;
+                    }
+                }
                 moveGhost(i);
             } else {
                 ++ghostState[i];
