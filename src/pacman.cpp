@@ -39,9 +39,11 @@ void Pacman::printWorld(void) {
                 case e_empty    : std::cout << " "; break;
                 case e_wall     : std::cout << "\u2588"; break;
                 case e_food     : std::cout << "\u2022"; break;
+                case e_power    : std::cout << "+"; break;
                 case e_pacman   : std::cout << "P"; break;
                 case e_ghost    : std::cout << "G"; break;
                 case e_gf       : std::cout << "G"; break;
+                case e_gp       : std::cout << "G"; break;
                 default         : std::cout << "x"; break;
             }
         }
@@ -59,9 +61,11 @@ void Pacman::printCurses(void) {
                 case e_empty    : addch(' '); break;
                 case e_wall     : addch(ACS_CKBOARD); break;
                 case e_food     : addch(ACS_BULLET); break;
+                case e_power    : addch('+'); break;
                 case e_pacman   : addch('P'); break;
                 case e_ghost    : addch('G'); break;
                 case e_gf       : addch('G'); break;
+                case e_gp       : addch('G'); break;
                 default         : addch('x'); break;
             }
         }
@@ -89,8 +93,9 @@ bool Pacman::entityAt(int row, int col, const int ent) {
     assert(col >= 0 && col < size);
     int actual = world[row][col];
     if (actual == ent) return true;
-    else if (ent == e_ghost) return actual == e_gf;
+    else if (ent == e_ghost) return (actual == e_gf || actual == e_gp);
     else if (ent == e_food) return actual == e_gf;
+    else if (ent == e_power) return actual == e_gp;
     return false;
 }
 
@@ -175,6 +180,7 @@ percept_t Pacman::genObservation(void) {
     bits[7] = lineOfSight(pacman, m_move_down, e_ghost);
 
     // 3 bits for food "smell" (Manhattan Distance)
+    // TODO: does a power pellet count as food?
     // Does food exist within 2 units?
     bits[8] = entityScan(pacman, 2, e_food);
     // Does food exist within 3 units?
@@ -189,7 +195,7 @@ percept_t Pacman::genObservation(void) {
     bits[14] = lineOfSight(pacman, m_move_down, e_food);
 
     // 1 bit for power pellet
-    bits[15] = power;
+    bits[15] = (powerP > 0);
 
     // TODO: DEBUG
     for (int i = 0; i < 16; i++) {
@@ -218,12 +224,21 @@ int Pacman::genReward(void) {
             world[pacman.row][pacman.col] = e_empty;
             --numFood;
             break;
-        case e_ghost :
-            reward -= m_reward_ghost;
-            endState = true;
+        case e_power :
+            powerP = init_power_length;
+            world[pacman.row][pacman.col] = e_empty;
             break;
+        case e_ghost :
         case e_gf :
-            reward = reward + m_reward_food - m_reward_ghost;
+            // TODO: if under power pill, get food reward.
+        case e_gp :
+            // TODO: if under effects of power pill, eat ghost
+            // no need to subtract reward.
+            // set ghost state to negative
+
+            // Ghosts take priority over food
+            // Ghosts take priority over power pellets
+            reward -= m_reward_ghost;
             endState = true;
             break;
         default : break;
@@ -268,9 +283,9 @@ void Pacman::moveGhost(int index) {
     };
 
     // Clear square
-    // TODO: power pellets
     switch (world[curRow][curCol]) {
         case e_gf : world[curRow][curCol] = e_food; break;
+        case e_gp : world[curRow][curCol] = e_power; break;
         default : world[curRow][curCol] = e_empty; break;
     };
 }
@@ -293,7 +308,7 @@ Pacman::Pacman(options_t &options) {
     pacman.row = 12;
     pacman.col = 9;
     // Start without effects of power pellet
-    power = 0;
+    powerP = 0;
 
     ghosts[0].row = 7;
     ghosts[0].col = 9;
@@ -303,6 +318,17 @@ Pacman::Pacman(options_t &options) {
     ghosts[2].col = 9;
     ghosts[3].row = 8;
     ghosts[3].col = 10;
+
+    ghostState[0] = 0;
+    ghostState[1] = 0;
+    ghostState[2] = 0;
+    ghostState[3] = 0;
+
+    // Place power pellets
+    world[1][1] = e_power;
+    world[1][17] = e_power;
+    world[14][1] = e_power;
+    world[14][17] = e_power;
 
     updateWorldPositions();
 
@@ -385,6 +411,9 @@ void Pacman::performAction(action_t action) {
     }
     // Update world based on results of move
     updateWorldPositions();
+
+    // Decrement duration of power pill if applicable
+    powerP = (powerP > 0) ? powerP - 1 : 0;
 
     // Check if a ghost has caught pacman
     reward += genReward();

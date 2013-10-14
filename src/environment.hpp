@@ -104,22 +104,34 @@ private:
     /* Entities */
     // PacMan
     point pacman;
-    // Power pellet
-    bool power;
+    // Power pellet duration
+    int powerP;
+    const static int init_power_length = 10;
     int numFood;
     // Ghosts
     const static int numGhosts = 4;
+    const static point g_init1;
+    const static point g_init2;
+    const static point g_init3;
+    const static point g_init4;
     point ghosts[numGhosts];
+    // Ghost states (random movement, or actively chasing)
+    // Negative indicates idle (eaten under effects of power pill)
+    int ghostState[numGhosts];
+    const static int g_rand = 0;
+    const static int g_init_chase = 10;
 
     // Enums to distinguish between entities
-    // TODO: power pellets?
     const static int e_empty = 0;
     const static int e_wall = 1;
     const static int e_food = 2;
     const static int e_pacman = 3;
     const static int e_ghost = 4;
-    // Ghost and food on the same location
-    const static int e_gf = 5;
+    const static int e_power = 5;
+    // Ghost and food in the same location
+    const static int e_gf = 6;
+    // Ghost and power pellet in the same location
+    const static int e_gp = 7;
 
     /* Actions */
     // Actions consist of a movement in some direction.
