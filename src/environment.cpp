@@ -77,3 +77,36 @@ void Tiger::performAction(action_t action) {
 		}
 	}
 }
+
+
+
+BiasedRockPaperScissor::BiasedRockPaperScissor(options_t &options) 
+: m_won_with_rock(false){
+	// Set up the initial observation
+	m_observation = m_opp_scissors;
+	m_reward = 0;
+}
+
+
+void BiasedRockPaperScissor::performAction(action_t action) {
+    if (m_won_with_rock) {
+        m_observation = m_opp_rock;
+    } else {
+        m_observation = randRange(3);
+    }
+    m_won_with_rock = false;
+    
+    if (m_observation == action) {
+        //draw
+        m_reward = 1;
+    } else if ((action + 1)%3 == m_observation) {
+        // Agent wins
+        m_reward = 2;
+    } else {
+        // Agent loses
+        m_reward = 0;
+        if (m_observation == m_opp_rock) {
+            m_won_with_rock = true;
+        }
+    }
+}

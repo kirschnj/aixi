@@ -70,6 +70,30 @@ private:
 	const static percept_t m_hear_tiger_right = 2;
 };
 
+class BiasedRockPaperScissor : public Environment {
+public:
+    
+    // set up the initial environment percept
+	BiasedRockPaperScissor(options_t &options);
+	
+	// receives the agent's action and calculates the new environment percept
+	virtual void performAction(action_t action);
+
+private:
+
+    bool m_won_with_rock;
+
+    const static action_t m_scisssors = 0;
+	const static action_t m_paper = 1;
+	const static action_t m_rock = 2;
+	const static unsigned int m_num_actions = 3;
+	
+	const static percept_t m_opp_scissors = 0;
+	const static percept_t m_opp_paper = 1;
+	const static percept_t m_opp_rock = 2;
+
+};
+
 // Pacman environment
 class Pacman : public Environment {
 public:
