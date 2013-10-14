@@ -21,7 +21,7 @@ pacman:
 	$(CC) $(CFLAGS) -o test pacman.o util.o test_pacman.o $(LDFLAGS)
 
 aixi: $(OBJS)
-	$(CC) $(CFLAGS) -o aixi $(OBJS) $(LDFLAGS)
+	$(CC) $(CFLAGS) -O2 -o aixi $(OBJS) $(LDFLAGS)
 
 .PHONY: clean
 
