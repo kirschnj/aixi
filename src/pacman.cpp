@@ -246,8 +246,6 @@ int Pacman::genReward(void) {
             --numFood;
             break;
         case e_power :
-            // TODO:remove
-            addstr("Pacman at power pill");
             powerP = init_power_length;
             world[pacman.row][pacman.col] = e_empty;
             break;
@@ -431,8 +429,11 @@ void Pacman::performAction(action_t action) {
     }
 
     // TODO: make ghosts move...
-    for (int i = 0; i < numGhosts; i++) {
-        moveGhost(i);
+    // If under effects of power pellet, move ghosts every 2 "turns"
+    if ((powerP % 2) == 0) {
+        for (int i = 0; i < numGhosts; i++) {
+            moveGhost(i);
+        }
     }
     // Update world based on results of move
     updateWorldPositions();
