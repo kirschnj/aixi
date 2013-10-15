@@ -46,7 +46,7 @@ void mainLoop(Agent &ai, Environment &env, options_t &options) {
         std::cerr << "WARNING: time_limit not large enough to sample all actions" << std::endl;
     }
 
-
+    std::cout << "starting agent/environment interaction loop...\n"; 
 	// Agent/environment interaction loop
 	for (unsigned int cycle = 1; !env.isFinished(); cycle++) {
 
@@ -211,7 +211,7 @@ int main(int argc, char *argv[]) {
 	options["agent-horizon"] = "3";
 	options["exploration"] = "0";     // do not explore
 	options["explore-decay"] = "1.0"; // exploration rate does not decay
-    options["mc-timelimit"] = "500"; //number of mc simulations per search ... is there a better way to dedicated time to mc-simulations?
+    options["mc-timelimit"] = "500"; //number of mc simulations per search
     options["terminate-age"] = "10000";
     options["log"]  = "log";
     options["load-ct"] = "";
@@ -239,13 +239,6 @@ int main(int argc, char *argv[]) {
 
 	// Set up the environment
 	Environment *env;
-
-	// TODO: instantiate the environment based on the "environment-name"
-	// option. For any environment you do not implement you may delete the
-	// corresponding if statement.
-	// NOTE: you may modify the options map in order to set quantities such as
-	// the reward-bits for each particular environment. See the coin-flip
-	// experiment for an example.
 	std::string environment_name = options["environment"];
 	if (environment_name == "coin-flip") {
 		env = new CoinFlip(options);
@@ -297,7 +290,6 @@ int main(int argc, char *argv[]) {
 		return -1;
 	}
 
-
     printOptions(options);
 
 	// Set up the agent
@@ -310,7 +302,7 @@ int main(int argc, char *argv[]) {
             ai.loadCT(ct);
         }
         else{
-            std::cerr << "WARNING: specified context tree file could not be loaded.";
+            std::cerr << "WARNING: specified context tree file could not be loaded.\n";
         }
         ct.close();
     }  
