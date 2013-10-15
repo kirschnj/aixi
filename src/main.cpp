@@ -113,6 +113,13 @@ void mainLoop(Agent &ai, Environment &env, options_t &options) {
 	std::cout << std::endl << std::endl << "SUMMARY" << std::endl;
 	std::cout << "agent age: " << ai.age() << std::endl;
 	std::cout << "average reward: " << ai.averageReward() << std::endl;
+
+    // Write context tree file
+    if(options["write-ct"] != ""){
+        std::ofstream ct(options["write-ct"].c_str());
+        ai.writeCT(ct);
+        ct.close();
+    }
 }
 
 
@@ -154,27 +161,47 @@ void processOptions(std::ifstream &in, options_t &options) {
 		}
 		else {
 			options[key] = value; // Success!
-			std::cout << "OPTION: '" << key << "' = '" << value << "'" << std::endl;
+			//std::cout << "OPTION: '" << key << "' = '" << value << "'" << std::endl;
 		}
 
 	}
 }
 
+void parseCmdOptions(int argc, char *argv[], options_t &options){
+    for(int i = 0; i < argc; ++i){
+        std::string arg = argv[i];
+
+        std::size_t pos = arg.find("=");
+        if(pos != std::string::npos){
+            std::string option = arg.substr(0, pos);
+            //remove leading -- 
+            if(option.find("--") == 0){
+                option = option.substr(2);
+            }
+            std::string value = arg.substr(pos+1);
+            
+            //add to options dict
+            if(option.length() > 0 && value.length() > 0){
+                options[option] = value;
+            }
+        }
+    }
+}
+
+void printOptions(options_t &options){
+    std::cout << "Agent configuration:\n------------------------------\n";
+    for(options_t::iterator it = options.begin(); it != options.end(); ++it){
+		std::cout << "OPTION: '" << it->first << "' = '" << it->second << "'" << std::endl;
+    }
+    std::cout << std::endl;
+}
+
 int main(int argc, char *argv[]) {
-	if (argc < 2 || argc > 3) {
-		std::cerr << "ERROR: Incorrect number of arguments" << std::endl;
-		std::cerr << "The first argument should indicate the location of the configuration file and the second (optional) argument should indicate the file to log to." << std::endl;
+	if (argc < 2) {
+		std::cerr << "USAGE: ./aixi agent.conf [--option1=value1 --option2=value2 ...] " << std::endl;
+		std::cerr << "The first argument should indicate the location of the configuration file. Further arguments can either be specified in the config file or passed as command line option. Command line options are used over options specified in the file." << std::endl;
 		return -1;
 	}
-
-	// Set up logging
-	std::string log_file = argc < 3 ? "log" : argv[2];
-	verboseLog.open((log_file + ".log").c_str());
-	compactLog.open((log_file + ".csv").c_str());
-
-	// Print header to compactLog
-	compactLog << "cycle, observation, reward, action, explored, explore_rate, total reward, average reward" << std::endl;
-
 
 	// Load configuration options
 	options_t options;
@@ -186,6 +213,9 @@ int main(int argc, char *argv[]) {
 	options["explore-decay"] = "1.0"; // exploration rate does not decay
     options["mc-timelimit"] = "500"; //number of mc simulations per search ... is there a better way to dedicated time to mc-simulations?
     options["terminate-age"] = "10000";
+    options["log"]  = "log";
+    options["load-ct"] = "";
+    options["write-ct"] = "";
 
 	// Read configuration options
 	std::ifstream conf(argv[1]);
@@ -195,6 +225,17 @@ int main(int argc, char *argv[]) {
 	}
 	processOptions(conf, options);
 	conf.close();
+
+    //parse command line options (overwrites values of config files)
+    parseCmdOptions(argc, argv, options);
+
+	// Set up logging
+	std::string log_file = options["log"];
+	verboseLog.open((log_file + ".log").c_str());
+	compactLog.open((log_file + ".csv").c_str());
+
+	// Print header to compactLog
+	compactLog << "cycle, observation, reward, action, explored, explore_rate, total reward, average reward" << std::endl;
 
 	// Set up the environment
 	Environment *env;
@@ -256,8 +297,23 @@ int main(int argc, char *argv[]) {
 		return -1;
 	}
 
+
+    printOptions(options);
+
 	// Set up the agent
 	Agent ai(options);
+
+    if(options["load-ct"] != ""){
+        std::ifstream ct(options["load-ct"].c_str());
+
+        if(ct.is_open()){
+            ai.loadCT(ct);
+        }
+        else{
+            std::cerr << "WARNING: specified context tree file could not be loaded.";
+        }
+        ct.close();
+    }  
 
 	// Run the main agent/environment interaction loop
 	mainLoop(ai, *env, options);
