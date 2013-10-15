@@ -2,6 +2,7 @@
 #define __PREDICT_HPP__
 
 #include <deque>
+#include <iostream>
 
 #include "main.hpp"
 
@@ -32,6 +33,10 @@ public:
 
 	// number of descendants
 	size_t size(void) const;
+
+    //streaming operators to write/load data
+    friend std::ostream& operator<< (std::ostream &out, CTNode &node);
+    friend std::istream& operator>> (std::istream &in, CTNode &node);
 
 private:
 	CTNode(void);
@@ -106,6 +111,10 @@ public:
     // number of nodes in the context tree
     size_t size(void) const { return m_root ? m_root->size() : 0; }
 
+    // io streaming of context tree, used to write/load
+    friend std::ostream& operator<< (std::ostream &out, ContextTree &ct);
+    friend std::istream& operator>> (std::istream &in, ContextTree &ct);
+    
 
 private:
     history_t m_history; // the agents history
@@ -113,5 +122,6 @@ private:
     size_t m_depth;      // the maximum depth of the context tree
 
 };
+
 
 #endif // __PREDICT_HPP__

@@ -89,6 +89,8 @@ public:
 	// get the agent's probability of receiving a particular percept
 	double perceptProbability(percept_t observation, percept_t reward) const; // TODO: implement in agent.cpp
 
+    void load_ct(std::istream &in);
+    void write_ct(std::ostream &out);
 private:
 	// action sanity check
 	bool isActionOk(action_t action) const;

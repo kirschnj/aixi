@@ -4,6 +4,7 @@
 #include <cmath>
 #include <errno.h>
 #include "util.hpp"
+#include <iostream>
 
 // compute log(0.5)
 static const double log_half = log(0.5);
@@ -340,4 +341,78 @@ double ContextTree::logBlockProbability(void) {
 // get the n'th most recent history symbol, NULL if doesn't exist
 const symbol_t *ContextTree::nthHistorySymbol(size_t n) const {
     return n < m_history.size() ? &m_history[n] : NULL;
+}
+
+std::ostream& operator<< (std::ostream &out, CTNode &node){
+    out << node.m_log_prob_est << " " << node.m_log_prob_weighted << " ";
+    out << node.m_count[0] << " " << node.m_count[1] << " ";
+
+    //output bit indicating that first child follows
+    out << (node.m_child[0] != NULL) << " ";
+    if(node.m_child[0] != NULL){
+        out << (*node.m_child[0]);
+    }
+
+    //output bit indicating that second child follows
+    out << (node.m_child[1] != NULL) << " ";
+    if(node.m_child[1] != NULL){
+        out << (*node.m_child[1]);
+    }
+    
+    return out;
+}
+
+std::istream& operator>> (std::istream &in, CTNode &node){
+    in >> node.m_log_prob_est;
+    in >> node.m_log_prob_weighted;
+    in >> node.m_count[0];
+    in >> node.m_count[1];
+
+    //output bit indicating that first child follows
+    bool child_follows;
+    in >> child_follows;
+    if(child_follows){
+        node.m_child[0] = new CTNode();
+        in >> (*node.m_child[0]);
+    }
+    in >> child_follows;
+    if(child_follows){
+        node.m_child[1] = new CTNode();
+        in >> (*node.m_child[1]);
+    }
+    
+    return in;
+}
+
+
+// write context tree to stream
+std::ostream& operator<< (std::ostream &out, ContextTree &ct){
+    out << ct.m_depth << std::endl;
+    for(history_t::iterator it = ct.m_history.begin(); it !=ct.m_history.end(); ++it){
+        out << (*it);
+    }
+    out << std::endl;
+
+    out << (*ct.m_root) << std::endl;
+    
+    return out;
+}
+
+//read context tree from stream
+std::istream& operator>> (std::istream &in, ContextTree &ct){
+    in >> ct.m_depth;
+    
+    in.get(); //read the next character out of the way
+    char c = in.get();
+    
+    ct.m_history.clear();
+    while(c != '\n'){
+        ct.m_history.push_back(c == '1');
+        c = in.get();
+    }
+    
+    //read nodes recursivly
+    in >> (*ct.m_root);
+    
+    return in;
 }
