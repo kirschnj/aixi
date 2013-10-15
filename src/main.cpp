@@ -240,10 +240,16 @@ int main(int argc, char *argv[]) {
 		options["reward-bits"] = "2";
 	}
 	else if (environment_name == "kuhn-poker") {
-		// TODO: instantiate "env" (if appropriate)
+		env = new KuhnPoker(options);
+		options["agent-actions"] = "2";
+		options["observation-bits"] = "4";
+		options["reward-bits"] = "3";
 	}
 	else if (environment_name == "pacman") {
-		// TODO: instantiate "env" (if appropriate)
+        env = new Pacman(options);
+		options["agent-actions"] = "2";
+		options["observation-bits"] = "16";
+		options["reward-bits"] = "8";
 	}
 	else {
 		std::cerr << "ERROR: unknown environment '" << environment_name << "'" << std::endl;

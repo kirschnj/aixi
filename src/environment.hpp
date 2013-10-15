@@ -94,6 +94,38 @@ private:
 
 };
 
+class KuhnPoker : public Environment {
+public:
+    
+    // set up the initial environment percept
+	KuhnPoker(options_t &options);
+	
+	// receives the agent's action and calculates the new environment percept
+	virtual void performAction(action_t action);
+
+    void opponentAct(unsigned int round);
+    void reset(void);
+
+private:
+
+    unsigned int m_opp_card;
+    double m_opp_nash_parameter;
+    unsigned int m_agent_card;
+    
+    unsigned int m_opp_action;
+    unsigned int m_opp_action_0;
+    
+    unsigned int m_showdown;
+    
+    const static action_t m_bet = 0;
+    const static action_t m_pass = 1;
+    
+    const static unsigned int m_jack = 0;
+    const static unsigned int m_queen = 1;
+    const static unsigned int m_king = 2;
+
+};
+
 // Pacman environment
 class Pacman : public Environment {
 public:
@@ -123,8 +155,11 @@ private:
     const static int size = 19;
     // Maze as shown by the diagram in the assignment spec
     const static bool maze[size][size];
+    // Adjacency list for non-wall locations
+    const static std::vector< std::vector<int> > adjList;
     // Current world
     int world[size][size];
+    
 
     /* Entities */
     // PacMan current position
@@ -147,8 +182,13 @@ private:
     // Ghost states (random movement, or actively chasing)
     // Negative indicates idle (eaten under effects of power pill)
     int ghostState[numGhosts];
-    const static int g_rand = 0;
+    // Start chasing pacman if within the following manhattan distance
+    const static int g_dist_chase = 5;
+    // Chase pacman for 10 time steps
     const static int g_init_chase = 10;
+    // Counters for random movements after chasing
+    int ghostWait[numGhosts];
+    const static int g_wait = 3;
 
     // Enums to distinguish between entities
     const static int e_empty = 0;
@@ -182,6 +222,7 @@ private:
     
     /* Functions */
     // Basic world utilities
+    void reset(void);
     void updateWorldPositions(void);
     bool entityAt(int row, int col, const int ent);
     bool entityScan(point &p, int range, const int ent);
@@ -193,6 +234,9 @@ private:
     void moveGhost(int index);
     void checkGhosts();
     void eatGhosts(point &p);
+    // BFS to chase pacman
+    static std::vector< std::vector<int> > genAdjList(void);
+    action_t shortestMove(point &src, point &dest);
 
 };
 
