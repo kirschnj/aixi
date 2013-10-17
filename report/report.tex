@@ -6,6 +6,8 @@
 \usepackage[hidelinks]{hyperref}
 \usepackage[hypcap]{caption}
 
+\hypersetup{pdfpagemode=UseNone}
+
 \title{Title here}
 \author{Names here}
 \date{Date}
@@ -16,16 +18,50 @@
 \section{Description}
 
 \section{User Manual}
-\subsection{Compilation}
-Run "make".... don't know what else we might need.
 
-\subsection{Run? TODO: think of a better word}
-"./aixi environment.conf"
+Our approximation of aixi is written in C++ and requires g++ for compilation.
 
-Expand on these.
+\subsection{Setup}
+
+\noindent Extract:\\
+\indent \textit{tar -zxvf aixi.tgz}
+
+\bigskip
+
+\noindent Compile:\\
+\indent \textit{cd aixi}\\
+\indent \textit{make}
+
+\bigskip
+
+\noindent Run:\\
+\indent \textit{./aixi environment.conf}
+
+\subsection{Configuration Options}
+
+Each configuration file specifies a particular environment and a set of options.
+
+Available environments are:
+\begin{itemize}
+    \item biased\textunderscore rock\textunderscore paper\textunderscore scissor
+    \item coinflip
+    \item kuhn\textunderscore poker
+    \item pacman
+    \item tiger
+\end{itemize}
+
+Other options specify parameters for the environment and the aixi agent's learning.
+TODO: so far I've only included options not explained in the assignment specification.
+
+\begin{itemize}
+    \item mc-timelimit: The number of MC simulations per cycle.
+    \item load-ct: Specifies a (trained) CTW for the agent to load at initialisation.
+    \item write-ct: Write CTW to file before agent termination.
+\end{itemize}
+
 
 \section{Experimental Results}
-\paragraph{Experimental setup}
+\subsection{Experimental setup}
 TODO:
 \begin{itemize}
     \item List configurations used for each environment.

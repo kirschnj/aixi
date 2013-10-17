@@ -64,7 +64,7 @@ action_t SearchNode::selectAction(Agent& agent, unsigned int dfr) {
         return action;
     } else {
         action_t arg_max = 0;
-        double C = 1;
+        double C = sqrt(2);
 
         double max = (1.0 / (dfr * agent.maxReward())) * m_child[0]->m_mean
                     + C * sqrt((log(m_visits)/m_child[0]->m_visits));
@@ -73,7 +73,6 @@ action_t SearchNode::selectAction(Agent& agent, unsigned int dfr) {
             double f = (1.0 / (dfr * agent.maxReward())) * m_child[a]->m_mean
                     + C * sqrt((log(m_visits)/m_child[a]->m_visits));
             // Notes: agent.minReward() defined as 0, so omitted.
-            // TODO Need constant C defined somewhere.
             if (f > max) {
                 max = f;
                 arg_max = a;
