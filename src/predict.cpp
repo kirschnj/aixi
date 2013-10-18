@@ -169,7 +169,7 @@ void ContextTree::update(symbol_t sym) {
         ++(context_nodes[n]->m_count[sym]);
 
         // Update weighted probabilities
-        if (n == m_depth - 1) {
+        if ((unsigned int) n == m_depth - 1) {
             // Leaf node
             context_nodes[n]->m_log_prob_weighted =
                     context_nodes[n]->logProbEstimated();
@@ -242,7 +242,6 @@ void ContextTree::revert(void) {
     // Traverse tree to leaf
     history_t::iterator hist_it = m_history.end() - 1;
     for (size_t n = 1; n < m_depth; ++n, --hist_it) {
-        symbol_t context_symbol;
         context_symbols[n] = *hist_it;//m_history[m_history.size() - n];
         context_nodes[n] = context_nodes[n-1]->m_child[context_symbols[n]];
     }
@@ -251,10 +250,8 @@ void ContextTree::revert(void) {
     for (int n = m_depth - 1; n >= 0; --n) {
         // Remove effects of last update
         --context_nodes[n]->m_count[latest_sym];
-        // TODO: consider deleting this node if it contains no visits.
-        // Definitely, the paper has CTW of depth 96, memory needs to be
-        // tightly managed.
 
+        // Delete node if it is no longer required
         if (context_nodes[n]->visits() == 0) {
             context_nodes[n-1]->m_child[context_symbols[n]] = NULL;
             delete context_nodes[n];
@@ -264,7 +261,7 @@ void ContextTree::revert(void) {
         context_nodes[n]->m_log_prob_est -= context_nodes[n]->logKTMul(latest_sym);
 
         // Update weighted probabilities
-        if (n == m_depth - 1) {
+        if ((unsigned int) n == m_depth - 1) {
             // Leaf node
             context_nodes[n]->m_log_prob_weighted = context_nodes[n]->logProbEstimated();
         } else {
@@ -275,7 +272,7 @@ void ContextTree::revert(void) {
 
 //revert n bits in
 void ContextTree::revert(size_t bits){
-    for(int i=0; i< bits; ++i){
+    for (unsigned int i = 0; i < bits; ++i) {
         revert();
     }
 }
@@ -283,7 +280,7 @@ void ContextTree::revert(size_t bits){
 //revert last bits in history without changing the ct
 void ContextTree::revertHistory(size_t bits) {
     assert(bits <= m_history.size());
-    for(int i = 0; i < bits; ++i){
+    for (unsigned int i = 0; i < bits; ++i) {
         m_history.pop_back();
     }
 }

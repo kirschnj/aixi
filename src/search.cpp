@@ -19,8 +19,8 @@ SearchNode::SearchNode(bool is_chance_node,
     m_child.resize(num_children, NULL);
     
     //make list of unexplored actions
-    if(!is_chance_node){
-        for(int i = 0; i < num_actions; ++i){
+    if (!is_chance_node) {
+        for (unsigned int i = 0; i < num_actions; ++i) {
             m_unexplored_actions.push_back(i);
         }
     }

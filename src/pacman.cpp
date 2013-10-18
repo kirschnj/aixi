@@ -96,7 +96,7 @@ action_t Pacman::shortestMove(point &src, point &dest) {
 
         // Check neighbours
         vector<int> neighbours = adjList.at(v);
-        for (int i = 0; i < neighbours.size(); i++) {
+        for (unsigned int i = 0; i < neighbours.size(); i++) {
             n = neighbours.at(i);
             // Update path
             if (parent[n] < 0) {
