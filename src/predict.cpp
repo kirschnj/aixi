@@ -315,7 +315,7 @@ void ContextTree::genRandomSymbolsAndUpdate(symbol_list_t &symbols, size_t bits)
         //calc probabilty that '0' follows
         double symbolCondProb = exp (logJointWithSymbolProb - logJointProb);
         
-        sym = rand01() < symbolCondProb;
+        sym = rand01() > symbolCondProb;
         
         // Only undo if necessary.
         if (sym) {
