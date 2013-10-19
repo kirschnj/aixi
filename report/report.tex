@@ -34,6 +34,9 @@
 
 \usepackage{titlesec}
 
+\usepackage{pgfplots}
+\usepgfplotslibrary{dateplot}
+
 \allsectionsfont{\centering \normalfont\scshape} % Make all sections centered, the default font and small caps
 
 \usepackage{fancyhdr} % Custom headers and footers
@@ -81,9 +84,9 @@
 \maketitle % Print the title
 
 \section{Introduction}
-The AIXI model [Hut05] is an attempt to solve the general AI problem. The AIXI agent interacts with an environment in cycles. Denote by $\mathcal{A}, \mathcal{O}$ and $\mathcal{R}$ an action, observation and reward space respectively. In each cycle, AIXI takes an action $a \in \mathcal{A}$ and receives an observation $o \in \mathcal{O}$ and a reward $r \in \mathcal{R}$. The goal of the agent is to maximize the total future reward. While the environment is not known to the agent, actions are chosen based on past perceptions, which are used to build an model of the environment. More specificly AIXI chooses in cycle $k$ an action
+The AIXI model \cite{Hutter:04uaibook} is an attempt to solve the general AI problem. The AIXI agent interacts with an environment in cycles. Denote by $\mathcal{A}, \mathcal{O}$ and $\mathcal{R}$ an action, observation and reward space respectively. In each cycle, AIXI takes an action $a \in \mathcal{A}$ and receives an observation $o \in \mathcal{O}$ and a reward $r \in \mathcal{R}$. The goal of the agent is to maximize the total future reward. While the environment is not known to the agent, actions are chosen based on past perceptions, which are used to build a model of the environment. More specifically, AIXI chooses in cycle $k$ an action
 \[ a_k = \arg \max_{a_k} \sum_{o_kr_k} \dots \max_{a_m} \sum_{o_m r_m} (r_k + \dots + r_m)\xi(o_1r_1\dots o_m r_m|a_1\dots a_m) \]
-The AIXI model is incomputable. In order to make it feasible we have to approximate it. One way to approximate AIXI is the MC-AIXI-CTW [ref] model. Here the expectimax search is solved by an Monte-Carlo approach. The UTC [ref] algorithm is used to balance exploration and exploitation. The class of environment models used in the implemntation is a mixture of $d$-th order Marcov Decision Process. To effectivly compute this model the Context Tree Weighning method is used [ref].
+The AIXI model is incomputable. In order to make it feasible we have to approximate it. One way to approximate AIXI is the MC-AIXI-CTW \cite{VNHS09} model. Here the expectimax search is solved by an Monte-Carlo approach. The UTC \cite{UCT} algorithm is used to balance exploration and exploitation. The class of environment models used in the implemntation is a mixture of $d$-th order Marcov Decision Process. To effectivly compute this model the Context Tree Weighning method is used \cite{CTW}.
 In the following we present our implementation of the MC-AIXI-CTW model. In section 2 we explain how to use the program and specify different options. Section 3 consists of different experiments we conducted.
 
 
@@ -140,6 +143,7 @@ Do we need this??
 
 \begin{itemize}
     \item List/Make table with configurations used for each environment.
+    \item Present results of each environment
     \item List hardware (cpu/clock speed/cache/ram)
 \end{itemize}
 
@@ -147,12 +151,18 @@ Do we need this??
 Present Results/Graphs of each environment. Maybe mention optimal result and/or scale results accordingly
 
 \subsection{Further Experiments}
-How does aixi handle a change of the envirnment?
+How does the exploration constant affect learning? (tiger env)\\
+How does aixi handle a change of the environment?\\
+-- Compare 0.3 coinflip to 0.7 coinflip\\
+-- biased rps vs tiger\\
 
-Compare 0.3 coinflip to 0.7 coinflip
+%sample graph
 
-biased rps vs tiger
-
+\begin{figure}
+\input{plots/coinflip.tex}
+\caption{\label{tab:setup}coinflip environment}
+\end{figure}
+\end{document}
 
 \begin{figure}[tb]
 \centering
@@ -176,13 +186,9 @@ Include results to do with forgetting past model - changing environments
 Include statistics about cycles required for optimal performance, time per cycle as in the VNHS paper \cite{VNHS09}.
 
 TODO: Does anyone have a bibtex library? Or shall we do references manually? We probably won't have many.
-\begin{thebibliography}{1}
 
-\bibitem{VNHS09}
-J. Veness et al.
-\newblock Reinforcement learning via AIXI approximation
-\newblock Technical report, Australian National University, 2009.
 
-\end{thebibliography}
+\bibliographystyle{alpha}
+\bibliography{references}
 
 \end{document}
