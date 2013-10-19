@@ -511,7 +511,7 @@ void Pacman::performAction(action_t action) {
             if (!maze[pacman.row][newcol]) {
                 world[pacman.row][pacman.col] = e_empty;
                 pacman.col = newcol;
-                reward += genReward();
+                //reward += genReward();
             } else reward -= m_reward_wall;
             break;
         case m_move_right :
@@ -519,7 +519,7 @@ void Pacman::performAction(action_t action) {
             if (!maze[pacman.row][newcol]) {
                 world[pacman.row][pacman.col] = e_empty;
                 pacman.col = newcol;
-                reward += genReward();
+                //reward += genReward();
             } else reward -= m_reward_wall;
             break;
         // No wrap-around for up/down movements
@@ -528,7 +528,7 @@ void Pacman::performAction(action_t action) {
             if (newrow >= 0 && !maze[newrow][pacman.col]) {
                 world[pacman.row][pacman.col] = e_empty;
                 --pacman.row;
-                reward += genReward();
+                //reward += genReward();
             } else reward -= m_reward_wall;
             break;
         case m_move_down :
@@ -536,7 +536,7 @@ void Pacman::performAction(action_t action) {
             if (newrow < size && !maze[newrow][pacman.col]) {
                 world[pacman.row][pacman.col] = e_empty;
                 ++pacman.row;
-                reward += genReward();
+                //reward += genReward();
             } else reward -= m_reward_wall;
             break;
         default : break;
