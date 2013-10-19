@@ -12,11 +12,8 @@ static const unsigned int MaxDistanceFromRoot  = 100;// Note, Agent defines it's
 static size_t             MaxSearchNodes;
 
 SearchNode::SearchNode(bool is_chance_node,
-    unsigned int num_actions, unsigned int num_percepts)
+    unsigned int num_actions)
     : m_chance_node(is_chance_node), m_visits(0) {
-    //make child field the right size
-    int num_children = m_chance_node ? num_percepts : num_actions;
-    m_child.resize(num_children, NULL);
     
     //make list of unexplored actions
     if (!is_chance_node) {
@@ -28,9 +25,10 @@ SearchNode::SearchNode(bool is_chance_node,
 
 SearchNode::~SearchNode() {
     // Destroy any allocated children.
-    for (unsigned int i = 0; i < m_child.size(); ++i) {
-        if (m_child[i] != NULL) {
-            delete m_child[i];
+    for (std::map<unsigned int, SearchNode*>::iterator it = m_child.begin();
+    		it != m_child.end(); ++it) {
+        if (it->second != NULL) {
+            delete it->second;
         }
     }
 }
@@ -60,7 +58,7 @@ action_t SearchNode::selectAction(Agent& agent, unsigned int dfr) {
         action_t action = m_unexplored_actions.at(action_index);
         m_unexplored_actions.erase(m_unexplored_actions.begin() + action_index);
 
-        m_child[action] = new SearchNode(true, agent.numActions(), agent.numPercepts());
+        m_child[action] = new SearchNode(true, agent.numActions());
         return action;
     } else {
         action_t arg_max = 0;
@@ -98,9 +96,8 @@ reward_t SearchNode::sample(Agent &agent, unsigned int dfr) {
         //calc index of whole percept
         percept_t percept = (rew << agent.numObsBits()) | obs;
         
-        if (m_child[percept] == NULL) {
-            m_child[percept] = new SearchNode(false,
-                                    agent.numActions(), agent.numPercepts());
+        if (m_child.count(percept) == 0) {
+            m_child[percept] = new SearchNode(false, agent.numActions());
         }
         newReward = rew + m_child[percept]->sample(agent, dfr - 1);
     } else if (m_visits == 0) {
@@ -121,7 +118,7 @@ extern action_t search(Agent &agent, timelimit_t timelimit) {
     //save agent's state
     ModelUndo undo = ModelUndo(agent);
 
-    SearchNode search_tree(false, agent.numActions(), agent.numPercepts());
+    SearchNode search_tree(false, agent.numActions());
 
     //sample
     for(visits_t i = 0; i < timelimit; ++i){    

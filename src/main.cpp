@@ -294,7 +294,7 @@ int main(int argc, char *argv[]) {
 	}
 	else if (environment_name == "pacman") {
         env = new Pacman(options);
-		options["agent-actions"] = "2";
+		options["agent-actions"] = "4";
 		options["observation-bits"] = "16";
 		options["reward-bits"] = "8";
 	}
