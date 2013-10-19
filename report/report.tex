@@ -28,6 +28,7 @@
 \usepackage{amsmath,amsfonts,amsthm} % Math packages
 \usepackage[hidelinks]{hyperref}
 \usepackage{natbib} % bibliography
+\usepackage{float}
 
 \usepackage{lipsum} % Used for inserting dummy 'Lorem ipsum' text into the template
 
@@ -138,57 +139,54 @@ Options can be either specified in the configuration file or passed directly as 
 \paragraph{-{}-explore-decay=D} Decay $0 \leq D \leq 1$ of exploration constant. $P$ is multiplied by $D$ in each cycle.
 %\paragraph{-{}-}
 
-\section{Code Documentation}
-Do we need this??
 
 \section{\label{results}Experimental Results}
 \subsection{Experimental Setup}
+TODO: reword the following paragraphs
 
-\begin{itemize}
-    \item List/Make table with configurations used for each environment.
-    \item Present results of each environment
-    \item List hardware (cpu/clock speed/cache/ram)
-\end{itemize}
+We evaluate the performance of our agent on five sample environments. For each environment the agent was allowed TODO: 10000 cycles to learn a model. During the learning process an exploratory constant was used. The performance of the model after at various cycle intervals was then evaluated by running the agent without exploration for TODO: 5000 cycles, and the average reward per cycle reported.
+
+The parameters used for each environment are shown in Figure~\ref{tab:setup}. The experiments themselves were performed using a TODO X.XXGhx CPU with 4GB of RAM.
+
+\begin{figure}[H]
+\centering
+\begin{tabular}{|l|c|c|c|c|c|}
+\hline
+Domain & CTW depth & $m$ & $\epsilon$ & $\gamma$ & $\rho$UCT Simulations\\\hline
+Biased Rock-Paper-Scissor & 32 & 3 & 0.1 & 0.999 & 100\\
+Coinflip & 32 & 3 & 0.1 & 0.999 & 100\\
+Kuhn-Poker & 32 & 3 & 0.1 & 0.999 & 100\\
+Pacman & 32 & 3 & 0.1 & 0.999 & 100\\
+Tiger & 32 & 3 & 0.1 & 0.999 & 100\\\hline
+\end{tabular}
+\caption{\label{tab:setup}MC-AIXI-CTW model learning configuration}
+\end{figure}
+
 
 \subsection{Results}
 Present Results/Graphs of each environment. Maybe mention optimal result and/or scale results accordingly
 
+All environments except for Pacman have a known optimal policy and reward.
+
 \subsection{Further Experiments}
+Include results to do with forgetting past model - changing environments
+
 How does the exploration constant affect learning? (tiger env)\\
 How does aixi handle a change of the environment?\\
 -- Compare 0.3 coinflip to 0.7 coinflip\\
 -- biased rps vs tiger\\
 
 %sample graph
-
 \begin{figure}
 \input{plots/coinflip.tex}
-\caption{\label{tab:setup}coinflip environment}
+\caption{\label{plot:coinflip}Results on the coinflip environment}
 \end{figure}
-\end{document}
 
-\begin{figure}[tb]
-\centering
-\begin{tabular}{l|c|c|c|c|c}
-Domain & CTW depth & $m$ & $\epsilon$ & $\gamma$ & $\rho$UCT Simulations\\\hline
-%TODO: fill in
-Biased Rock-Paper-Scissor & \\
-Coinflip & \\
-Kuhn-Poker & \\
-Pacman & \\
-Tiger & \\
-\end{tabular}
-\caption{\label{tab:setup}Agent configurations}
-\end{figure}
 
 \subsection{Discussion}
 How well did it do.
 
-Include results to do with forgetting past model - changing environments
-
 Include statistics about cycles required for optimal performance, time per cycle as in the VNHS paper \cite{VNHS09}.
-
-TODO: Does anyone have a bibtex library? Or shall we do references manually? We probably won't have many.
 
 
 \bibliographystyle{alpha}
