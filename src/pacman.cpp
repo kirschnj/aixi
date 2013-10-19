@@ -497,7 +497,6 @@ Pacman::Pacman(options_t &options) {
 
 void Pacman::performAction(action_t action) {
     assert(action < 4);
-    if (endState) reset();
 
     // Cumulative reward
     int reward = m_reward_init;
@@ -550,9 +549,10 @@ void Pacman::performAction(action_t action) {
         endState = true;
     }
 
-    // The game has ended return now.
+    // If the game has ended, return now.
     if (endState == true) {
         // Update percepts
+        reset();
         m_observation = genObservation();
         m_reward = reward;
         return;
@@ -584,6 +584,15 @@ void Pacman::performAction(action_t action) {
 
     // Check if a ghost has caught pacman
     reward += genReward();
+
+    // If the game has ended, return now.
+    if (endState == true) {
+        // Update percepts
+        reset();
+        m_observation = genObservation();
+        m_reward = reward;
+        return;
+    }
 
     // Decrement duration of power pill if applicable
     powerP = (powerP > 0) ? powerP - 1 : 0;

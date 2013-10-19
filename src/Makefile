@@ -26,4 +26,4 @@ aixi: $(OBJS)
 .PHONY: clean
 
 clean:
-	rm -f $(OBJS)
+	rm -f *.o aixi test
