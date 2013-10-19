@@ -102,6 +102,16 @@ void mainLoop(Agent &ai, Environment &env, options_t &options) {
 			if (explore) {
 				std::cout << "explore rate: " << explore_rate << std::endl;
 			}
+
+			// Write context tree file
+			if(options["write-ct"] != ""){
+				// write a ct for each 2^n cycles.
+				char cycle_string[256];
+				sprintf(cycle_string, "%d", cycle);
+				std::ofstream ct((options["write-ct"] + std::string(cycle_string) + ".ct").c_str());
+				ai.writeCT(ct);
+				ct.close();
+			}
 		}
 
 		// Update exploration rate
@@ -116,9 +126,12 @@ void mainLoop(Agent &ai, Environment &env, options_t &options) {
 
     // Write context tree file
     if(options["write-ct"] != ""){
-        std::ofstream ct(options["write-ct"].c_str());
-        ai.writeCT(ct);
-        ct.close();
+    	// write a ct for the final cycle too.
+		char cycle_string[256];
+		sprintf(cycle_string, "%lld", ai.age());
+		std::ofstream ct((options["write-ct"] + std::string(cycle_string) + ".ct").c_str());
+		ai.writeCT(ct);
+		ct.close();
     }
 }
 

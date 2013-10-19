@@ -113,7 +113,7 @@ void BiasedRockPaperScissor::performAction(action_t action) {
 
 
 KuhnPoker::KuhnPoker(options_t &options) {
-    m_opp_nash_parameter = 1.0;
+    m_opp_nash_parameter = 0.5;
 	if (options.count("nash-parameter") > 0) {
 		strExtract(options["nash-parameter"], m_opp_nash_parameter);
 	}
@@ -128,7 +128,7 @@ KuhnPoker::KuhnPoker(options_t &options) {
 void KuhnPoker::opponentAct(unsigned int round) {
     if (round == 0) {
         if (m_opp_card == m_jack) {
-            if (rand01() > m_opp_nash_parameter / 3.0) {
+            if (rand01() < m_opp_nash_parameter / 3.0) {
                 m_opp_action = m_bet;
             } else {
                 m_opp_action = m_pass;
@@ -136,7 +136,7 @@ void KuhnPoker::opponentAct(unsigned int round) {
         } else if (m_opp_card == m_queen) {
             m_opp_action = m_pass;
         } else {//king
-            if (rand01() > m_opp_nash_parameter) {
+            if (rand01() < m_opp_nash_parameter) {
                 m_opp_action = m_bet;
             } else {
                 m_opp_action = m_pass;
@@ -147,7 +147,7 @@ void KuhnPoker::opponentAct(unsigned int round) {
         if (m_opp_card == m_jack) {
             m_opp_action = m_pass;
         } else if (m_opp_card == m_queen) {
-            if (rand01() > (1.0 + m_opp_nash_parameter) / 3.0) {
+            if (rand01() < (1.0 + m_opp_nash_parameter) / 3.0) {
                 m_opp_action = m_bet;
             } else {
                 m_opp_action = m_pass;
