@@ -2,6 +2,7 @@
 #define __SEARCH_HPP__
 
 #include "main.hpp"
+#include <map>
 
 class Agent;
 
@@ -15,8 +16,7 @@ class SearchNode {
 
 public:
 
-	SearchNode(bool is_chance_node, unsigned int num_actions,
-	    unsigned int num_percepts);
+	SearchNode(bool is_chance_node, unsigned int num_actions);
     
     ~SearchNode();
     
@@ -43,7 +43,7 @@ private:
 
 	// TODO: decide how to reference child nodes
 	//  e.g. a fixed-size array
-	std::vector<SearchNode*> m_child;
+	std::map<unsigned int, SearchNode*> m_child;
     std::vector<action_t> m_unexplored_actions;
 };
 
