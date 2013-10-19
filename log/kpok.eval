@@ -1,0 +1,7 @@
+# Average reward after 5000 greedy simulations, after col 1 experience
+512		1.96421
+1024	1.95201
+2048	1.92701
+4096	1.94361
+8192	1.9778
+10000	1.96561
