@@ -1,20 +1,91 @@
-\documentclass{article}
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Short Sectioned Assignment
+% LaTeX Template
+% Version 1.0 (5/5/12)
+%
+% This template has been downloaded from:
+% http://www.LaTeXTemplates.com
+%
+% Original author:
+% Frits Wenneker (http://www.howtotex.com)
+%
+% License:
+% CC BY-NC-SA 3.0 (http://creativecommons.org/licenses/by-nc-sa/3.0/)
+%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-\usepackage{amsmath}
-\usepackage{float}
-\usepackage[hidelinks]{hyperref}
-\usepackage[hypcap]{caption}
 
-\hypersetup{pdfpagemode=UseNone}
 
-\title{Title here}
-\author{Names here}
-\date{Date}
+%----------------------------------------------------------------------------------------
+%	PACKAGES AND OTHER DOCUMENT CONFIGURATIONS
+%----------------------------------------------------------------------------------------
+\documentclass[paper=a4, fontsize=11pt]{scrartcl} % A4 paper and 11pt font size
+\usepackage[utf8]
+{inputenc}
+\usepackage[T1]{fontenc} % Use 8-bit encoding that has 256 glyphs
+%\usepackage{fourier} % Use the Adobe Utopia font for the document - comment this line to return to the LaTeX default
+\usepackage[english]{babel} % English language/hyphenation
+\usepackage{amsmath,amsfonts,amsthm} % Math packages
+\usepackage{hyperref}
+
+\usepackage{lipsum} % Used for inserting dummy 'Lorem ipsum' text into the template
+
+\usepackage{sectsty} % Allows customizing section commands
+
+\usepackage{titlesec}
+
+\allsectionsfont{\centering \normalfont\scshape} % Make all sections centered, the default font and small caps
+
+\usepackage{fancyhdr} % Custom headers and footers
+\pagestyle{fancyplain} % Makes all pages in the document conform to the custom headers and footers
+\fancyhead{} % No page header - if you want one, create it in the same way as the footers below
+\fancyfoot[L]{} % Empty left footer
+\fancyfoot[C]{} % Empty center footer
+\fancyfoot[R]{\thepage} % Page numbering for right footer
+\renewcommand{\headrulewidth}{0pt} % Remove header underlines
+\renewcommand{\footrulewidth}{0pt} % Remove footer underlines
+\setlength{\headheight}{13.6pt} % Customize the height of the header
+
+\numberwithin{equation}{section} % Number equations within sections (i.e. 1.1, 1.2, 2.1, 2.2 instead of 1, 2, 3, 4)
+\numberwithin{figure}{section} % Number figures within sections (i.e. 1.1, 1.2, 2.1, 2.2 instead of 1, 2, 3, 4)
+\numberwithin{table}{section} % Number tables within sections (i.e. 1.1, 1.2, 2.1, 2.2 instead of 1, 2, 3, 4)
+
+\setlength\parindent{0pt} % Removes all indentation from paragraphs - comment this line for an assignment with lots of text
+
+%----------------------------------------------------------------------------------------
+%	TITLE SECTION
+%----------------------------------------------------------------------------------------
+
+\newcommand{\horrule}[1]{\rule{\linewidth}{#1}} % Create horizontal rule command with 1 argument of height
+
+\title{	
+\normalfont \normalsize 
+\textsc{Australian National University} \\ [25pt] % Your university, school and/or department name(s)
+\horrule{0.5pt} \\[0.4cm] % Thin top horizontal rule
+\huge A implementation of MC-AIXI-CTW\\ Group Project \\ % The assignment title
+\horrule{2pt} \\[0.5cm] % Thick bottom horizontal rule
+}
+
+\author{Johannes Kirschner\\ Kerry Olesen\\ Jerry Wu} % Your name
+
+\date{\normalsize\today} % Today's date or a custom date
+
+
+%\titleformat{\section}{\large\centering\normalfont\scshape}{}{0em}{}
+%\titleformat{\subsection}{\centering\normalfont}{\roman{subsection})}{0em}{}
+
+  
 
 \begin{document}
-\maketitle
 
-\section{Description}
+\maketitle % Print the title
+
+\section{Introduction}
+The AIXI model [Hut05] is an attempt to solve the general AI problem. The AIXI agent interacts with an environment in cycles. Denote by $\mathcal{A}, \mathcal{O}$ and $\mathcal{R}$ an action, observation and reward space respectively. In each cycle, AIXI takes an action $a \in \mathcal{A}$ and receives an observation $o \in \mathcal{O}$ and a reward $r \in \mathcal{R}$. The goal of the agent is to maximize the total future reward. While the environment is not known to the agent, actions are chosen based on past perceptions, which are used to build an model of the environment. More specificly AIXI chooses in cycle $k$ an action
+\[ a_k = \arg \max_{a_k} \sum_{o_kr_k} \dots \max_{a_m} \sum_{o_m r_m} (r_k + \dots + r_m)\xi(o_1r_1\dots o_m r_m|a_1\dots a_m) \]
+The AIXI model is incomputable. In order to make it feasible we have to approximate it. One way to approximate AIXI is the MC-AIXI-CTW [ref] model. Here the expectimax search is solved by an Monte-Carlo approach. The UTC [ref] algorithm is used to balance exploration and exploitation. The class of environment models used in the implemntation is a mixture of $d$-th order Marcov Decision Process. To effectivly compute this model the Context Tree Weighning method is used [ref].
+In the following we present our implementation of the MC-AIXI-CTW model. In section 2 we explain how to use the program and specify different options. Section 3 consists of different experiments we conducted.
+
 
 \section{User Manual}
 
@@ -22,10 +93,6 @@ Our approximation of aixi is written in C++ and requires g++ for compilation.
 
 \subsection{Setup}
 
-\noindent Extract:\\
-\indent \textit{tar -zxvf aixi.tgz}
-
-\bigskip
 
 \noindent Compile:\\
 \indent \textit{cd aixi}\\
@@ -34,14 +101,21 @@ Our approximation of aixi is written in C++ and requires g++ for compilation.
 \bigskip
 
 \noindent Run:\\
-\indent \textit{./aixi environment.conf}
+\indent \textit{./aixi file.conf [-{}-option1=value1 -{}-option2=value2 \dots]}
+
+
+Include trained ctw data?? I think this is a good idea Johannes
 
 \subsection{Configuration Options}
 
-Each configuration file specifies a particular environment and a set of options.
+Options can be either specified in the configuration file or passed directly as --option=value to the program. Several configuration files are available, each specifies a particular environment and a set of default options. 
 
-Available environments are:
+\subsubsection*{Available Options}
+
+\paragraph{-{}-environment=env} Specifies the environment. Available environments are
 \begin{itemize}
+\itemsep0pt
+\renewcommand\labelitemi{--}
     \item biased\textunderscore rock\textunderscore paper\textunderscore scissor
     \item coinflip
     \item kuhn\textunderscore poker
@@ -49,23 +123,36 @@ Available environments are:
     \item tiger
 \end{itemize}
 
-Other options specify parameters for the environment and the aixi agent's learning.
-TODO: so far I've only included options not explained in the assignment specification.
+\paragraph{-{}-mc-timelimit=N} The number $N$ of MC simulations per cycle.
+\paragraph{-{}-write-ct=file} Write CTW to file before agent termination.
+\paragraph{-{}-load-ct=file}: Specifies a (trained) CTW for the agent to load at initialisation.
+\paragraph{-{}-log=file}
+\paragraph{-{}-terminate-age=N} The number $N$ of agent/environment interaction cycles.
+\paragraph{-{}-exploration=P} Probability $0 \leq P \leq 1$ that a action is chosen randomly.
+\paragraph{-{}-explore-decay=D} Decay $0 \leq D \leq 1$ of exploration constant. $P$ is multiplied by $D$ in each cycle.
+%\paragraph{-{}-}
 
-\begin{itemize}
-    \item mc-timelimit: The number of MC simulations per cycle.
-    \item load-ct: Specifies a (trained) CTW for the agent to load at initialisation.
-    \item write-ct: Write CTW to file before agent termination.
-\end{itemize}
-
+\section{Code Documentation}
+Do we need this??
 
 \section{Experimental Results}
 \subsection{Experimental Setup}
-TODO:
+
 \begin{itemize}
-    \item List configurations used for each environment.
+    \item List/Make table with configurations used for each environment.
     \item List hardware (cpu/clock speed/cache/ram)
 \end{itemize}
+
+\subsection{Results}
+Present Results/Graphs of each environment. Maybe mention optimal result and/or scale results accordingly
+
+\subsection{Further Experiments}
+How does aixi handle a change of the envirnment?
+
+Compare 0.3 coinflip to 0.7 coinflip
+
+biased rps vs tiger
+
 
 \begin{figure}[tb]
 \centering
