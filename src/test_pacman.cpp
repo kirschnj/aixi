@@ -64,6 +64,9 @@ int main(int argc, char *argv[]) {
     clear();
     p->printCurses();
     addstr("Game over. Press any key to quit...");
+    move(1, 20);
+    addstr("Reward: ");
+    printw("%d", p->getReward());
     input = getch();
 
     endwin();
