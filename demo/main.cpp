@@ -67,7 +67,7 @@ void mainLoop(Agent &ai, Environment &env, options_t &options) {
 
         // check for agent termination
         if (terminate_check && ai.age() > terminate_age) {
-            addstr("terminate age reached.");
+            addstr(" Terminate age reached. ");
             break;
         }
 
