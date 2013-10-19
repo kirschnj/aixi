@@ -26,7 +26,8 @@
 %\usepackage{fourier} % Use the Adobe Utopia font for the document - comment this line to return to the LaTeX default
 \usepackage[english]{babel} % English language/hyphenation
 \usepackage{amsmath,amsfonts,amsthm} % Math packages
-\usepackage{hyperref}
+\usepackage[hidelinks]{hyperref}
+\usepackage{natbib} % bibliography
 
 \usepackage{lipsum} % Used for inserting dummy 'Lorem ipsum' text into the template
 
@@ -65,11 +66,11 @@
 \normalfont \normalsize 
 \textsc{Australian National University} \\ [25pt] % Your university, school and/or department name(s)
 \horrule{0.5pt} \\[0.4cm] % Thin top horizontal rule
-\huge A implementation of MC-AIXI-CTW\\ Group Project \\ % The assignment title
+\huge A MC-AIXI-CTW Implementation\\ Group Project \\ % The assignment title
 \horrule{2pt} \\[0.5cm] % Thick bottom horizontal rule
 }
 
-\author{Johannes Kirschner\\ Kerry Olesen\\ Jerry Wu} % Your name
+\author{Johannes Kirschner\\ Kerry Olesen\\ Jesse Wu} % Your name
 
 \date{\normalsize\today} % Today's date or a custom date
 
@@ -84,19 +85,21 @@
 \maketitle % Print the title
 
 \section{Introduction}
-The AIXI model \cite{Hutter:04uaibook} is an attempt to solve the general AI problem. The AIXI agent interacts with an environment in cycles. Denote by $\mathcal{A}, \mathcal{O}$ and $\mathcal{R}$ an action, observation and reward space respectively. In each cycle, AIXI takes an action $a \in \mathcal{A}$ and receives an observation $o \in \mathcal{O}$ and a reward $r \in \mathcal{R}$. The goal of the agent is to maximize the total future reward. While the environment is not known to the agent, actions are chosen based on past perceptions, which are used to build a model of the environment. More specifically, AIXI chooses in cycle $k$ an action
+The AIXI model \cite{Hutter:04uaibook} is an attempt to solve the general AI problem. The AIXI agent interacts with an environment in cycles. Denote by $\mathcal{A}, \mathcal{O}$ and $\mathcal{R}$ an action, observation and reward space respectively. In each cycle, AIXI takes an action $a \in \mathcal{A}$ and receives an observation $o \in \mathcal{O}$ and a reward $r \in \mathcal{R}$. The goal of the agent is to maximize the total future reward. AIXI does not require any previous knowledge of an environment, actions are chosen based on past perceptions, which are used to build a model of the environment. More specifically, AIXI chooses in cycle $k$ an action
 \[ a_k = \arg \max_{a_k} \sum_{o_kr_k} \dots \max_{a_m} \sum_{o_m r_m} (r_k + \dots + r_m)\xi(o_1r_1\dots o_m r_m|a_1\dots a_m) \]
-The AIXI model is incomputable. In order to make it feasible we have to approximate it. One way to approximate AIXI is the MC-AIXI-CTW \cite{VNHS09} model. Here the expectimax search is solved by an Monte-Carlo approach. The UTC \cite{UCT} algorithm is used to balance exploration and exploitation. The class of environment models used in the implemntation is a mixture of $d$-th order Marcov Decision Process. To effectivly compute this model the Context Tree Weighning method is used \cite{CTW}.
-In the following we present our implementation of the MC-AIXI-CTW model. In section 2 we explain how to use the program and specify different options. Section 3 consists of different experiments we conducted.
+TODO: explain what $\xi$ is, and why it is good (because it is so large)
+
+Unfortunately the AIXI model is incomputable. For all practical applications, the agent must be approximated. One approach in approximating AIXI is the MC-AIXI-CTW \cite{VNHS09} model. Here the expectimax search is solved by an Monte-Carlo approach. The UTC \cite{UCT} algorithm is used to balance exploration and exploitation. The class of environment models used in the implementation is a mixture of $d$-th order Markov Decision Process. Notably, Context Tree Weighting allows efficient linear time computation of this rather general class of models \cite{CTW}.
+In the following we present our implementation of the MC-AIXI-CTW model. In Section~\ref{usr} we explain how to use the program and specify different options. Section~\ref{results} describes the results of the model on several experimental environments.
 
 
-\section{User Manual}
+\section{\label{usr}User Manual}
 
 Our approximation of aixi is written in C++ and requires g++ for compilation.
 
 \subsection{Setup}
 
-
+\setlength\parindent{20pt}
 \noindent Compile:\\
 \indent \textit{cd aixi}\\
 \indent \textit{make}
@@ -105,7 +108,7 @@ Our approximation of aixi is written in C++ and requires g++ for compilation.
 
 \noindent Run:\\
 \indent \textit{./aixi file.conf [-{}-option1=value1 -{}-option2=value2 \dots]}
-
+\setlength\parindent{0pt}
 
 Include trained ctw data?? I think this is a good idea Johannes
 
@@ -128,7 +131,7 @@ Options can be either specified in the configuration file or passed directly as 
 
 \paragraph{-{}-mc-timelimit=N} The number $N$ of MC simulations per cycle.
 \paragraph{-{}-write-ct=file} Write CTW to file before agent termination.
-\paragraph{-{}-load-ct=file}: Specifies a (trained) CTW for the agent to load at initialisation.
+\paragraph{-{}-load-ct=file} Specifies a (trained) CTW for the agent to load at initialisation.
 \paragraph{-{}-log=file}
 \paragraph{-{}-terminate-age=N} The number $N$ of agent/environment interaction cycles.
 \paragraph{-{}-exploration=P} Probability $0 \leq P \leq 1$ that a action is chosen randomly.
@@ -138,7 +141,7 @@ Options can be either specified in the configuration file or passed directly as 
 \section{Code Documentation}
 Do we need this??
 
-\section{Experimental Results}
+\section{\label{results}Experimental Results}
 \subsection{Experimental Setup}
 
 \begin{itemize}
