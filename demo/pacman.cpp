@@ -602,6 +602,20 @@ void Pacman::performAction(action_t action) {
     // Update percepts
     m_observation = genObservation();
     m_reward = reward;
+
+    // Print world
+    clear();
+    printCurses();
+    move(0, 20);
+    addstr("Observation: ");
+    printw("%d", getObservation());
+    move(1, 20);
+    addstr("Reward: ");
+    printw("%d", getReward() - m_reward_init);
+    if (powerActive()) {
+        move(2, 20);
+        addstr("Power pill active.");
+    }
 }
 
 

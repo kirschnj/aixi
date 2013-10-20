@@ -7,12 +7,6 @@ OBJS=$(SRCS:.cpp=.o)
 
 all: aixi
 
-debug: $(OBJS)
-	$(CC) $(CXXFLAGS) -pg -o aixi $(OBJS) $(LDFLAGS)
-
-gdb: $(OBJS)
-	$(CC) $(CXXFLAGS) -pg -g $(SRCS) -o aixi $(LDFLAGS)
-
 pacman:
 	$(CC) -c -o pacman.o pacman.cpp
 	$(CC) -c -o environment.o environment.cpp
