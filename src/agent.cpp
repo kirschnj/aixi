@@ -184,7 +184,7 @@ bool Agent::modelRevert(const ModelUndo &mu) {
     //TODO: check this
     
     //go back in history and revert actions and percepts
-    while(historySize() > mu.historySize() + 1){
+    while(historySize() > mu.historySize()){// + 1){
         if(m_last_update_percept){
             m_ct->revert(m_rew_bits + m_obs_bits);
             m_last_update_percept = false;
@@ -195,7 +195,7 @@ bool Agent::modelRevert(const ModelUndo &mu) {
         }
     }
 
-    //revert one more action
+    /*//revert one more action
     m_ct->revertHistory(m_actions_bits);
     m_last_update_percept = true;
 
@@ -203,7 +203,7 @@ bool Agent::modelRevert(const ModelUndo &mu) {
     if(!mu.lastUpdatePercept()){
         m_ct->revert(m_rew_bits + m_obs_bits);
         m_last_update_percept = false;
-    }
+    }*/
 
     m_time_cycle = mu.age();
     m_total_reward = mu.reward();
