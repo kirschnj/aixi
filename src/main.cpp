@@ -28,7 +28,7 @@ void mainLoop(Agent &ai, Environment &env, options_t &options) {
 		assert(0.0 <= explore_decay && explore_decay <= 1.0);
 	}
 
-
+    
 	// Determine termination age
 	bool terminate_check = options.count("terminate-age") > 0;
 	age_t terminate_age;
@@ -46,12 +46,17 @@ void mainLoop(Agent &ai, Environment &env, options_t &options) {
         std::cerr << "WARNING: time_limit not large enough to sample all actions" << std::endl;
     }
 
+    bool intermediate_ct = true;
+    if(options.count("intermediate-ct") > 0){
+        intermediate_ct = !(options["intermediate-ct"] == "0");
+    }
+
     std::cout << "starting agent/environment interaction loop...\n"; 
 	// Agent/environment interaction loop
 	for (unsigned int cycle = 1; !env.isFinished(); cycle++) {
 
 		// check for agent termination
-		if (terminate_check && ai.age() > terminate_age) {
+		if (terminate_check && ai.age() >= terminate_age) {
 			verboseLog << "info: terminating agent" << std::endl;
 			break;
 		}
@@ -104,7 +109,7 @@ void mainLoop(Agent &ai, Environment &env, options_t &options) {
 			}
 
 			// Write context tree file
-			if(options["write-ct"] != ""){
+			if(options["write-ct"] != "" && intermediate_ct){
 				// write a ct for each 2^n cycles.
 				char cycle_string[256];
 				sprintf(cycle_string, "%d", cycle);
@@ -229,6 +234,7 @@ int main(int argc, char *argv[]) {
     options["log"]  = "log";
     options["load-ct"] = "";
     options["write-ct"] = "";
+    options["intermediate-ct"] = "1";
 
 	// Read configuration options
 	std::ifstream conf(argv[1]);
