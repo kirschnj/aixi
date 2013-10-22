@@ -4,12 +4,14 @@
 #include <fstream>
 #include <iostream>
 #include <string>
-
+#include <time.h>
+#include <stdlib.h>
 
 #include "agent.hpp"
 #include "environment.hpp"
 #include "search.hpp"
 #include "util.hpp"
+
 
 // Streams for logging
 std::ofstream verboseLog;        // A verbose human-readable log
@@ -220,6 +222,8 @@ int main(int argc, char *argv[]) {
 		std::cerr << "The first argument should indicate the location of the configuration file. Further arguments can either be specified in the config file or passed as command line option. Command line options are used over options specified in the file." << std::endl;
 		return -1;
 	}
+    // Initialize random seed
+    srand(time(NULL));
 
 	// Load configuration options
 	options_t options;
