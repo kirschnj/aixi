@@ -118,13 +118,6 @@ action_t Agent::genAction(void) const {
 }
 
 
-// generate a percept distributed according
-// to our history statistics
-void Agent::genPercept(percept_t &obs, percept_t &rew) const {
- //TODO: Implement
-}
-
-
 // generate a percept distributed to our history statistics, and
 // update our mixture environment model with it
 void Agent::genPerceptAndUpdate(percept_t &obs, percept_t &rew) {
@@ -180,11 +173,9 @@ void Agent::modelUpdate(action_t action) {
 bool Agent::modelRevert(const ModelUndo &mu) {
     if(m_time_cycle < mu.age())
         return false;
-
-    //TODO: check this
     
-    //go back in history and revert actions and percepts
-    while(historySize() > mu.historySize()){// + 1){
+    //go back in history and revert actions and percepts as appropriate
+    while(historySize() > mu.historySize()){
         if(m_last_update_percept){
             m_ct->revert(m_rew_bits + m_obs_bits);
             m_last_update_percept = false;
@@ -194,16 +185,6 @@ bool Agent::modelRevert(const ModelUndo &mu) {
             m_last_update_percept = true;
         }
     }
-
-    /*//revert one more action
-    m_ct->revertHistory(m_actions_bits);
-    m_last_update_percept = true;
-
-    //if last state was action state, revert one more percept
-    if(!mu.lastUpdatePercept()){
-        m_ct->revert(m_rew_bits + m_obs_bits);
-        m_last_update_percept = false;
-    }*/
 
     m_time_cycle = mu.age();
     m_total_reward = mu.reward();
@@ -219,20 +200,6 @@ void Agent::reset(void) {
 	m_total_reward = 0.0;
     m_last_update_percept=false;
 }
-
-
-// probability of selecting an action according to the
-// agent's internal model of it's own behaviour
-//double Agent::getPredictedActionProb(action_t action) {
-//	return NULL; // TODO: implement
-//} NOTE: agent gets probability straight from model when it is needed
-
-
-// get the agent's probability of receiving a particular percept
-//double Agent::perceptProbability(percept_t observation, percept_t reward) const {
-//	return NULL; // TODO: implement
-//} NOTE: agent gets probability straight from model when it is needed
-
 
 // action sanity check
 bool Agent::isActionOk(action_t action) const {
