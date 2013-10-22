@@ -48,6 +48,7 @@ void mainLoop(Agent &ai, Environment &env, options_t &options) {
         std::cerr << "WARNING: time_limit not large enough to sample all actions" << std::endl;
     }
 
+	// Determine whether to write cts during the process, or only at the end.
     bool intermediate_ct = true;
     if(options.count("intermediate-ct") > 0){
         intermediate_ct = !(options["intermediate-ct"] == "0");
@@ -78,7 +79,7 @@ void mainLoop(Agent &ai, Environment &env, options_t &options) {
 			action = ai.genRandomAction();
 		}
 		else {
-			action = search(ai, mc_timelimit); // TODO: implement in search.cpp
+			action = search(ai, mc_timelimit);
 		}
 
 		// Send an action to the environment
@@ -269,30 +270,15 @@ int main(int argc, char *argv[]) {
 		options["observation-bits"] = "1";
 		options["reward-bits"] = "1";
 	}
-	else if (environment_name == "1d-maze") {
-		// TODO: instantiate "env" (if appropriate)
-	}
-	else if (environment_name == "cheese-maze") {
-		// TODO: instantiate "env" (if appropriate)
-	}
 	else if (environment_name == "tiger") {
 		env = new Tiger(options);
 		options["agent-actions"] = "3";
 		options["observation-bits"] = "2";
 		options["reward-bits"] = "7";
 	}
-	else if (environment_name == "extended-tiger") {
-		// TODO: instantiate "env" (if appropriate)
-	}
-	else if (environment_name == "4x4-grid") {
-		// TODO: instantiate "env" (if appropriate)
-	}
-	else if (environment_name == "tictactoe") {
-		// TODO: instantiate "env" (if appropriate)
-	}
 	else if (environment_name == "biased-rock-paper-scissor") {
 		env = new BiasedRockPaperScissor(options);
-		options["agent-actions"] = "2";
+		options["agent-actions"] = "3";
 		options["observation-bits"] = "2";
 		options["reward-bits"] = "2";
 	}
@@ -318,6 +304,7 @@ int main(int argc, char *argv[]) {
 	// Set up the agent
 	Agent ai(options);
 
+	// If specified, load a pretrained context tree.
     if(options["load-ct"] != ""){
         std::ifstream ct(options["load-ct"].c_str());
 
