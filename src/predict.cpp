@@ -142,16 +142,15 @@ void ContextTree::clear(void) {
 
 // Update the CTW with the given symbol, and add that symbol to the history.
 void ContextTree::update(symbol_t sym) {
-    // TODO: implement
     
     // Path based on context
-    // TODO consider renaming this, it's a bit long..
     CTNode *context_nodes[m_depth];
 
+	// Traverse tree to appropriate leaf.
     context_nodes[0] = m_root;
     history_t::iterator hist_it = m_history.end() - 1;
     for (size_t n = 1; n < m_depth; ++n, --hist_it) {
-        symbol_t context_symbol = *hist_it;//m_history[m_history.size() - n];
+        symbol_t context_symbol = *hist_it;
         // Create children as they are needed.
         if (context_nodes[n-1]->m_child[context_symbol] == NULL) {
             context_nodes[n-1]->m_child[context_symbol] = new CTNode();
@@ -159,7 +158,7 @@ void ContextTree::update(symbol_t sym) {
         context_nodes[n] = context_nodes[n-1]->m_child[context_symbol];
     }
 
-    // Update possibilities from leaf back to root
+    // Update probabilities from leaf back to root
     for (int n = m_depth - 1; n >= 0; --n) {
         // Update the log probabilities, after seeing sym.
         // Local KT estimate update, in log form.
@@ -179,25 +178,6 @@ void ContextTree::update(symbol_t sym) {
     }
     
     m_history.push_back(sym);
-    
-    /* Notes:
-       Get context / CTNodes corresponding to that context
-            - What to do when m_history is smaller than m_depth?
-                Is a fictional history of 0s ok?
-    Jesse:
-    Rather than creating a node based on arbitrary histories, we could just
-    not update (the probabilities, symbols still should be added to history)
-    until we have enough context (seen depth bits).
-    I'm not sure about this though.
-
-       Create nodes if this is the first time we have seen this context.
-       Update estimates back up to root - need to figure out weighting for log.
-       Use -log of KT estimate, to avoid precision errors.
-       Update KT estimate - something to do with logKTMul.
-
-       Add "sym" to context.
-        - m_history.push_back(sym);
-    */
 }
 
 
@@ -208,7 +188,7 @@ void ContextTree::update(const symbol_list_t &symlist) {
     }
 }
 
-// updates the history statistics, without touching the context tree
+// updates the history symbols, without touching the context tree
 void ContextTree::updateHistory(const symbol_list_t &symlist) {
     for (size_t i=0; i < symlist.size(); i++) {
         m_history.push_back(symlist[i]);
@@ -218,16 +198,6 @@ void ContextTree::updateHistory(const symbol_list_t &symlist) {
 
 // removes the most recently observed symbol from the context tree
 void ContextTree::revert(void) {
-    // TODO: implement
-
-    /* Notes:
-       We can either store a snapshot of the tree in its entirety
-            We probably won't have enough memory to do this.
-       OR
-       Just recompute the tree -
-            delete whatever nodes were added by the last symbol.
-            recalculate estimates.
-    */
     
     // Get latest symbol (to update counts) and remove from history
     symbol_t latest_sym = m_history.back();
@@ -235,14 +205,14 @@ void ContextTree::revert(void) {
 
     // Path based on context
     CTNode *context_nodes[m_depth];
-    // context
+    // Symbols that are the context
     symbol_t context_symbols[m_depth];
 
     context_nodes[0] = m_root;
     // Traverse tree to leaf
     history_t::iterator hist_it = m_history.end() - 1;
     for (size_t n = 1; n < m_depth; ++n, --hist_it) {
-        context_symbols[n] = *hist_it;//m_history[m_history.size() - n];
+        context_symbols[n] = *hist_it;
         context_nodes[n] = context_nodes[n-1]->m_child[context_symbols[n]];
     }
 
@@ -303,8 +273,6 @@ void ContextTree::genRandomSymbols(symbol_list_t &symbols, size_t bits) {
 // generated bits
 void ContextTree::genRandomSymbolsAndUpdate(symbol_list_t &symbols, size_t bits) {
     for (size_t i=0; i < bits; i++) {
-        //make a symbol somehow
-        symbol_t sym; 
 
         double logJointProb = m_root->logProbWeighted();
         
@@ -315,9 +283,9 @@ void ContextTree::genRandomSymbolsAndUpdate(symbol_list_t &symbols, size_t bits)
         //calc probabilty that '0' follows
         double symbolCondProb = exp (logJointWithSymbolProb - logJointProb);
         
-        sym = rand01() > symbolCondProb;
+        symbol_t sym = rand01() > symbolCondProb;
         
-        // Only undo if necessary.
+        // Only revert the update of '0' if necessary.
         if (sym) {
             revert();
             update(sym);
@@ -331,13 +299,6 @@ void ContextTree::genRandomSymbolsAndUpdate(symbol_list_t &symbols, size_t bits)
 // the logarithm of the block probability of the whole sequence
 double ContextTree::logBlockProbability(void) {
     return m_root->logProbWeighted();
-}
-
-// TODO Watch out, returns the n'th history symbol (from the front),
-//      not the n'th most recent (from the back).
-// get the n'th most recent history symbol, NULL if doesn't exist
-const symbol_t *ContextTree::nthHistorySymbol(size_t n) const {
-    return n < m_history.size() ? &m_history[n] : NULL;
 }
 
 std::ostream& operator<< (std::ostream &out, CTNode &node){
