@@ -5,12 +5,6 @@
 
 #include <cmath>
 
-
-// search options
-static const visits_t     MinVisitsBeforeExpansion = 1;
-static const unsigned int MaxDistanceFromRoot  = 100;// Note, Agent defines it's own horizon size;
-static size_t             MaxSearchNodes;
-
 SearchNode::SearchNode(bool is_chance_node,
     unsigned int num_actions)
     : m_chance_node(is_chance_node), m_visits(0) {
@@ -33,24 +27,26 @@ SearchNode::~SearchNode() {
     }
 }
 
-// simulate a path through a hypothetical future for the agent within it's
-// internal model of the world, returning the accumulated reward.
+// simulate a sequence of random actions, returning the accumulated reward.
 static reward_t playout(Agent &agent, unsigned int playout_len) {
 	reward_t r = 0;
 	for (unsigned int i = 0; i < playout_len; ++i) {
 	    // Pick a random action
 	    action_t a = agent.genRandomAction();
 	    agent.modelUpdate(a);
-
+		
+		// Generate a random percept distributed according to the agent's
+		// internal model of the environment.
         percept_t rew;
         percept_t obs;
-	    agent.genPerceptAndUpdate(obs, rew); // random percept
+	    agent.genPerceptAndUpdate(obs, rew);
 	    
 	    r = r + rew;
     }
 	return r;
 }
 
+// UCB action selection strategy
 action_t SearchNode::selectAction(Agent& agent, unsigned int dfr) {
     //choose unexplored action at random if any and append to tree
     if (!m_unexplored_actions.empty()) {
@@ -81,19 +77,19 @@ action_t SearchNode::selectAction(Agent& agent, unsigned int dfr) {
     }
 }
 
+// Sample one possible sequence of future events, up to 'dfr' cycles.
 reward_t SearchNode::sample(Agent &agent, unsigned int dfr) {
     double newReward;
     if (dfr == 0) {
-        return 0;// TODO catch this earlier, no point generating any nodes at 
-                // this depth. Waste of space.
+        return 0;
     } else if (m_chance_node) {
-        // Generate whole observation-reward percept.
-        // Make sure the percept is added to the agent's model and history.
+        // Generate whole observation-reward percept,
+        // according to the agent's model of the environment.
         percept_t obs;
         percept_t rew;
         agent.genPerceptAndUpdate(obs, rew);
 
-        //calc index of whole percept
+        // Calculate the index of whole percept
         percept_t percept = (rew << agent.numObsBits()) | obs;
         
         if (m_child.count(percept) == 0) {
@@ -103,10 +99,12 @@ reward_t SearchNode::sample(Agent &agent, unsigned int dfr) {
     } else if (m_visits == 0) {
         newReward = playout(agent, dfr);
     } else {
+    	// Select an action to sample.
         action_t action = selectAction(agent, dfr);
         agent.modelUpdate(action);
         newReward = m_child[action]->sample(agent, dfr);
     }
+    // Update our estimate of the future reward.
     m_mean = (1.0 / (double) (m_visits + 1)) * (newReward + m_visits * m_mean);
     ++m_visits;
     return newReward;
@@ -126,7 +124,9 @@ extern action_t search(Agent &agent, timelimit_t timelimit) {
         agent.modelRevert(undo);
     }
     
-    // we assume timelimit is large enough so that every action was sampled. this is checked in main_loop.
+    // Choose the action that has the highest expected reward.
+    // We assume timelimit is large enough so that every action was sampled.
+    // This is asserted in main::mainLoop().
     double best_reward = search_tree.child(0)->expectation();
     unsigned int best_action = 0;
     for (unsigned int i = 1; i < agent.numActions(); ++i) {
