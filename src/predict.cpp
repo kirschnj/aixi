@@ -40,45 +40,12 @@ size_t CTNode::size(void) const {
 double CTNode::logKTMul(symbol_t sym) const {
     return log( (double) (m_count[sym] + 0.5)
                 / (double) (m_count[false] + m_count[true] + 1) );
-    
-    //TODO probably needs <cmath> for log.
-    // Note, CTNode includes a visits() function, which we could use in place
-    // of m_count[false] + m_count[true]. That's optional (they do exactly the
-    // same thing, just visits() looks shorter).
-
-    /* We could consider using a cache (like the table in the lectures) where
-       we calculate a bunch of smallish KT estimates, which are looked up
-       rather than re-computed every time we call this function.
-       I imagine a lookup will be faster than using log(), and considering
-       we'll be constantly updating the CTW tree, this should improve speed a
-       little. At least in the beginning, before we get really large numbers
-       for a and b (which won't be in our table).
-
-       A possible implementation:
-        
-        // Cache initialisation
-        int tableSize = 128 // Could make this larger even
-        double KTCache[tableSize][tableSize];
-        for (int i = 0; i < tableSize; i++) {
-            for (int j = 0; j < tableSize; j++) {
-                KTCache[i][j] = log( ((double) i + 0.5) / ((double) j + 1));
-            }
-        }
-
-        // Later calls to logKTMul
-        if (visits() < tableSize) {
-            return KTCache[m_count[sym]][visits()];
-        }
-
-    */
 }
 
 void CTNode::updateLogProbWeighted() {
     // Compute log(0.5 * (P_e + P_w0 * P_w1))
     // == log(0.5) + log(P_e)
     //    + log(1 + exp(log(P_w0) + log(P_w1) - log(P_e))
-    // TODO check syntax/calculation
-    // Johannes: did check, seems ok to me
 
     double log_w0;
     if (m_child[false] != NULL) {
@@ -102,8 +69,6 @@ void CTNode::updateLogProbWeighted() {
         // log(1 + exp(log(P_w0) + log(P_w1) - log(P_e)) becomes:
         // log(P_w0) + log(P_w1) - log(P_e)
         // Then log(P_e)'s cancel out.
-        // TODO double check this. 
-        // Johannes: looks good
         // log_half is defined static
         m_log_prob_weighted = log_half + log_w0 + log_w1; //approximate
     } else {
