@@ -34,11 +34,10 @@ const bool Pacman::maze[size][size] = {
     };
 
 
-// Adjacency list, for bfs
+// Adjacency list, used in BFS for ghost movement
 const vector< vector<int> > Pacman::adjList = Pacman::genAdjList();
 
-// Generate an adjacency list based on maze
-// TODO: this is rather large, at most 361*4 ints
+// Generate an adjacency list based on maze wall locations
 vector< vector<int> > Pacman::genAdjList(void) {
     vector< vector<int> > aList;
 
@@ -70,7 +69,8 @@ vector< vector<int> > Pacman::genAdjList(void) {
 }
 
 
-/** Use BFS to find a shortest path between two points
+/** Use BFS to find a shortest path between two points.
+    Assumes only movement in the four cardinal directions are possible.
     @param src Start point
     @param dest Destination point
     @return action_t Corresponding to best move from src
@@ -182,12 +182,12 @@ void Pacman::printCurses(void) {
     addch('\n');
 }
 
-// Is pacman under the effects of a power pill
+// Returns whether pacman is under the effects of a power pill
 bool Pacman::powerActive(void) {
     return (powerP > 0);
 }
 
-// Update entity positions only
+// Update entity positions (Pacman and Ghosts)
 void Pacman::updateWorldPositions(void) {
     world[pacman.row][pacman.col] = e_pacman;
     // Update ghosts
@@ -211,6 +211,7 @@ void Pacman::updateWorldPositions(void) {
 bool Pacman::entityAt(int row, int col, const int ent) {
     assert(row >= 0 && row < size);
     assert(col >= 0 && col < size);
+    // Get object at p
     int actual = world[row][col];
     if (actual == ent) return true;
     else if (ent == e_ghost) return (actual == e_gf || actual == e_gp);
@@ -232,7 +233,7 @@ void Pacman::eatGhosts(point &p) {
     }
 }
 
-// Check if a particular entity exists within "range" units away from p 
+// Check if a particular entity exists within "range" units from p 
 bool Pacman::entityScan(point &p, int range, const int ent) {
     // Start with square of length "range" centered on p
     for (int i = p.row - range; i < p.row + range; i++) {
@@ -242,7 +243,7 @@ bool Pacman::entityScan(point &p, int range, const int ent) {
             if (j < 0 || j >= size) continue;
             // Discard corners (outside "range" in Manhattan distance)
             if (abs(i - p.row) + abs(j - p.col) > range) continue;
-
+            // Check if the required entitiy is at this point
             if (entityAt(i, j, ent)) return true;
         }
     }
@@ -313,7 +314,6 @@ percept_t Pacman::genObservation(void) {
     bits[7] = lineOfSight(pacman, m_move_down, e_ghost);
 
     // 3 bits for food "smell" (Manhattan Distance)
-    // TODO: does a power pellet count as food?
     // Does food exist within 2 units?
     bits[8] = entityScan(pacman, 2, e_food);
     // Does food exist within 3 units?
@@ -379,8 +379,6 @@ int Pacman::genReward(void) {
 
 
 // Move a ghost
-// TODO: bfs if within 5 manhattan distance to chase pacman
-// TODO: might want an adjacency matrix
 void Pacman::moveGhost(int index) {
     int curRow = ghosts[index].row;
     int curCol = ghosts[index].col;
@@ -474,10 +472,10 @@ void Pacman::reset(void) {
 
     updateWorldPositions();
 
+    // Place food in empty locations with 0.5 probability
     for (int i = 0; i < size; i++) {
         for (int j = 0; j < size; j++) {
             int entity = world[i][j];
-            // Place food in empty locations with 0.5 probability
             if (entity == e_empty) {
                 if (rand01() < 0.5) {
                     ++numFood;

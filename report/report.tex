@@ -87,10 +87,21 @@
 
 \section{Introduction}
 The AIXI model \cite{Hutter:04uaibook} is an attempt to solve the general AI problem. The AIXI agent interacts with an environment in cycles. Denote by $\mathcal{A}, \mathcal{O}$ and $\mathcal{R}$ an action, observation and reward space respectively. In each cycle, AIXI takes an action $a \in \mathcal{A}$ and receives an observation $o \in \mathcal{O}$ and a reward $r \in \mathcal{R}$. The goal of the agent is to maximize the total future reward. AIXI does not require any previous knowledge of an environment, actions are chosen based on past perceptions, which are used to build a model of the environment. More specifically, AIXI chooses in cycle $k$ an action
-\[ a_k = \arg \max_{a_k} \sum_{o_kr_k} \dots \max_{a_m} \sum_{o_m r_m} (r_k + \dots + r_m)\xi(o_1r_1\dots o_m r_m|a_1\dots a_m) \]
-TODO: explain what $\xi$ is, and why it is good (because it is so large)
+\[ a_k = \arg \max_{a_k} \sum_{o_kr_k} \dots \max_{a_m} \sum_{o_m r_m} (r_k + \dots + r_m) \sum_{\rho \in \mathcal{M}}2^{-K(\rho)} \rho(o_1r_1\dots o_m r_m|a_1\dots a_m, \rho) \]
+Where $\mathcal{M}$ is the model class of all chronological semi-computable semi-measures and $K(\rho)$ is the Kolmogorov Complexity of $\rho$.
+
+\bigskip
 
 Unfortunately the AIXI model is incomputable. For all practical applications, the agent must be approximated. One approach in approximating AIXI is the MC-AIXI-CTW \cite{VNHS09} model. Here the expectimax search is solved by an Monte-Carlo approach. The UTC \cite{UCT} algorithm is used to balance exploration and exploitation. The class of environment models used in the implementation is a mixture of $d$-th order Markov Decision Process. Notably, Context Tree Weighting allows efficient linear time computation of this rather general class of models \cite{CTW}.
+
+\bigskip
+
+In comparison to AIXI, at cycle $k$ MC-AIXI-CTW selects an action
+\[ a_k = \arg \max_{a_k} \sum_{o_kr_k} \dots \max_{a_m} \sum_{o_m r_m} (r_k + \dots + r_m) \sum_{M \in \mathcal{C}_D}2^{-\Gamma_D(M)} \rho(o_1r_1\dots o_m r_m|a_1\dots a_m, M) \]
+Here $\mathcal{C}_D$ is the class of all prediction suffix trees of maximum depth $D$, and $\Gamma_D(M)$ is the description length of a context tree $M$.
+
+\bigskip
+
 In the following we present our implementation of the MC-AIXI-CTW model. In Section~\ref{usr} we explain how to use the program and specify different options. Section~\ref{results} describes the results of the model on several experimental environments.
 
 
@@ -147,7 +158,7 @@ TODO: reword the following paragraphs
 
 We evaluate the performance of our agent on five sample environments. For each environment the agent was allowed 100000 cycles to learn a model. During the learning process an exploratory constant was used. The performance of the model after various amounts of experience was then evaluated by running the agent without exploration for 5000 cycles, and the average reward per cycle reported.
 
-The parameters used for each environment are shown in Figure~\ref{tab:setup}. The experiments themselves were performed using a 3.47Ghx CPU with 4GB of RAM.
+The parameters used for each environment are shown in Figure~\ref{tab:setup}. The experiments themselves were performed using a 3.47GHz CPU with 4GB of RAM.
 
 \begin{figure}[H]
 \centering
@@ -187,7 +198,7 @@ How does aixi handle a change of the environment?\\
 \subsection{Discussion}
 How well did it do.
 
-Include statistics about cycles required for optimal performance, time per cycle as in the VNHS paper \cite{VNHS09}.
+Include statistics about cycles required for optimal performance, time per cycle as in the VNHS paper \cite{VNHS09}. Also note the number of simulations required at each cycle for near optimal performance.
 
 
 \bibliographystyle{alpha}
