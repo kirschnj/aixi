@@ -1,0 +1,69 @@
+Agent configuration:
+------------------------------
+OPTION: 'agent-actions' = '2'
+OPTION: 'agent-horizon' = '2'
+OPTION: 'coin-flip-p' = '0.2'
+OPTION: 'ct-depth' = '16'
+OPTION: 'environment' = 'coin-flip'
+OPTION: 'exploration' = '0.2'
+OPTION: 'explore-decay' = '0.999'
+OPTION: 'intermediate-ct' = '0'
+OPTION: 'load-ct' = ''
+OPTION: 'log' = 'log/coinflip4'
+OPTION: 'mc-timelimit' = '100'
+OPTION: 'observation-bits' = '1'
+OPTION: 'reward-bits' = '1'
+OPTION: 'terminate-age' = '20000'
+OPTION: 'write-ct' = ''
+
+starting agent/environment interaction loop...
+cycle: 1
+average reward: 0
+explore rate: 0.2
+cycle: 2
+average reward: 0
+explore rate: 0.1998
+cycle: 4
+average reward: 0.25
+explore rate: 0.199401
+cycle: 8
+average reward: 0.375
+explore rate: 0.198604
+cycle: 16
+average reward: 0.4375
+explore rate: 0.197021
+cycle: 32
+average reward: 0.53125
+explore rate: 0.193892
+cycle: 64
+average reward: 0.625
+explore rate: 0.187783
+cycle: 128
+average reward: 0.617188
+explore rate: 0.176136
+cycle: 256
+average reward: 0.617188
+explore rate: 0.154964
+cycle: 512
+average reward: 0.6875
+explore rate: 0.119948
+cycle: 1024
+average reward: 0.731445
+explore rate: 0.0718662
+cycle: 2048
+average reward: 0.748047
+explore rate: 0.0257979
+cycle: 4096
+average reward: 0.764648
+explore rate: 0.00332433
+cycle: 8192
+average reward: 0.779541
+explore rate: 5.52006e-05
+cycle: 16384
+average reward: 0.789856
+explore rate: 1.52203e-08
+
+
+SUMMARY
+agent age: 20000
+average reward: 0.7919
