@@ -29,6 +29,8 @@
 \usepackage[hidelinks]{hyperref}
 \usepackage{natbib} % bibliography
 \usepackage{float}
+\usepackage{graphicx}
+\DeclareGraphicsExtensions{.png,.jpg,.pdf}
 
 \usepackage{lipsum} % Used for inserting dummy 'Lorem ipsum' text into the template
 
@@ -192,6 +194,15 @@ How does aixi handle a change of the environment?\\
 \begin{figure}
 \input{plots/coinflip.tex}
 \caption{\label{plot:coinflip}Results on the coinflip environment}
+\end{figure}
+
+\begin{figure}
+\includegraphics[width=0.5\textwidth]{plots/tiger}
+\includegraphics[width=0.5\textwidth]{plots/rps}
+\includegraphics[width=0.5\textwidth]{plots/kpok}
+\includegraphics[width=0.5\textwidth]{plots/pacman}
+%\includegraphics[width=386px]{plots/pacman}
+\caption{\label{plot:rewards}Average Reward per Cycle vs Experience}
 \end{figure}
 
 
