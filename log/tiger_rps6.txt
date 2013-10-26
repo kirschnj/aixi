@@ -1,0 +1,68 @@
+Agent configuration:
+------------------------------
+OPTION: 'agent-actions' = '3'
+OPTION: 'agent-horizon' = '5'
+OPTION: 'ct-depth' = '32'
+OPTION: 'environment' = 'biased-rock-paper-scissor'
+OPTION: 'exploration' = '0'
+OPTION: 'explore-decay' = '0.999'
+OPTION: 'intermediate-ct' = '1'
+OPTION: 'load-ct' = 'ct-files/tiger_rps120000.ct'
+OPTION: 'log' = 'log/tiger_rps6'
+OPTION: 'mc-timelimit' = '500'
+OPTION: 'observation-bits' = '2'
+OPTION: 'reward-bits' = '2'
+OPTION: 'terminate-age' = '20000'
+OPTION: 'write-ct' = ''
+
+starting agent/environment interaction loop...
+cycle: 1
+average reward: 0
+explore rate: 0
+cycle: 2
+average reward: 0
+explore rate: 0
+cycle: 4
+average reward: 0.25
+explore rate: 0
+cycle: 8
+average reward: 0.625
+explore rate: 0
+cycle: 16
+average reward: 0.875
+explore rate: 0
+cycle: 32
+average reward: 1.0625
+explore rate: 0
+cycle: 64
+average reward: 1.03125
+explore rate: 0
+cycle: 128
+average reward: 0.953125
+explore rate: 0
+cycle: 256
+average reward: 1.01562
+explore rate: 0
+cycle: 512
+average reward: 1.11523
+explore rate: 0
+cycle: 1024
+average reward: 1.13184
+explore rate: 0
+cycle: 2048
+average reward: 1.16504
+explore rate: 0
+cycle: 4096
+average reward: 1.18384
+explore rate: 0
+cycle: 8192
+average reward: 1.18188
+explore rate: 0
+cycle: 16384
+average reward: 1.17963
+explore rate: 0
+
+
+SUMMARY
+agent age: 20000
+average reward: 1.1821
