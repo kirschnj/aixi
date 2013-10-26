@@ -86,9 +86,9 @@
 \maketitle % Print the title
 
 \section{Introduction}
-The AIXI model \cite{Hutter:04uaibook} is an attempt to solve the general AI problem. The AIXI agent interacts with an environment in cycles. Denote by $\mathcal{A}, \mathcal{O}$ and $\mathcal{R}$ an action, observation and reward space respectively. In each cycle, AIXI takes an action $a \in \mathcal{A}$ and receives an observation $o \in \mathcal{O}$ and a reward $r \in \mathcal{R}$. The goal of the agent is to maximize the total future reward. AIXI does not require any previous knowledge of an environment, actions are chosen based on past perceptions, which are used to build a model of the environment. More specifically, AIXI chooses in cycle $k$ an action
+The AIXI model \cite{Hutter:04uaibook} is an attempt to solve the general AI problem. The AIXI agent interacts with an environment in cycles. Denote by $\mathcal{A}, \mathcal{O}$ and $\mathcal{R}$ an action, observation and reward space respectively. In each cycle, AIXI takes an action $a \in \mathcal{A}$ and receives an observation $o \in \mathcal{O}$ and a reward $r \in \mathcal{R}$. The goal of the agent is to maximize the total future reward. AIXI does not require any previous knowledge of an environment, actions are chosen based on past perceptions, which are used to build a model of the environment. Let $\mathcal{M}$ be the model class of all chronological semi-computable semi-measures and $K(\rho)$ the Kolmogorov Complexity of $\rho$. Then AIXI chooses in cycle $k$ an action
 \[ a_k = \arg \max_{a_k} \sum_{o_kr_k} \dots \max_{a_m} \sum_{o_m r_m} (r_k + \dots + r_m) \sum_{\rho \in \mathcal{M}}2^{-K(\rho)} \rho(o_1r_1\dots o_m r_m|a_1\dots a_m, \rho) \]
-Where $\mathcal{M}$ is the model class of all chronological semi-computable semi-measures and $K(\rho)$ is the Kolmogorov Complexity of $\rho$.
+
 
 \bigskip
 
@@ -126,7 +126,7 @@ Include trained ctw data?? I think this is a good idea Johannes
 
 \subsection{Configuration Options}
 
-Options can be either specified in the configuration file or passed directly as --option=value to the program. Several configuration files are available, each specifies a particular environment and a set of default options. 
+Options can be either specified in the configuration file or passed directly as -{}-option=value to the program. Several configuration files are available, each specifies a particular environment and a set of default options. 
 
 \subsubsection*{Available Options}
 
@@ -181,12 +181,53 @@ Present Results/Graphs of each environment. Maybe mention optimal result and/or 
 All environments except for Pacman have a known optimal policy and reward.
 
 \subsection{Further Experiments}
-Include results to do with forgetting past model - changing environments
 
-How does the exploration constant affect learning? (tiger env)\\
-How does aixi handle a change of the environment?\\
--- Compare 0.3 coinflip to 0.7 coinflip\\
--- biased rps vs tiger\\
+\paragraph{0.2 Coin vs 0.8 Coin}
+We run the coinflip environment with the following settings:
+\begin{tabular}{|l|c|c|c|c|c|}
+\hline
+Domain & CTW depth & $m$ & $\epsilon$ & $\rho$UCT Simulations & bias $p$\\\hline
+Coinflip A & 16 & 2 & 0.999 & 100 & 0.8\\
+Coinflip B & 16 & 2 & 0.999 & 100 & 0.2\\\hline
+\end{tabular}
+The values are chosen to give reasonable speed and accuracy. We run the following experiments:
+
+\begin{enumerate}
+ \setlength{\itemsep}{0cm}%
+  \setlength{\parskip}{0cm}%
+\item run agent on A with exploration=0.2 and save context tree\label{coinflip_a_ct}
+\item run agent on A with exploration=0
+\item load context tree generated in \ref{coinflip_a_ct}. and run agent on A with exploration=0
+\item run agent on B, exploration = 0.2 (expected: same result as in 1.)
+\item run agent on B, exploration = 0 (expected: same result as in 2.)
+\item load tree 1, run agent on B with exploration = 0
+\item load tree 1, run agent on B with exploration = 0.2
+\end{enumerate}
+TODO: Add plot with results for 1-7
+
+
+
+\paragraph{Biased rps vs tiger}
+
+\begin{tabular}{|l|c|c|c|c|c|}
+\hline
+Domain & CTW depth & $m$ & $\epsilon$ &$\gamma $ & $\rho$ UCT Simulations\\\hline
+Tiger & 32 & 5 & 0.999 & 0.99 & 500\\
+rps & 32 & 5 & 0.999 & 0.99 & 500\\\hline
+\end{tabular}
+\begin{enumerate}
+ \setlength{\itemsep}{0cm}%
+  \setlength{\parskip}{0cm}%
+\item run agent in Tiger environment and save context tree
+\item load context tree and run Tiger environment with exploration=0
+\item run rps environment
+\item run rps environment with exploration=0
+\item load tiger context tree and run rps environment 
+\item load tiger context tree and run rps environment with exploration=0
+\end{enumerate}
+
+TODO: Add plot with results for 1-6
+
 
 %sample graph
 \begin{figure}
