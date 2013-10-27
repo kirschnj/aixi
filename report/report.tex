@@ -143,6 +143,11 @@ Options can be either specified in the configuration file or passed directly as 
     \item tiger
 \end{itemize}
 
+\paragraph{-{}-ct-depth=M} Set the maximum depth of the context tree used for prediction to $M$.
+%\paragraph{-{}-reward-bits=N} Number of bits used to encode a reward.
+%\paragraph{-{}-observation-bits=N} Number of bits used to encode an observation.
+\paragraph{-{}-agent-horizon=N} The number of percept/action pairs to look forward.
+%\paragraph{-{}-agent-actions=N} The number of distinct actions an agent can perform.
 \paragraph{-{}-mc-timelimit=N} The number $N$ of MC simulations per cycle.
 \paragraph{-{}-write-ct=file} Write CTW to file before agent termination.
 \paragraph{-{}-load-ct=file} Specifies a (trained) CTW for the agent to load at initialisation.
@@ -156,11 +161,10 @@ Options can be either specified in the configuration file or passed directly as 
 
 \section{\label{results}Experimental Results}
 \subsection{Experimental Setup}
-TODO: reword the following paragraphs
 
-We evaluate the performance of our agent on five sample environments. For each environment the agent was allowed 100000 cycles to learn a model. During the learning process an exploratory constant was used. The performance of the model after various amounts of experience was then evaluated by running the agent without exploration for 5000 cycles, and the average reward per cycle reported.
+The performance of our agent was evaluated on five sample environments. For each environment the agent was allowed 100000 cycles to learn a model. During the learning process an exploratory constant was used. The performance of the model after various amounts of experience was then evaluated by running the agent without exploration for 5000 cycles, and the average reward per cycle reported.
 
-The parameters used for each environment are shown in Figure~\ref{tab:setup}. The experiments themselves were performed using a 3.47GHz CPU with 4GB of RAM.
+The parameters used for learning each environment are shown in Figure~\ref{tab:setup}. The experiments themselves were performed using a 3.47GHz CPU with 4GB of RAM.
 
 \begin{figure}[H]
 \centering
@@ -176,13 +180,47 @@ Tiger & 96 & 5 & 0.99 & 0.9999 & 500\\\hline
 \caption{\label{tab:setup}MC-AIXI-CTW model learning configuration}
 \end{figure}
 
+$m$, $\epsilon$, $\gamma$ and $\rho$UCT Simulations correspond to the options "agent-horizon", "exploration", "explore-decay" and "mc-timelimit" as described previoiusly.
 
 \subsection{Results}
-Present Results/Graphs of each environment. Maybe mention optimal result and/or scale results accordingly
 
-All environments except for Pacman have a known optimal policy and reward.
+\setlength\parindent{20pt}
+All environments except for Pacman have a known optimal policy and reward. Figure~\ref{plot:rewards} shows the average reward obtained by the agent in four environments, using a model with various cycles of experience. Generally the agent's performance improves with training, and approaches optimality. While the agent manages to improve average reward, our results are not quite as succesful as those given in the original paper \ref{VNHS09}. There are two main explanations for this.
+
+Only 500 simulations were used during each cycle of model evaluation, while Veness et al. indicated that up to 25000 simulations are required for near optimal performance on some environements. Fewer simulations provided poorer estimates for the $\rho$UCT sampling process, and may occasionally lead to the selection of the incorrect action.
+
+The most likely contributor to the difference in performance is due the implementation of model prediction. Veness et al. implement a factored CTW model, which allows for far greater predictive capabilities by using a chain of action-conditional prediction suffix trees. Each tree essentially deals with a single bit of an environment's percept space. In contrast, our implementation uses only a single tree.
+
+While far simpler, a single tree allows only a single model for predicting percepts, and notably cannot distinguish between observation and reward bits. Consequently larger depth trees must be used in order to extract information from percepts, and the implementation generates an overall environment model which is more complex than necessary. Rather than predicting observations and rewards individually, no differentiation between the two is possible using a single CTW tree. Clearly then, such an agent cannot be expected to perform as well as an agent which models percepts separately.
+
+Nevertheless, even with this rather limited environment model, our agent still manages to perform reasonably well in a variety of test domains.
+
+\begin{figure}
+\includegraphics[width=0.5\textwidth]{plots/tiger}
+\includegraphics[width=0.5\textwidth]{plots/rps}
+\includegraphics[width=0.5\textwidth]{plots/kpok}
+\includegraphics[width=0.5\textwidth]{plots/pacman}
+%\includegraphics[width=386px]{plots/pacman}
+\caption{\label{plot:rewards}Average Reward per Cycle vs Experience}
+\end{figure}
+
+Performance on Pacman is significantly worse than on the other environments. While an optimal policy and reward for this domain are currently unknown, average rewards of approximately 2 are entirely possible.\\
+TODO: visual inspection of agent playing pacman...\\
+Learns to move.\\
+Does not actively chase ghosts under effects of power pills\\
+Never won a single game.
+
+\setlength\parindent{0pt}
 
 \subsection{Further Experiments}
+
+\begin{figure}
+\includegraphics[width=\textwidth]{plots/coinflip_tests1}
+\includegraphics[width=\textwidth]{plots/rps_tiger_1}
+%\includegraphics[width=\textwidth]{plots/coinflip_tests}
+%\includegraphics[width=\textwidth]{plots/rps_tiger_trim}
+\caption{\label{plot:cointests}Further experiments}
+\end{figure}
 
 \paragraph{0.2 Coin vs 0.8 Coin}
 We run the coinflip environment with the following settings:
@@ -205,17 +243,6 @@ The values are chosen to give reasonable speed and accuracy. We run the followin
 \item load tree 1, run agent on B with exploration = 0
 \item load tree 1, run agent on B with exploration = 0.2
 \end{enumerate}
-TODO: Add plot with results for 1-7
-
-\begin{figure}
-\includegraphics[width=\textwidth]{plots/coinflip_tests1}
-\includegraphics[width=\textwidth]{plots/rps_tiger_1}
-%\includegraphics[width=\textwidth]{plots/coinflip_tests}
-%\includegraphics[width=\textwidth]{plots/rps_tiger_trim}
-\caption{\label{plot:cointests}Further experiments}
-\end{figure}
-
-
 
 \paragraph{Biased rps vs tiger}
 
@@ -236,27 +263,15 @@ rps & 32 & 5 & 0.999 & 0.99 & 500\\\hline
 \item load tiger context tree and run rps environment with exploration=0
 \end{enumerate}
 
-TODO: Add plot with results for 1-6
-
 
 %sample graph
-\begin{figure}
-\input{plots/coinflip.tex}
-\caption{\label{plot:coinflip}Results on the coinflip environment}
-\end{figure}
-
-\begin{figure}
-\includegraphics[width=0.5\textwidth]{plots/tiger}
-\includegraphics[width=0.5\textwidth]{plots/rps}
-\includegraphics[width=0.5\textwidth]{plots/kpok}
-\includegraphics[width=0.5\textwidth]{plots/pacman}
-%\includegraphics[width=386px]{plots/pacman}
-\caption{\label{plot:rewards}Average Reward per Cycle vs Experience}
-\end{figure}
+%\begin{figure}
+%\input{plots/coinflip.tex}
+%\caption{\label{plot:coinflip}Results on the coinflip environment}
+%\end{figure}
 
 
 \subsection{Discussion}
-How well did it do.
 
 Include statistics about cycles required for optimal performance, time per cycle as in the VNHS paper \cite{VNHS09}. Also note the number of simulations required at each cycle for near optimal performance.
 
