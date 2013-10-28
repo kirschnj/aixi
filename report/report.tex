@@ -124,7 +124,7 @@ Our approximation of aixi is written in C++ and requires g++ for compilation.
 \indent \textit{./aixi file.conf [-{}-option1=value1 -{}-option2=value2 \dots]}
 \setlength\parindent{0pt}
 
-Include trained ctw data?? I think this is a good idea Johannes
+%Include trained ctw data?? I think this is a good idea Johannes
 
 \subsection{Configuration Options}
 
@@ -132,7 +132,7 @@ Options can be either specified in the configuration file or passed directly as 
 
 \subsubsection*{Available Options}
 
-\paragraph{-{}-environment=env} Specifies the environment. Available environments are
+\paragraph{-{}-environment=env} Specifies the environment. This option is mandatory. Available environments are
 \begin{itemize}
 \itemsep0pt
 \renewcommand\labelitemi{--}
@@ -143,25 +143,45 @@ Options can be either specified in the configuration file or passed directly as 
     \item tiger
 \end{itemize}
 
-\paragraph{-{}-ct-depth=M} Set the maximum depth of the context tree used for prediction to $M$.
+Further optional arguments are listed below:
+
+\bigskip
+
+\begin{tabular}{ll}
+Option & Effect \\\hline
+\textsc{-{}-ct-depth=M} & Maximum depth of the context tree used for prediction.\\
+\textsc{-{}-agent-horizon=N} & Number of percept/action pairs to look forward.\\
+\textsc{-{}-mc-timelimit=N} & Number $N$ of MC simulations per cycle.\\
+\textsc{-{}-write-ct=file} & Write CTW to file before agent termination.\\
+\textsc{-{}-load-ct=file} & Specifies a (trained) CT to load at initialisation.\\
+\textsc{-{}-log=file} & Specifies the name of the log file.\\
+\textsc{-{}-terminate-age=N} & The number $N$ of agent/environment interaction cycles.\\
+\textsc{-{}-exploration=P} & Probability $0 \leq P \leq 1$ of taking a random action.\\
+\textsc{-{}-explore-decay=D} & Geometric decay of the exploration rate $0 \leq D \leq 1$\\
+\textsc{-{}-intermediate-ct=[1|0]} & Set whether a CT is written at time $t=2^k$. Default is 1.\\
+\end{tabular}
+
+%\paragraph{-{}-ct-depth=M} Set the maximum depth of the context tree used for prediction to $M$.
 %\paragraph{-{}-reward-bits=N} Number of bits used to encode a reward.
 %\paragraph{-{}-observation-bits=N} Number of bits used to encode an observation.
-\paragraph{-{}-agent-horizon=N} The number of percept/action pairs to look forward.
+%\paragraph{-{}-agent-horizon=N} The number of percept/action pairs to look forward.
 %\paragraph{-{}-agent-actions=N} The number of distinct actions an agent can perform.
-\paragraph{-{}-mc-timelimit=N} The number $N$ of MC simulations per cycle.
-\paragraph{-{}-write-ct=file} Write CTW to file before agent termination.
-\paragraph{-{}-load-ct=file} Specifies a (trained) CTW for the agent to load at initialisation.
-\paragraph{-{}-log=file}
-\paragraph{-{}-terminate-age=N} The number $N$ of agent/environment interaction cycles.
-\paragraph{-{}-exploration=P} Probability $0 \leq P \leq 1$ that a action is chosen randomly.
-\paragraph{-{}-explore-decay=D} Decay $0 \leq D \leq 1$ of exploration constant. $P$ is multiplied by $D$ in each cycle.
-\paragraph{-{}-intermediate-ct=[1|0]} If set to 0 , no intermediate context tree at time $t=2^k$ is written. Default is 1. (TODO: I actually would prefer default 0 but that's not so important :)  Johannes)
+%\paragraph{-{}-mc-timelimit=N} The number $N$ of MC simulations per cycle.
+%\paragraph{-{}-write-ct=file} Write CTW to file before agent termination.
+%\paragraph{-{}-load-ct=file} Specifies a (trained) CTW for the agent to load at initialisation.
+%\paragraph{-{}-log=file}
+%\paragraph{-{}-terminate-age=N} The number $N$ of agent/environment interaction cycles.
+%\paragraph{-{}-exploration=P} Probability $0 \leq P \leq 1$ that a action is chosen randomly.
+%\paragraph{-{}-explore-decay=D} Decay $0 \leq D \leq 1$ of exploration constant. $P$ is multiplied by $D$ in each cycle.
+%\paragraph{-{}-intermediate-ct=[1|0]} If set to 0, no intermediate context tree at time $t=2^k$ is written. Default is 1.
+%(TODO: I actually would prefer default 0 but that's not so important :)  Johannes)
 %\paragraph{-{}-}
 
 
 \section{\label{results}Experimental Results}
 \subsection{Experimental Setup}
 
+\setlength\parindent{20pt}
 The performance of our agent was evaluated on five sample environments. For each environment the agent was allowed 100000 cycles to learn a model. During the learning process an exploratory constant was used. The performance of the model after various amounts of experience was then evaluated by running the agent without exploration for 5000 cycles, and the average reward per cycle reported.
 
 The parameters used for learning each environment are shown in Figure~\ref{tab:setup}. The experiments themselves were performed using a 3.47GHz CPU with 4GB of RAM.
@@ -172,7 +192,7 @@ The parameters used for learning each environment are shown in Figure~\ref{tab:s
 \hline
 Domain & CTW depth & $m$ & $\epsilon$ & $\gamma$ & $\rho$UCT Simulations\\\hline
 Biased Rock-Paper-Scissor & 32 & 4 & 0.999 & 0.99999 & 500\\
-Coinflip & x & x & x & x & x00\\
+%Coinflip & x & x & x & x & x00\\
 Kuhn-Poker & 42 & 2 & 0.99 & 0.9999 & 500\\
 Partial Observable Pacman & 96 & 4 & 0.9999 & 0.99999 & 500\\
 Tiger & 96 & 5 & 0.99 & 0.9999 & 500\\\hline
@@ -180,12 +200,11 @@ Tiger & 96 & 5 & 0.99 & 0.9999 & 500\\\hline
 \caption{\label{tab:setup}MC-AIXI-CTW model learning configuration}
 \end{figure}
 
-$m$, $\epsilon$, $\gamma$ and $\rho$UCT Simulations correspond to the options "agent-horizon", "exploration", "explore-decay" and "mc-timelimit" as described previoiusly.
+\noindent $m$, $\epsilon$, $\gamma$ and $\rho$UCT Simulations correspond to the options "agent-horizon", "exploration", "explore-decay" and "mc-timelimit" as described previoiusly.
 
 \subsection{Results}
 
-\setlength\parindent{20pt}
-All environments except for Pacman have a known optimal policy and reward. Figure~\ref{plot:rewards} shows the average reward obtained by the agent in four environments, using a model with various cycles of experience. Generally the agent's performance improves with training, and approaches optimality. While the agent manages to improve average reward, our results are not quite as succesful as those given in the original paper \ref{VNHS09}. There are two main explanations for this.
+All environments except for Pacman have a known optimal policy and reward. Figure~\ref{plot:rewards} shows the average reward obtained by the agent in four environments, using a model with various cycles of experience. Generally the agent's performance improves with training, and approaches optimality. However our results are not quite as succesful as those given in the original paper \cite{VNHS09}. There are two main explanations for this.
 
 Only 500 simulations were used during each cycle of model evaluation, while Veness et al. indicated that up to 25000 simulations are required for near optimal performance on some environements. Fewer simulations provided poorer estimates for the $\rho$UCT sampling process, and may occasionally lead to the selection of the incorrect action.
 
@@ -193,7 +212,9 @@ The most likely contributor to the difference in performance is due the implemen
 
 While far simpler, a single tree allows only a single model for predicting percepts, and notably cannot distinguish between observation and reward bits. Consequently larger depth trees must be used in order to extract information from percepts, and the implementation generates an overall environment model which is more complex than necessary. Rather than predicting observations and rewards individually, no differentiation between the two is possible using a single CTW tree. Clearly then, such an agent cannot be expected to perform as well as an agent which models percepts separately.
 
-Nevertheless, even with this rather limited environment model, our agent still manages to perform reasonably well in a variety of test domains.
+Performance on Pacman is significantly worse than on the other environments. While an optimal policy and reward for this domain are currently unknown, average rewards of approximately 2 are entirely possible. From a visual inspection of the agent playing pacman, the agent appears to have learnt how to move without bumping into walls, but still generally fails to actively find and eat food. Such poor behaviour can be explained by the lack of a factored CTW implementation, but also by a lack of training. At 100000 cycles the agent's performance is in fact comparable to the implementation of Veness et al. With one million cycles to refine an environment model, the agent may approach positive average rewards.
+
+Overall, we find that even with a rather limited environment model, our agent still manages to learn and improve average reward on a variety of test domains.
 
 \begin{figure}
 \includegraphics[width=0.5\textwidth]{plots/tiger}
@@ -203,12 +224,6 @@ Nevertheless, even with this rather limited environment model, our agent still m
 %\includegraphics[width=386px]{plots/pacman}
 \caption{\label{plot:rewards}Average Reward per Cycle vs Experience}
 \end{figure}
-
-Performance on Pacman is significantly worse than on the other environments. While an optimal policy and reward for this domain are currently unknown, average rewards of approximately 2 are entirely possible.\\
-TODO: visual inspection of agent playing pacman...\\
-Learns to move.\\
-Does not actively chase ghosts under effects of power pills\\
-Never won a single game.
 
 \setlength\parindent{0pt}
 
@@ -224,13 +239,19 @@ Never won a single game.
 
 \paragraph{0.2 Coin vs 0.8 Coin}
 We run the coinflip environment with the following settings:
+
+\bigskip
+
 \begin{tabular}{|l|c|c|c|c|c|}
 \hline
 Domain & CTW depth & $m$ & $\epsilon$ & $\rho$UCT Simulations & bias $p$\\\hline
 Coinflip A & 16 & 2 & 0.999 & 100 & 0.8\\
 Coinflip B & 16 & 2 & 0.999 & 100 & 0.2\\\hline
 \end{tabular}
-The values are chosen to give reasonable speed and accuracy. We run the following experiments:
+
+\bigskip
+
+These values were chosen to give reasonable speed and accuracy. The following experiments were then conducted:
 
 \begin{enumerate}
  \setlength{\itemsep}{0cm}%
@@ -244,7 +265,10 @@ The values are chosen to give reasonable speed and accuracy. We run the followin
 \item load tree 1, run agent on B with exploration = 0.2
 \end{enumerate}
 
-\paragraph{Biased rps vs tiger}
+\paragraph{Biased RPS vs Tiger}
+Experiments were also conducted on the Biased Rock Paper Scissor and Tiger domains.
+
+\bigskip
 
 \begin{tabular}{|l|c|c|c|c|c|}
 \hline
@@ -252,6 +276,9 @@ Domain & CTW depth & $m$ & $\epsilon$ &$\gamma $ & $\rho$ UCT Simulations\\\hlin
 Tiger & 32 & 5 & 0.999 & 0.99 & 500\\
 rps & 32 & 5 & 0.999 & 0.99 & 500\\\hline
 \end{tabular}
+
+\bigskip
+
 \begin{enumerate}
  \setlength{\itemsep}{0cm}%
   \setlength{\parskip}{0cm}%
