@@ -73,7 +73,7 @@
 \horrule{2pt} \\[0.5cm] % Thick bottom horizontal rule
 }
 
-\author{Johannes Kirschner\\ Kerry Olesen\\ Jesse Wu} % Your name
+\author{Johannes Kirschner, Kerry Olesen, Jesse Wu} % Your name
 
 \date{\normalsize\today} % Today's date or a custom date
 
@@ -228,9 +228,10 @@ Overall, we find that even with a rather limited environment model, our agent st
 
 \setlength\parindent{0pt}
 
-\subsection{Further Experiments and Discussion}
+\pagebreak
+\subsection{Further Experiments}
 
-\paragraph{0.2 Coin vs 0.8 Coin} To see how well the agent handles a sudden change of the environment it is in, we conducted the following experiment. The agent is trained in a simple 0.8 biased coinflip environment and the generated context tree is saved. This data is then loaded in a new 0.2 biased coinflip environment. We used the following settings:
+\paragraph{0.2 Coin vs 0.8 Coin} To see how well the agent handles a sudden change of the environment, we conducted the following experiment. The agent is trained in a simple 0.8 biased coinflip environment and the generated context tree is saved. This data is then loaded in a new 0.2 biased coinflip environment. The agent was evaluated during 20000 cycles with the following settings:
 
 \bigskip
 
@@ -248,19 +249,19 @@ These values were chosen to give reasonable speed and accuracy. In detail, the f
 \begin{enumerate}
  \setlength{\itemsep}{0cm}%
   \setlength{\parskip}{0cm}%
-\item run agent on A with exploration=0.2 and save context tree\label{coinflip_a_ct}
-\item run agent on A with exploration=0
-\item load context tree generated in \ref{coinflip_a_ct}. and run agent on A with exploration=0
-\item run agent on B, exploration = 0.2 (expected: same result as in 1.)
-\item run agent on B, exploration = 0 (expected: same result as in 2.)
-\item load tree 1, run agent on B with exploration = 0
-\item load tree 1, run agent on B with exploration = 0.2
+\item environment A with exploration=0.2,\emph{ save context tree}\label{coinflip_a_ct}
+\item environment A with exploration=0
+\item environment A with exploration=0, \emph{context tree A loaded}
+\item environment B, exploration = 0.2 (expected: same result as in 1.)
+\item environment B, exploration = 0 (expected: same result as in 2.)
+\item environment B with exploration = 0, \emph{context tree A loaded}
+\item environment B with exploration = 0.2, \emph{context tree A loaded}
 \end{enumerate}
 
-The most interesting results are summarized in figure \ref{plot:cointests}.  Compared to the normal learning case (4) the agent does not perform well anymore in the new environment if exploration is suppressed (6) and it only slowly learns the new strategy. If exploration is permitted the new environment can be learned much faster (7).
+Experiments 1-5 should be seen as reference values for the settings in 6-7 where the agent acts in environment B with the model of environment A. The most interesting results are summarized in figure \ref{plot:cointests}.  Compared to the normal learning case (4) the agent does not perform well anymore in the new environment if exploration is suppressed (6) and it only slowly learns the new strategy. If exploration is permitted the new environment can be learned faster (7). To reach a 0.75 average reward it took the agent 1600 cycles in setting (4), 10700 cycles in setting (6) and 5000 cycles in setting (7). Full results are presented in figure \ref{plot:cointests_all}.
 
 \paragraph{Biased RPS vs Tiger}
-A similar experiment was also conducted on the Biased Rock Paper Scissor and Tiger domains. We used the following settings:
+A similar experiment was also conducted on the biased rock-paper-scissor and tiger domains. The agent was evaluated during 20000 cycles with the following settings:
 
 \bigskip
 
@@ -277,26 +278,26 @@ The following test runs where recorded:
 \begin{enumerate}
  \setlength{\itemsep}{0cm}%
   \setlength{\parskip}{0cm}%
-\item run agent in Tiger environment and save context tree
-\item load context tree and run Tiger environment with exploration=0
-\item run rps environment
-\item run rps environment with exploration=0
-\item load tiger context tree and run rps environment 
-\item load tiger context tree and run rps environment with exploration=0
+\item tiger environment,\emph{ save context tree}
+\item tiger environment with exploration=0, context tree loaded
+\item rock-paper-scissor environment
+\item rock-paper-scissor environment with exploration=0
+\item rock-paper-scissor environment, \emph{tiger context tree loaded} 
+\item rock-paper-scissor environment with exploration=0, \emph{tiger context tree loaded} 
 \end{enumerate}
 
-The results for (3), (5), (6) are presented in figure \ref{plot:cointests}. In this case the context tree structure from a different environment doesn't seem to affect the agent. Moreover, with exploration turned off the agent performs better in spite of the `wrong' model. To explain this we have to assume that the context tree of the tiger environment is similar to the one generated in rock-paper-scissor, so forgetting old percepts is not necessary. 
+The results for (3), (5), (6) are presented in figure \ref{plot:cointests}. In this case the context tree structure from a different environment doesn't seem to affect the agent. Moreover, with exploration turned off the agent performs better in spite of the `wrong' model. To explain this we have to assume that the context tree of the tiger environment is similar to the one generated in rock-paper-scissor, so forgetting old percepts is not necessary. Results of all test runs can be found in figure \ref{plot:cointests_all}.
 
-\begin{figure}
-\includegraphics[width=\textwidth]{plots/coinflip_tests1}
-\includegraphics[width=\textwidth]{plots/rps_tiger_1}
+\begin{figure}[h]
+\includegraphics[width=0.5\textwidth]{plots/coinflip_tests1}
+\includegraphics[width=0.5\textwidth]{plots/rps_tiger_1}
 \caption{\label{plot:cointests}Further experiments}
 \end{figure}
 
-\begin{figure}
-\includegraphics[width=\textwidth]{plots/coinflip_tests}
-\includegraphics[width=\textwidth]{plots/rps_tiger_trim}
-\caption{\label{plot:cointests_all}Further experiments: all results. Result (5) in the coinflip experiment seems to be an outlier, the agent was run again with the same settings resulting in (5a). The reason for this is probably the use of a single context tree instead of a factored context tree.}
+\begin{figure}[h]
+\includegraphics[width=0.5\textwidth]{plots/coinflip_tests}
+\includegraphics[width=0.5\textwidth]{plots/rps_tiger_trim}
+\caption{\label{plot:cointests_all}Further experiments, all results. Result (5) in the coinflip experiment seems to be an outlier, the agent was run again with the same settings resulting in (5a). The reason for this is probably the use of a single context tree instead of a factored context tree.}
 \end{figure}
 
 %sample graph
@@ -309,8 +310,7 @@ The results for (3), (5), (6) are presented in figure \ref{plot:cointests}. In t
 %\subsection{Discussion}
 %
 %Include statistics about cycles required for optimal performance, time per cycle as in the VNHS paper \cite{VNHS09}. Also note the number of simulations required at each cycle for near optimal performance.
-
-
+\newpage
 \bibliographystyle{alpha}
 \bibliography{references}
 
