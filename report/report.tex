@@ -200,13 +200,13 @@ Tiger & 96 & 5 & 0.99 & 0.9999 & 500\\\hline
 \caption{\label{tab:setup}MC-AIXI-CTW model learning configuration}
 \end{figure}
 
-\noindent $m$, $\epsilon$, $\gamma$ and $\rho$UCT Simulations correspond to the options "agent-horizon", "exploration", "explore-decay" and "mc-timelimit" as described previoiusly.
+\noindent $m$, $\epsilon$, $\gamma$ and $\rho$UCT Simulations correspond to the options "agent-horizon", "exploration", "explore-decay" and "mc-timelimit" as described previously.
 
 \subsection{Results}
 
-All environments except for Pacman have a known optimal policy and reward. Figure~\ref{plot:rewards} shows the average reward obtained by the agent in four environments, using a model with various cycles of experience. Generally the agent's performance improves with training, and approaches optimality. However our results are not quite as succesful as those given in the original paper \cite{VNHS09}. There are two main explanations for this.
+All environments except for Pacman have a known optimal policy and reward. Figure~\ref{plot:rewards} shows the average reward obtained by the agent in four environments, using a model with various cycles of experience. Generally the agent's performance improves with training, and approaches optimality. However our results are not quite as successful as those given in the original paper \cite{VNHS09}. There are two main explanations for this.
 
-Only 500 simulations were used during each cycle of model evaluation, while Veness et al. indicated that up to 25000 simulations are required for near optimal performance on some environements. Fewer simulations provided poorer estimates for the $\rho$UCT sampling process, and may occasionally lead to the selection of the incorrect action.
+Only 500 simulations were used during each cycle of model evaluation, while Veness et al. indicated that up to 25000 simulations are required for near optimal performance on some environments. Fewer simulations provided poorer estimates for the $\rho$UCT sampling process, and may occasionally lead to the selection of the incorrect action.
 
 The most likely contributor to the difference in performance is due the implementation of model prediction. Veness et al. implement a factored CTW model, which allows for far greater predictive capabilities by using a chain of action-conditional prediction suffix trees. Each tree essentially deals with a single bit of an environment's percept space. In contrast, our implementation uses only a single tree.
 
