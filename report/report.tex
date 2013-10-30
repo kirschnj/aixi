@@ -228,18 +228,9 @@ Overall, we find that even with a rather limited environment model, our agent st
 
 \setlength\parindent{0pt}
 
-\subsection{Further Experiments}
+\subsection{Further Experiments and Discussion}
 
-\begin{figure}
-\includegraphics[width=\textwidth]{plots/coinflip_tests1}
-\includegraphics[width=\textwidth]{plots/rps_tiger_1}
-%\includegraphics[width=\textwidth]{plots/coinflip_tests}
-%\includegraphics[width=\textwidth]{plots/rps_tiger_trim}
-\caption{\label{plot:cointests}Further experiments}
-\end{figure}
-
-\paragraph{0.2 Coin vs 0.8 Coin}
-We run the coinflip environment with the following settings:
+\paragraph{0.2 Coin vs 0.8 Coin} To see how well the agent handles a sudden change of the environment it is in, we conducted the following experiment. The agent is trained in a simple 0.8 biased coinflip environment and the generated context tree is saved. This data is then loaded in a new 0.2 biased coinflip environment. We used the following settings:
 
 \bigskip
 
@@ -252,7 +243,7 @@ Coinflip B & 16 & 2 & 0.999 & 100 & 0.2\\\hline
 
 \bigskip
 
-These values were chosen to give reasonable speed and accuracy. The following experiments were then conducted:
+These values were chosen to give reasonable speed and accuracy. In detail, the following experiments were conducted:
 
 \begin{enumerate}
  \setlength{\itemsep}{0cm}%
@@ -266,8 +257,10 @@ These values were chosen to give reasonable speed and accuracy. The following ex
 \item load tree 1, run agent on B with exploration = 0.2
 \end{enumerate}
 
+The most interesting results are summarized in figure \ref{plot:cointests}.  Compared to the normal learning case (4) the agent does not perform well anymore in the new environment if exploration is suppressed (6) and it only slowly learns the new strategy. If exploration is permitted the new environment can be learned much faster (7).
+
 \paragraph{Biased RPS vs Tiger}
-Experiments were also conducted on the Biased Rock Paper Scissor and Tiger domains.
+A similar experiment was also conducted on the Biased Rock Paper Scissor and Tiger domains. We used the following settings:
 
 \bigskip
 
@@ -280,6 +273,7 @@ rps & 32 & 5 & 0.999 & 0.99 & 500\\\hline
 
 \bigskip
 
+The following test runs where recorded:
 \begin{enumerate}
  \setlength{\itemsep}{0cm}%
   \setlength{\parskip}{0cm}%
@@ -291,6 +285,19 @@ rps & 32 & 5 & 0.999 & 0.99 & 500\\\hline
 \item load tiger context tree and run rps environment with exploration=0
 \end{enumerate}
 
+The results for (3), (5), (6) are presented in figure \ref{plot:cointests}. In this case the context tree structure from a different environment doesn't seem to affect the agent. Moreover, with exploration turned off the agent performs better in spite of the `wrong' model. To explain this we have to assume that the context tree of the tiger environment is similar to the one generated in rock-paper-scissor, so forgetting old percepts is not necessary. 
+
+\begin{figure}
+\includegraphics[width=\textwidth]{plots/coinflip_tests1}
+\includegraphics[width=\textwidth]{plots/rps_tiger_1}
+\caption{\label{plot:cointests}Further experiments}
+\end{figure}
+
+\begin{figure}
+\includegraphics[width=\textwidth]{plots/coinflip_tests}
+\includegraphics[width=\textwidth]{plots/rps_tiger_trim}
+\caption{\label{plot:cointests_all}Further experiments: all results. Result (5) in the coinflip experiment seems to be an outlier, the agent was run again with the same settings resulting in (5a). The reason for this is probably the use of a single context tree instead of a factored context tree.}
+\end{figure}
 
 %sample graph
 %\begin{figure}
@@ -299,9 +306,9 @@ rps & 32 & 5 & 0.999 & 0.99 & 500\\\hline
 %\end{figure}
 
 
-\subsection{Discussion}
-
-Include statistics about cycles required for optimal performance, time per cycle as in the VNHS paper \cite{VNHS09}. Also note the number of simulations required at each cycle for near optimal performance.
+%\subsection{Discussion}
+%
+%Include statistics about cycles required for optimal performance, time per cycle as in the VNHS paper \cite{VNHS09}. Also note the number of simulations required at each cycle for near optimal performance.
 
 
 \bibliographystyle{alpha}
