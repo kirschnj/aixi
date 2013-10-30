@@ -94,7 +94,7 @@ The AIXI model \cite{Hutter:04uaibook} is an attempt to solve the general AI pro
 
 \bigskip
 
-Unfortunately the AIXI model is incomputable. For all practical applications, the agent must be approximated. One approach in approximating AIXI is the MC-AIXI-CTW \cite{VNHS09} model. Here the expectimax search is solved by an Monte-Carlo approach. The UTC \cite{UCT} algorithm is used to balance exploration and exploitation. The class of environment models used in the implementation is a mixture of $d$-th order Markov Decision Process. Notably, Context Tree Weighting allows efficient linear time computation of this rather general class of models \cite{CTW}.
+Unfortunately the AIXI model is incomputable. For all practical applications, the agent must be approximated. One approach in approximating AIXI is the MC-AIXI-CTW \cite{VNHS09} model. Here the expectimax search is solved by an Monte-Carlo approach. in particular, a variation of the UTC \cite{UCT} algorithm, called $\rho$UCT, is used to approximate a finite horizon expectimax given an environment model $\rho$. Within this, the UCB \cite{Auer02} algorithm is used to balance exploration and exploitation. The class of environment models used in the implementation is a mixture of $d$-th order Markov Decision Process. Notably, Context Tree Weighting allows efficient linear time computation of this rather general class of models \cite{CTW}.
 
 \bigskip
 
