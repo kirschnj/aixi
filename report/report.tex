@@ -286,7 +286,7 @@ The following test runs where recorded:
 \item rock-paper-scissor environment with exploration=0, \emph{tiger context tree loaded} 
 \end{enumerate}
 
-The results for (3), (5), (6) are presented in figure \ref{plot:cointests}. In this case the context tree structure from a different environment doesn't seem to affect the agent. Moreover, with exploration turned off the agent performs better in spite of the `wrong' model. To explain this we have to assume that the context tree of the tiger environment is similar to the one generated in rock-paper-scissor, so forgetting old percepts is not necessary. Results of all test runs can be found in figure \ref{plot:cointests_all}.
+First note that this is a non-greedy evaluation, so actions taken under exploration are taken into account for the average reward. Therefore the overall performance is not as good as in the standard experimental setup. The results for (3), (5), (6) are presented in figure \ref{plot:cointests}. Here the context tree structure from a different environment doesn't seem to affect the agent. Moreover, with exploration turned off the agent performs better in spite of the `wrong' model. To explain this we have to assume that the context tree of the tiger environment is similar to the one generated in rock-paper-scissor, so forgetting old percepts is not necessary. Results of all test runs can be found in figure \ref{plot:cointests_all}.
 
 \begin{figure}[h]
 \includegraphics[width=0.5\textwidth]{plots/coinflip_tests1}
