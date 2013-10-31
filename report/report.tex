@@ -258,7 +258,7 @@ These values were chosen to give reasonable speed and accuracy. In detail, the f
 \item environment B with exploration = 0.2, \emph{context tree A loaded}
 \end{enumerate}
 
-Experiments 1-5 should be seen as reference values for the settings in 6-7 where the agent acts in environment B with the model of environment A. The most interesting results are summarized in figure \ref{plot:cointests}.  Compared to the normal learning case (4) the agent does not perform well anymore in the new environment if exploration is suppressed (6) and it only slowly learns the new strategy. If exploration is permitted the new environment can be learned faster (7). To reach a 0.75 average reward it took the agent 1600 cycles in setting (4), 10700 cycles in setting (6) and 5000 cycles in setting (7). Full results are presented in figure \ref{plot:cointests_all}.
+Experiments 1-5 should be seen as reference values for the settings in 6-7 where the agent acts in environment B with the model of environment A. The most interesting results are summarized in Figure~\ref{plot:cointests}.  Compared to the normal learning case (4) the agent does not perform well anymore in the new environment if exploration is suppressed (6) and it only slowly learns the new strategy. If exploration is permitted the new environment can be learned faster (7). To reach a 0.75 average reward it took the agent 1600 cycles in setting (4), 10700 cycles in setting (6) and 5000 cycles in setting (7). Full results are presented in Figure~\ref{plot:cointests_all}.
 
 \paragraph{Biased RPS vs Tiger}
 A similar experiment was also conducted on the biased rock-paper-scissor and tiger domains. The agent was evaluated during 20000 cycles with the following settings:
@@ -286,8 +286,7 @@ The following test runs where recorded:
 \item rock-paper-scissor environment with exploration=0, \emph{tiger context tree loaded} 
 \end{enumerate}
 
-First note that this is a non-greedy evaluation, so actions taken under exploration are taken into account for the average reward. Therefore the overall performance is not as good as in the standard experimental setup. The results for (3), (5), (6) are presented in figure \ref{plot:cointests}. Here the context tree structure from a different environment doesn't seem to affect the agent. Moreover, with exploration turned off the agent performs better in spite of the `wrong' model. To explain this we have to assume that the context tree of the tiger environment is similar to the one generated in rock-paper-scissor, so forgetting old percepts is not necessary. Results of all test runs can be found in figure \ref{plot:cointests_all}.
-
+First note that this is a non-greedy evaluation, so actions taken under exploration are taken into account for the average reward. Therefore the overall performance is not as good as in the standard experimental setup. The results for (3), (5), (6) are presented in Figure~\ref{plot:cointests}. Here the context tree structure from a different environment doesn't seem to affect the agent. Moreover, with exploration turned off the agent performs better in spite of the `wrong' model. To explain this we have to assume that the context tree of the tiger environment is similar to the one generated in rock-paper-scissor, so forgetting old percepts is not necessary. Results of all test runs can be found in Figure~\ref{plot:cointests_all}.
 \begin{figure}[h]
 \includegraphics[width=0.5\textwidth]{plots/coinflip_tests1}
 \includegraphics[width=0.5\textwidth]{plots/rps_tiger_1}
